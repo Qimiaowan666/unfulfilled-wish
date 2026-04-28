@@ -278,7 +278,7 @@ SpriteRenderer:
   m_ReceiveShadows: 0
   m_DynamicOccludee: 1
   m_StaticShadowCaster: 0
-  m_MotionVectors: 1
+  m_MotionVectors: 2
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 0
@@ -312,7 +312,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 2
+  m_SortingOrder: 5
   m_MaskInteraction: 0
   m_Sprite: {fileID: 8894105245806051599, guid: 85ef43ed5f9c65b41bf1f24726ef51a4, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -394,16 +394,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyAI
   detectionRange: 6
-  attackRange: 1.2
+  attackRange: 1.25
   playerLayer:
     serializedVersion: 2
-    m_Bits: 1
+    m_Bits: 512
   moveSpeed: 2.5
   patrolDistance: 3
+  preferredCombatDistance: 1.05
+  retreatDistance: 0.75
   attackCooldown: 1.5
   specialAttackCooldown: 5
   poiseDamagePerHit: 15
   specialAttackWarningDuration: 0.6
+  stunDuration: 3
 --- !u!114 &3826207803882851688
 MonoBehaviour:
   m_ObjectHideFlags: 0

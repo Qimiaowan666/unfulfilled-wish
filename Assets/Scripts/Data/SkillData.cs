@@ -14,6 +14,7 @@ public class SkillData : ScriptableObject
     [Header("Active Skill")]
     public float cooldown;
     public float damage;
+    public float poiseDamage;
     public float manaCost;
 
     [Header("Passive Bonus")]

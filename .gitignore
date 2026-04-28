@@ -7,6 +7,7 @@
 /Logs/
 /UserSettings/
 /MemoryCaptures/
+/Assets/_Recovery/
 
 # Unity cache and generated files
 *.csproj
@@ -39,6 +40,10 @@ Desktop.ini
 # Logs and local test output
 *.log
 .playwright-mcp/
+.codex_video_frames/
+
+# Local reference projects used for analysis, not part of the playable Unity project
+ReferenceProjects/
 
 # Unity package manager local cache
 /Packages/packages-lock.json.bak

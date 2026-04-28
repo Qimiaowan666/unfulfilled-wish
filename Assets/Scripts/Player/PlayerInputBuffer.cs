@@ -4,7 +4,6 @@ public enum BufferedPlayerAction
 {
     None,
     Attack,
-    Dodge,
     Counter,
     Execute,
     Dash
@@ -20,6 +19,7 @@ public class PlayerInputBuffer : MonoBehaviour
     public void Queue(BufferedPlayerAction action, float duration = -1f)
     {
         if (action == BufferedPlayerAction.None) return;
+        if (Time.timeScale <= 0f) return;
 
         bufferedAction = action;
         expiresAt = Time.time + (duration > 0f ? duration : defaultBufferTime);
@@ -42,6 +42,12 @@ public class PlayerInputBuffer : MonoBehaviour
     {
         bufferedAction = BufferedPlayerAction.None;
         expiresAt = 0f;
+    }
+
+    public static void ClearAll()
+    {
+        foreach (var buffer in FindObjectsByType<PlayerInputBuffer>(FindObjectsInactive.Include))
+            buffer.Clear();
     }
 
     bool HasBufferedAction

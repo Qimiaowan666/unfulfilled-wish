@@ -2,18 +2,17 @@
 
 public enum PlayerState
 {
-    Idle,
-    Running,
-    Jumping,
-    Falling,
-    Dashing,
-    Dodging,
-    Attacking,
-    Blocking,
-    Countering,
-    Executing,
-    Stunned,
-    Dead
+    Idle = 0,
+    Running = 1,
+    Jumping = 2,
+    Falling = 3,
+    Dashing = 4,
+    Attacking = 6,
+    Blocking = 7,
+    Countering = 8,
+    Executing = 9,
+    Stunned = 10,
+    Dead = 11
 }
 
 [RequireComponent(typeof(Rigidbody2D))]
@@ -24,9 +23,9 @@ public class PlayerController : MonoBehaviour
 
     public bool IsGrounded { get; private set; }
     public bool FacingRight { get; private set; } = true;
-    public bool CanAct => State != PlayerState.Stunned && State != PlayerState.Dead && State != PlayerState.Executing;
-    public bool CanMove => State == PlayerState.Idle || State == PlayerState.Running || State == PlayerState.Jumping || State == PlayerState.Falling;
-    public bool CanStartAction => State == PlayerState.Idle || State == PlayerState.Running || State == PlayerState.Jumping || State == PlayerState.Falling;
+    public bool CanAct => !ShopUI.IsOpen && State != PlayerState.Stunned && State != PlayerState.Dead && State != PlayerState.Executing;
+    public bool CanMove => !ShopUI.IsOpen && (State == PlayerState.Idle || State == PlayerState.Running || State == PlayerState.Jumping || State == PlayerState.Falling);
+    public bool CanStartAction => !ShopUI.IsOpen && (State == PlayerState.Idle || State == PlayerState.Running || State == PlayerState.Jumping || State == PlayerState.Falling);
 
     [Header("Ground Detection")]
     public Transform groundCheck;
@@ -52,6 +51,11 @@ public class PlayerController : MonoBehaviour
         CheckGrounded();
         UpdateLandingState();
         UpdateFallState();
+    }
+
+    void FixedUpdate()
+    {
+        StabilizeLockedStateVelocity();
     }
 
     void CheckGrounded()
@@ -88,6 +92,12 @@ public class PlayerController : MonoBehaviour
     public void SetLocomotionState()
     {
         SetState(Mathf.Abs(Rb.linearVelocity.x) > 0.05f ? PlayerState.Running : PlayerState.Idle);
+    }
+
+    void StabilizeLockedStateVelocity()
+    {
+        if (CanMove || State == PlayerState.Dashing) return;
+        Rb.linearVelocity = new Vector2(0f, Rb.linearVelocity.y);
     }
 
     public void SetAnimInteger(string name, int value)
@@ -134,8 +144,14 @@ public class PlayerController : MonoBehaviour
 
     void OnDrawGizmosSelected()
     {
-        if (groundCheck == null) return;
-        Gizmos.color = Color.green;
-        Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
+        Gizmos.color = Color.yellow;
+
+        Vector3 origin = transform.position;
+        Vector3 target = groundCheck != null
+            ? groundCheck.position
+            : origin + Vector3.down * groundCheckRadius;
+
+        Gizmos.DrawLine(origin, target);
+        Gizmos.DrawWireSphere(target, groundCheckRadius);
     }
 }

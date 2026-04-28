@@ -6,6 +6,8 @@ public class CheckpointManager : MonoBehaviour
 {
     public static CheckpointManager Instance { get; private set; }
 
+    public bool restorePlayerOnActivate = true;
+
     public string LastCheckpointID { get; private set; }
     public event Action<string> OnCheckpointActivated;
 
@@ -19,19 +21,32 @@ public class CheckpointManager : MonoBehaviour
 
     public void ActivateCheckpoint(string id, Vector2 position)
     {
-        if (unlockedIDs.Contains(id)) return;
+        if (string.IsNullOrWhiteSpace(id))
+            id = "Checkpoint";
 
         unlockedIDs.Add(id);
         LastCheckpointID = id;
 
-        var stats = FindAnyObjectByType<PlayerStats>();
-        if (stats != null)
+        var player = FindAnyObjectByType<PlayerController>();
+        var stats = player != null ? player.Stats : FindAnyObjectByType<PlayerStats>();
+        if (stats != null && restorePlayerOnActivate)
         {
-            stats.TakeDamage(-stats.maxHP);
+            stats.RestoreAll();
         }
 
-        SaveSystem.Instance?.Save(stats, FindAnyObjectByType<PlayerController>().transform, this);
+        if (player != null)
+        {
+            player.Rb.linearVelocity = Vector2.zero;
+            player.SetLocomotionState();
+        }
+
+        PlayerInputBuffer.ClearAll();
+
+        if (stats != null && player != null)
+            SaveSystem.Instance?.Save(stats, player.transform, this);
+
         OnCheckpointActivated?.Invoke(id);
+        AudioManager.Instance?.PlayCheckpoint();
     }
 
     public bool IsTeleportable(string id) => unlockedIDs.Contains(id);

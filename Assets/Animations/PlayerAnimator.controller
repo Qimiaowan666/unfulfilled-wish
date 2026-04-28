@@ -155,32 +155,6 @@ AnimatorState:
   m_MirrorParameter: 
   m_CycleOffsetParameter: 
   m_TimeParameter: 
---- !u!1102 &-4332973389523772707
-AnimatorState:
-  serializedVersion: 6
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: Dodging
-  m_Speed: 1
-  m_CycleOffset: 0
-  m_Transitions: []
-  m_StateMachineBehaviours: []
-  m_Position: {x: 50, y: 50, z: 0}
-  m_IKOnFeet: 0
-  m_WriteDefaultValues: 1
-  m_Mirror: 0
-  m_SpeedParameterActive: 0
-  m_MirrorParameterActive: 0
-  m_CycleOffsetParameterActive: 0
-  m_TimeParameterActive: 0
-  m_Motion: {fileID: 7400000, guid: 44e6c686bba0e2c429cce332ad3e6d4b, type: 2}
-  m_Tag: 
-  m_SpeedParameter: 
-  m_MirrorParameter: 
-  m_CycleOffsetParameter: 
-  m_TimeParameter: 
 --- !u!1102 &-2920693053137361145
 AnimatorState:
   serializedVersion: 6
@@ -232,9 +206,6 @@ AnimatorStateMachine:
     m_State: {fileID: -5348552244109657827}
     m_Position: {x: 260, y: 270, z: 0}
   - serializedVersion: 1
-    m_State: {fileID: -4332973389523772707}
-    m_Position: {x: 300, y: 330, z: 0}
-  - serializedVersion: 1
     m_State: {fileID: 2076744526311405532}
     m_Position: {x: 360, y: 470, z: 0}
   - serializedVersion: 1
@@ -265,7 +236,6 @@ AnimatorStateMachine:
   - {fileID: -6175990109155205704}
   - {fileID: 589110069977734444}
   - {fileID: 5301672714892100420}
-  - {fileID: 4486255230570248449}
   - {fileID: 5035657530555365633}
   - {fileID: 6730600262963326774}
   - {fileID: 221919032135456749}
@@ -589,31 +559,6 @@ AnimatorStateTransition:
     m_EventTreshold: 11
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: -7596025325407344723}
-  m_Solo: 0
-  m_Mute: 0
-  m_IsExit: 0
-  serializedVersion: 3
-  m_TransitionDuration: 0.05
-  m_TransitionOffset: 0
-  m_ExitTime: 0.75
-  m_HasExitTime: 0
-  m_HasFixedDuration: 1
-  m_InterruptionSource: 0
-  m_OrderedInterruption: 1
-  m_CanTransitionToSelf: 0
---- !u!1101 &4486255230570248449
-AnimatorStateTransition:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: 
-  m_Conditions:
-  - m_ConditionMode: 6
-    m_ConditionEvent: State
-    m_EventTreshold: 5
-  m_DstStateMachine: {fileID: 0}
-  m_DstState: {fileID: -4332973389523772707}
   m_Solo: 0
   m_Mute: 0
   m_IsExit: 0

@@ -45,6 +45,13 @@ public class BossAI : MonoBehaviour
     {
         enemy = GetComponent<EnemyBase>();
         rb = GetComponent<Rigidbody2D>();
+        specialTimer = specialAttackCooldown;
+        rushTimer = rushAttackCooldown;
+
+        int playerLayerIndex = LayerMask.NameToLayer("Player");
+        if (playerLayerIndex >= 0 && (playerLayer.value & (1 << playerLayerIndex)) == 0)
+            playerLayer = 1 << playerLayerIndex;
+
         GetComponent<PoiseMeter>().OnPoiseBroken += OnStunned;
     }
 
@@ -182,21 +189,23 @@ public class BossAI : MonoBehaviour
     void HitPlayer(float damage, float poiseDamage)
     {
         if (player == null) return;
-        var dodge = player.GetComponent<PlayerDodge>();
-        if (dodge != null && dodge.IsInvincible) return;
+        var stats = player.GetComponent<PlayerStats>();
+        if (stats != null && stats.IsInvulnerable) return;
 
         var block = player.GetComponent<PlayerBlock>();
         var feedback = player.GetComponent<DamageFeedback>();
-        if (feedback != null) feedback.ApplyKnockback(transform.position, block != null && block.IsBlocking ? 3f : 7f);
+        bool isBlocking = block != null && block.IsBlocking;
+        if (feedback != null && !isBlocking) feedback.ApplyKnockback(transform.position, 7f);
 
-        if (block != null && block.IsBlocking)
+        if (isBlocking)
             block.ReceiveAttack(damage);
         else
-            player.GetComponent<PlayerStats>()?.TakeDamage(damage);
+            stats?.TakeDamage(damage);
     }
 
     void OnStunned()
     {
+        StopAllCoroutines();
         StartCoroutine(StunRoutine());
     }
 
@@ -206,7 +215,15 @@ public class BossAI : MonoBehaviour
         enemy.SetAnimationState(4);
         rb.linearVelocity = Vector2.zero;
         float stunTime = isPhase2 ? 2f : 3f;
-        yield return new WaitForSeconds(stunTime);
+        while (stunTime > 0f && enemy.CurrentHP > 0f)
+        {
+            rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
+            stunTime -= Time.deltaTime;
+            yield return null;
+        }
+
+        if (enemy.CurrentHP <= 0f) yield break;
+
         GetComponent<PoiseMeter>().ResetPoise();
         state = BossState.Chase;
     }

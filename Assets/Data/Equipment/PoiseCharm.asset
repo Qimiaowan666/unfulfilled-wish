@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f6411a44f3b4a7d4a87dad3e00641536, type: 3}
+  m_Name: PoiseCharm
+  m_EditorClassIdentifier: Assembly-CSharp::EquipmentData
+  equipmentName: "\u5B88\u62A4\u62A4\u7B26"
+  description: "\u9970\u54C1\uFF0C\u9632\u5FA1 +2\uFF0CHP +20\u3002"
+  icon: {fileID: 0}
+  slot: 2
+  price: 140
+  attackBonus: 0
+  defenseBonus: 2
+  maxHPBonus: 20
+  maxGhostHPBonus: 0

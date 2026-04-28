@@ -1,5 +1,7 @@
-﻿using UnityEngine;
+using UnityEngine;
+using UnityEngine.Serialization;
 using System;
+using System.Collections.Generic;
 
 public class EquipmentSystem : MonoBehaviour
 {
@@ -7,7 +9,10 @@ public class EquipmentSystem : MonoBehaviour
 
     public EquipmentData weapon;
     public EquipmentData armor;
-    public EquipmentData accessory;
+    [FormerlySerializedAs("accessory")]
+    public EquipmentData accessory1;
+    public EquipmentData accessory2;
+    public List<EquipmentData> ownedEquipment = new List<EquipmentData>();
 
     public event Action OnEquipmentChanged;
 
@@ -19,52 +24,150 @@ public class EquipmentSystem : MonoBehaviour
         Instance = this;
     }
 
-    void Start() => stats = FindAnyObjectByType<PlayerStats>();
+    void Start()
+    {
+        stats = FindAnyObjectByType<PlayerStats>();
+        RegisterEquippedAsOwned();
+    }
+
+    public bool HasEquipment(EquipmentData equipment)
+    {
+        return equipment != null && ownedEquipment.Contains(equipment);
+    }
+
+    public bool AddEquipment(EquipmentData equipment, bool equipNow = true)
+    {
+        if (equipment == null) return false;
+
+        if (!ownedEquipment.Contains(equipment))
+            ownedEquipment.Add(equipment);
+
+        if (equipNow) Equip(equipment);
+        else OnEquipmentChanged?.Invoke();
+
+        return true;
+    }
+
+    public void EquipOwned(EquipmentData equipment)
+    {
+        if (equipment == null) return;
+        if (!ownedEquipment.Contains(equipment))
+            ownedEquipment.Add(equipment);
+
+        Equip(equipment);
+    }
 
     public void Equip(EquipmentData equipment)
     {
+        if (equipment == null) return;
+
+        if (equipment.slot == EquipmentSlot.Accessory)
+        {
+            EquipAccessory(equipment);
+            return;
+        }
+
+        if (equipment.slot == EquipmentSlot.Weapon && weapon == equipment) return;
+        if (equipment.slot == EquipmentSlot.Armor && armor == equipment) return;
+
         Unequip(equipment.slot);
 
         switch (equipment.slot)
         {
-            case EquipmentSlot.Weapon:    weapon = equipment; break;
-            case EquipmentSlot.Armor:     armor = equipment; break;
-            case EquipmentSlot.Accessory: accessory = equipment; break;
+            case EquipmentSlot.Weapon:
+                weapon = equipment;
+                break;
+            case EquipmentSlot.Armor:
+                armor = equipment;
+                break;
         }
 
         ApplyBonus(equipment, 1f);
         OnEquipmentChanged?.Invoke();
     }
 
-    public void Unequip(EquipmentSlot slot)
+    void EquipAccessory(EquipmentData equipment)
     {
-        EquipmentData current = slot switch
-        {
-            EquipmentSlot.Weapon    => weapon,
-            EquipmentSlot.Armor     => armor,
-            EquipmentSlot.Accessory => accessory,
-            _ => null
-        };
+        if (accessory1 == equipment || accessory2 == equipment) return;
 
-        if (current == null) return;
-        ApplyBonus(current, -1f);
-
-        switch (slot)
+        if (accessory1 == null)
         {
-            case EquipmentSlot.Weapon:    weapon = null; break;
-            case EquipmentSlot.Armor:     armor = null; break;
-            case EquipmentSlot.Accessory: accessory = null; break;
+            accessory1 = equipment;
+            ApplyBonus(equipment, 1f);
+            OnEquipmentChanged?.Invoke();
+            return;
         }
 
+        if (accessory2 == null)
+        {
+            accessory2 = equipment;
+            ApplyBonus(equipment, 1f);
+            OnEquipmentChanged?.Invoke();
+            return;
+        }
+
+        ApplyBonus(accessory1, -1f);
+        accessory1 = equipment;
+        ApplyBonus(accessory1, 1f);
+        OnEquipmentChanged?.Invoke();
+    }
+
+    public void Unequip(EquipmentSlot slot)
+    {
+        switch (slot)
+        {
+            case EquipmentSlot.Weapon:
+                UnequipWeapon();
+                break;
+            case EquipmentSlot.Armor:
+                UnequipArmor();
+                break;
+            case EquipmentSlot.Accessory:
+                UnequipAccessory(1);
+                break;
+        }
+    }
+
+    public void UnequipAccessory(int index)
+    {
+        EquipmentData current = index == 1 ? accessory1 : accessory2;
+        if (current == null) return;
+
+        ApplyBonus(current, -1f);
+        if (index == 1) accessory1 = null;
+        else accessory2 = null;
+        OnEquipmentChanged?.Invoke();
+    }
+
+    void UnequipWeapon()
+    {
+        if (weapon == null) return;
+        ApplyBonus(weapon, -1f);
+        weapon = null;
+        OnEquipmentChanged?.Invoke();
+    }
+
+    void UnequipArmor()
+    {
+        if (armor == null) return;
+        ApplyBonus(armor, -1f);
+        armor = null;
         OnEquipmentChanged?.Invoke();
     }
 
     void ApplyBonus(EquipmentData eq, float sign)
     {
-        if (stats == null) return;
-        stats.attack    += eq.attackBonus    * sign;
-        stats.defense   += eq.defenseBonus   * sign;
-        stats.maxHP     += eq.maxHPBonus     * sign;
-        stats.maxGhostHP += eq.maxGhostHPBonus * sign;
+        if (stats == null || eq == null) return;
+        stats.attack += eq.attackBonus * sign;
+        stats.defense += eq.defenseBonus * sign;
+        stats.maxHP += eq.maxHPBonus * sign;
+    }
+
+    void RegisterEquippedAsOwned()
+    {
+        if (weapon != null && !ownedEquipment.Contains(weapon)) ownedEquipment.Add(weapon);
+        if (armor != null && !ownedEquipment.Contains(armor)) ownedEquipment.Add(armor);
+        if (accessory1 != null && !ownedEquipment.Contains(accessory1)) ownedEquipment.Add(accessory1);
+        if (accessory2 != null && !ownedEquipment.Contains(accessory2)) ownedEquipment.Add(accessory2);
     }
 }

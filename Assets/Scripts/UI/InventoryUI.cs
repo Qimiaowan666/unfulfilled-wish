@@ -10,6 +10,8 @@ public class InventoryUI : MonoBehaviour
     public Text hintText;
 
     bool isOpen;
+    bool pausedByInventory;
+    float previousTimeScale = 1f;
 
     void Start()
     {
@@ -21,6 +23,7 @@ public class InventoryUI : MonoBehaviour
     void Update()
     {
         var kb = Keyboard.current;
+        if (ShopUI.IsOpen) return;
         if (kb != null && kb.iKey.wasPressedThisFrame)
             Toggle();
     }
@@ -28,8 +31,22 @@ public class InventoryUI : MonoBehaviour
     void Toggle()
     {
         isOpen = !isOpen;
+        PlayerInputBuffer.ClearAll();
         if (panel != null) panel.SetActive(isOpen);
-        if (isOpen) Refresh();
+        if (isOpen)
+        {
+            PauseGameTime();
+            Refresh();
+        }
+        else
+        {
+            ResumeGameTime();
+        }
+    }
+
+    void OnDisable()
+    {
+        ResumeGameTime();
     }
 
     void Refresh()
@@ -71,5 +88,25 @@ public class InventoryUI : MonoBehaviour
     public void MoveItem(int fromIndex, int toIndex)
     {
         InventorySystem.Instance?.MoveItem(fromIndex, toIndex);
+    }
+
+    void PauseGameTime()
+    {
+        if (pausedByInventory) return;
+
+        previousTimeScale = Time.timeScale;
+        Time.timeScale = 0f;
+        pausedByInventory = true;
+    }
+
+    void ResumeGameTime()
+    {
+        if (!pausedByInventory) return;
+
+        Time.timeScale = GameManager.Instance != null && GameManager.Instance.IsPaused
+            ? 0f
+            : previousTimeScale;
+
+        pausedByInventory = false;
     }
 }

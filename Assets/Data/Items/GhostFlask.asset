@@ -12,13 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5b8459a54b768840ab93aa00236bcc9, type: 3}
   m_Name: GhostFlask
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
-  itemName: Ghost Flask
-  description: Restores 20 Ghost HP.
+  itemName: "\u6025\u6551\u836F\u6C34"
+  description: "\u56DE\u590D 15 \u70B9\u751F\u547D\u3002"
   icon: {fileID: 0}
   type: 0
   price: 40
-  healAmount: 0
-  ghostHPRestore: 20
+  healAmount: 15
+  ghostHPRestore: 0
   attackBonus: 0
   defenseBonus: 0
   maxHPBonus: 0

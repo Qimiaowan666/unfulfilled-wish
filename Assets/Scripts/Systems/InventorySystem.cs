@@ -51,11 +51,24 @@ public class InventorySystem : MonoBehaviour
     public void UseItem(ItemData item, PlayerStats stats)
     {
         if (!items.Contains(item)) return;
-        if (item.type != ItemType.Consumable) return;
         if (stats == null) return;
 
         if (item.healAmount > 0)
-            stats.TakeDamage(-item.healAmount);  // 璐熶激瀹?= 鍥炶锛堥€氳繃澶栭儴鎺ュ彛澶勭悊锛?
+            stats.TakeDamage(-item.healAmount);
+
+        if (item.attackBonus != 0f)
+            stats.attack += item.attackBonus;
+
+        if (item.defenseBonus != 0f)
+            stats.defense += item.defenseBonus;
+
+        if (item.maxHPBonus != 0f)
+        {
+            stats.maxHP += item.maxHPBonus;
+            if (item.maxHPBonus > 0f)
+                stats.TakeDamage(-item.maxHPBonus);
+        }
+
         RemoveItem(item);
     }
 }

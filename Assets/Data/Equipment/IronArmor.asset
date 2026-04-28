@@ -12,12 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f6411a44f3b4a7d4a87dad3e00641536, type: 3}
   m_Name: IronArmor
   m_EditorClassIdentifier: Assembly-CSharp::EquipmentData
-  equipmentName: Iron Armor
-  description: +8 DEF, +20 Max HP.
+  equipmentName: "\u94C1\u7532"
+  description: "\u57FA\u7840\u9632\u5177\uFF0C\u9632\u5FA1 +8\uFF0CHP +15\u3002"
   icon: {fileID: 0}
   slot: 1
   price: 120
   attackBonus: 0
   defenseBonus: 8
-  maxHPBonus: 20
+  maxHPBonus: 15
   maxGhostHPBonus: 0

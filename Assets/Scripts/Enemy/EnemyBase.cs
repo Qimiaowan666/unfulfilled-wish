@@ -32,11 +32,17 @@ public class EnemyBase : MonoBehaviour
 
     public virtual void TakeDamage(float damage)
     {
+        TakeDamage(damage, 0f);
+    }
+
+    public virtual void TakeDamage(float damage, float poiseDamage)
+    {
         if (CurrentHP <= 0f) return;
 
         CurrentHP = Mathf.Max(CurrentHP - damage, 0f);
         OnHPChanged?.Invoke(CurrentHP, maxHP);
-        poiseMeter.TakePoiseDamage(damage * 0.5f);
+        if (poiseDamage > 0f)
+            poiseMeter.TakePoiseDamage(poiseDamage);
 
         var feedback = GetComponent<DamageFeedback>();
         if (feedback != null) feedback.Flash();

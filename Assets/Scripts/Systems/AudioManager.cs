@@ -34,6 +34,7 @@ public class AudioManager : MonoBehaviour
     {
         if (Instance != null) { Destroy(gameObject); return; }
         Instance = this;
+        transform.SetParent(null);
         DontDestroyOnLoad(gameObject);
         source = gameObject.AddComponent<AudioSource>();
         source.playOnAwake = false;

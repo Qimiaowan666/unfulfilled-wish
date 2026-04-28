@@ -12,12 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f6411a44f3b4a7d4a87dad3e00641536, type: 3}
   m_Name: LuckyCharm
   m_EditorClassIdentifier: Assembly-CSharp::EquipmentData
-  equipmentName: Lucky Charm
-  description: +15 Max Ghost HP.
+  equipmentName: "\u5E78\u8FD0\u62A4\u7B26"
+  description: "\u9970\u54C1\uFF0C\u653B\u51FB +1\uFF0C\u9632\u5FA1 +1\uFF0CHP +5\u3002"
   icon: {fileID: 0}
   slot: 2
   price: 90
-  attackBonus: 0
-  defenseBonus: 0
-  maxHPBonus: 0
-  maxGhostHPBonus: 15
+  attackBonus: 1
+  defenseBonus: 1
+  maxHPBonus: 5
+  maxGhostHPBonus: 0

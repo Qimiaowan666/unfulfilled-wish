@@ -45,7 +45,7 @@ public class CheckpointPromptUI : MonoBehaviour
     public void Show(string checkpointID)
     {
         if (messageText != null)
-            messageText.text = $"Checkpoint activated: {checkpointID}";
+            messageText.text = $"已存档并恢复：{checkpointID}";
 
         if (activeRoutine != null) StopCoroutine(activeRoutine);
         activeRoutine = StartCoroutine(ShowRoutine());

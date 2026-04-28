@@ -11,13 +11,48 @@ public class SkillSystem : MonoBehaviour
 
     void Awake()
     {
-        if (Instance != null) { Destroy(gameObject); return; }
+        if (Instance != null)
+        {
+            foreach (var skill in learnedSkills)
+            {
+                if (skill != null && !Instance.learnedSkills.Contains(skill))
+                    Instance.learnedSkills.Add(skill);
+            }
+
+            Destroy(gameObject);
+            return;
+        }
+
         Instance = this;
+    }
+
+    void OnDestroy()
+    {
+        if (Instance == this)
+            Instance = null;
+    }
+
+    public static SkillSystem GetOrCreate()
+    {
+        if (Instance != null) return Instance;
+
+        Instance = FindAnyObjectByType<SkillSystem>();
+        if (Instance != null) return Instance;
+
+        var go = new GameObject("SkillSystem");
+        return go.AddComponent<SkillSystem>();
+    }
+
+    public bool HasSkill(SkillData skill)
+    {
+        return skill != null && learnedSkills.Contains(skill);
     }
 
     public bool LearnSkill(SkillData skill)
     {
-        if (learnedSkills.Contains(skill)) return false;
+        if (skill == null) return false;
+        if (learnedSkills.Contains(skill)) return true;
+
         learnedSkills.Add(skill);
         ApplyPassives(skill);
         OnSkillsChanged?.Invoke();
@@ -32,9 +67,15 @@ public class SkillSystem : MonoBehaviour
 
         stats.attack  *= 1f + skill.attackPercent  / 100f;
         stats.defense *= 1f + skill.defensePercent / 100f;
+    }
 
-        var block = FindAnyObjectByType<PlayerBlock>();
-        if (block != null && skill.perfectBlockWindowBonus > 0f)
-            block.perfectBlockWindow += skill.perfectBlockWindowBonus;
+    public bool ApplyActiveSkill(SkillData skill, EnemyBase target)
+    {
+        if (skill == null || target == null) return false;
+        if (skill.type != SkillType.Active) return false;
+        if (!learnedSkills.Contains(skill)) return false;
+
+        target.TakeDamage(skill.damage, skill.poiseDamage);
+        return true;
     }
 }

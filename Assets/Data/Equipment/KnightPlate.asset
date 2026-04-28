@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f6411a44f3b4a7d4a87dad3e00641536, type: 3}
+  m_Name: KnightPlate
+  m_EditorClassIdentifier: Assembly-CSharp::EquipmentData
+  equipmentName: "\u9A91\u58EB\u677F\u7532"
+  description: "\u91CD\u578B\u9632\u5177\uFF0C\u9632\u5FA1 +14\uFF0CHP +30\u3002"
+  icon: {fileID: 0}
+  slot: 1
+  price: 260
+  attackBonus: 0
+  defenseBonus: 14
+  maxHPBonus: 30
+  maxGhostHPBonus: 0

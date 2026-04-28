@@ -12,14 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 457fe927cd7afe642a13ab2b44fe4b91, type: 3}
   m_Name: CounterMaster
   m_EditorClassIdentifier: Assembly-CSharp::SkillData
-  skillName: Counter Master
-  description: +0.1s perfect block window.
+  skillName: "\u8BC6\u7834\u5927\u5E08"
+  description: "\u88AB\u52A8\uFF1A\u63D0\u9AD8\u9632\u5FA1\u3002"
   icon: {fileID: 0}
   type: 1
   price: 150
   cooldown: 0
   damage: 0
+  poiseDamage: 0
   manaCost: 0
   attackPercent: 0
-  defensePercent: 0
-  perfectBlockWindowBonus: 0.1
+  defensePercent: 5
+  perfectBlockWindowBonus: 0

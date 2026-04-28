@@ -13,6 +13,8 @@ public class EnemyAI : MonoBehaviour
     [Header("Movement")]
     public float moveSpeed = 2.5f;
     public float patrolDistance = 3f;
+    public float preferredCombatDistance = 1.05f;
+    public float retreatDistance = 0.75f;
 
     [Header("Attack")]
     public float attackCooldown = 1.5f;
@@ -21,6 +23,9 @@ public class EnemyAI : MonoBehaviour
 
     [Header("Special Attack")]
     public float specialAttackWarningDuration = 0.6f;
+
+    [Header("Stun")]
+    public float stunDuration = 3f;
 
     EnemyBase enemy;
     Rigidbody2D rb;
@@ -48,6 +53,11 @@ public class EnemyAI : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
         patrolOrigin = transform.position;
+        specialTimer = specialAttackCooldown;
+
+        int playerLayerIndex = LayerMask.NameToLayer("Player");
+        if (playerLayerIndex >= 0 && (playerLayer.value & (1 << playerLayerIndex)) == 0)
+            playerLayer = 1 << playerLayerIndex;
 
         GetComponent<PoiseMeter>().OnPoiseBroken += OnStunned;
     }
@@ -79,7 +89,7 @@ public class EnemyAI : MonoBehaviour
         if (hit != null)
         {
             player = hit.transform;
-            float dist = Vector2.Distance(transform.position, player.position);
+            float dist = GetHorizontalDistanceToPlayer();
 
             if (dist <= attackRange && attackTimer <= 0f)
             {
@@ -87,6 +97,11 @@ public class EnemyAI : MonoBehaviour
                     StartCoroutine(SpecialAttackRoutine());
                 else
                     StartCoroutine(NormalAttackRoutine());
+            }
+            else if (dist <= preferredCombatDistance)
+            {
+                SetAIState(AIState.Chase);
+                rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
             }
             else if (dist > attackRange)
             {
@@ -113,8 +128,29 @@ public class EnemyAI : MonoBehaviour
     void Chase()
     {
         if (player == null) return;
-        float dir = Mathf.Sign(player.position.x - transform.position.x);
+        float deltaX = player.position.x - transform.position.x;
+        float absX = GetHorizontalDistanceToPlayer();
+        float dir = Mathf.Sign(deltaX);
+
+        if (absX < retreatDistance)
+        {
+            rb.linearVelocity = new Vector2(-dir * moveSpeed * 0.6f, rb.linearVelocity.y);
+            return;
+        }
+
+        if (absX <= preferredCombatDistance)
+        {
+            rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
+            return;
+        }
+
         rb.linearVelocity = new Vector2(dir * moveSpeed, rb.linearVelocity.y);
+    }
+
+    float GetHorizontalDistanceToPlayer()
+    {
+        if (player == null) return Mathf.Infinity;
+        return Mathf.Abs(player.position.x - transform.position.x);
     }
 
     IEnumerator NormalAttackRoutine()
@@ -161,26 +197,27 @@ public class EnemyAI : MonoBehaviour
         if (player == null) return;
 
         var block = player.GetComponent<PlayerBlock>();
-        var dodge = player.GetComponent<PlayerDodge>();
+        var stats = player.GetComponent<PlayerStats>();
 
-        if (dodge != null && dodge.IsInvincible) return;
+        if (stats != null && stats.IsInvulnerable) return;
 
         var feedback = player.GetComponent<DamageFeedback>();
-        if (feedback != null) feedback.ApplyKnockback(transform.position, block != null && block.IsBlocking ? 2f : 5f);
+        bool isBlocking = block != null && block.IsBlocking;
+        if (feedback != null && !isBlocking) feedback.ApplyKnockback(transform.position, 5f);
 
-        if (block != null && block.IsBlocking)
+        if (isBlocking)
         {
             block.ReceiveAttack(damage);
         }
         else
         {
-            var stats = player.GetComponent<PlayerStats>();
             stats?.TakeDamage(damage);
         }
     }
 
     void OnStunned()
     {
+        StopAllCoroutines();
         StartCoroutine(StunRoutine());
     }
 
@@ -188,7 +225,20 @@ public class EnemyAI : MonoBehaviour
     {
         SetAIState(AIState.Stunned);
         rb.linearVelocity = Vector2.zero;
-        yield return new WaitForSeconds(3f);
+        attackTimer = attackCooldown;
+        specialTimer = Mathf.Max(specialTimer, 0.5f);
+
+        float timer = stunDuration;
+        while (timer > 0f && enemy.CurrentHP > 0f)
+        {
+            rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
+            timer -= Time.deltaTime;
+            yield return null;
+        }
+
+        if (enemy.CurrentHP <= 0f) yield break;
+
+        GetComponent<PoiseMeter>().ResetPoise();
         SetAIState(player != null ? AIState.Chase : AIState.Patrol);
     }
 
@@ -198,5 +248,9 @@ public class EnemyAI : MonoBehaviour
         Gizmos.DrawWireSphere(transform.position, detectionRange);
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, attackRange);
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawWireSphere(transform.position, preferredCombatDistance);
+        Gizmos.color = Color.magenta;
+        Gizmos.DrawWireSphere(transform.position, retreatDistance);
     }
 }

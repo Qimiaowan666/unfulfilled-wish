@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections;
+using System;
 
 [RequireComponent(typeof(PlayerController))]
 public class PlayerCounter : MonoBehaviour
@@ -10,7 +11,10 @@ public class PlayerCounter : MonoBehaviour
     public float poiseDamageOnSuccess = 60f;
     PlayerController controller;
     PlayerInputBuffer inputBuffer;
+    PlayerAnimationEvents animationEvents;
     float cooldownTimer;
+    bool counterWindowClosed;
+    bool actionFinished;
 
     public bool IsCountering { get; private set; }
 
@@ -19,6 +23,18 @@ public class PlayerCounter : MonoBehaviour
         controller = GetComponent<PlayerController>();
         inputBuffer = GetComponent<PlayerInputBuffer>();
         if (inputBuffer == null) inputBuffer = gameObject.AddComponent<PlayerInputBuffer>();
+
+        animationEvents = GetComponent<PlayerAnimationEvents>();
+        if (animationEvents == null) animationEvents = gameObject.AddComponent<PlayerAnimationEvents>();
+        animationEvents.CounterWindowClosed += OnAnimationCounterWindowClosed;
+        animationEvents.ActionFinished += OnAnimationFinish;
+    }
+
+    void OnDestroy()
+    {
+        if (animationEvents == null) return;
+        animationEvents.CounterWindowClosed -= OnAnimationCounterWindowClosed;
+        animationEvents.ActionFinished -= OnAnimationFinish;
     }
 
     void Update()
@@ -47,14 +63,37 @@ public class PlayerCounter : MonoBehaviour
     IEnumerator CounterRoutine()
     {
         cooldownTimer = counterCooldown;
+        counterWindowClosed = false;
+        actionFinished = false;
         controller.SetState(PlayerState.Countering);
         IsCountering = true;
 
-        yield return new WaitForSeconds(counterWindow);
+        yield return WaitForAnimationSignal(() => counterWindowClosed, counterWindow);
 
         IsCountering = false;
+        yield return WaitForAnimationSignal(() => actionFinished, counterWindow);
+
         if (controller.IsGrounded) controller.SetLocomotionState();
         else controller.SetState(PlayerState.Falling);
+    }
+
+    IEnumerator WaitForAnimationSignal(Func<bool> signal, float fallbackSeconds)
+    {
+        float endTime = Time.time + Mathf.Max(0.05f, fallbackSeconds);
+        while (!signal() && Time.time < endTime)
+            yield return null;
+    }
+
+    void OnAnimationCounterWindowClosed()
+    {
+        if (!IsCountering) return;
+        counterWindowClosed = true;
+    }
+
+    void OnAnimationFinish()
+    {
+        if (!IsCountering && !counterWindowClosed) return;
+        actionFinished = true;
     }
 
     public bool TryCounter(EnemyBase enemy)

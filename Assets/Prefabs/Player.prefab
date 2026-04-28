@@ -16,7 +16,6 @@ GameObject:
   - component: {fileID: 7311375103500413638}
   - component: {fileID: 6925171004837204896}
   - component: {fileID: 2613438185022460602}
-  - component: {fileID: 9017391642799873275}
   - component: {fileID: 5120045067717801669}
   - component: {fileID: 8906075615336048985}
   - component: {fileID: 4974289781718357257}
@@ -62,7 +61,7 @@ SpriteRenderer:
   m_ReceiveShadows: 0
   m_DynamicOccludee: 1
   m_StaticShadowCaster: 0
-  m_MotionVectors: 1
+  m_MotionVectors: 2
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 0
@@ -96,9 +95,9 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 1
+  m_SortingOrder: 20
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 21300000, guid: 73d1fc26ea55e664f8850358ce662ea0, type: 3}
+  m_Sprite: {fileID: 21300000, guid: ae297123f091bbf4e8f1835eb98fb293, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -131,7 +130,7 @@ Rigidbody2D:
   m_ExcludeLayers:
     serializedVersion: 2
     m_Bits: 0
-  m_Interpolate: 0
+  m_Interpolate: 1
   m_SleepingMode: 1
   m_CollisionDetection: 1
   m_Constraints: 4
@@ -154,7 +153,7 @@ MonoBehaviour:
   ghostHPBlockRatio: 0.5
   perfectBlockHealAmount: 20
   attackHealAmount: 5
-  gold: 0
+  gold: 5000
 --- !u!114 &8613147777729047271
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -168,7 +167,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
   groundCheck: {fileID: 2480071268557199417}
-  groundCheckRadius: 0.12
+  groundCheckRadius: 0.1
   groundLayer:
     serializedVersion: 2
     m_Bits: 1
@@ -213,22 +212,6 @@ MonoBehaviour:
   dashSpeed: 20
   dashDuration: 0.15
   dashCooldown: 1
---- !u!114 &9017391642799873275
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5273294629470592368}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cf96d4d840fa7cc408b6b8e52a8c8abe, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerDodge
-  dodgeSpeed: 14
-  dodgeDuration: 0.2
-  dodgeCooldown: 1.5
-  invincibleDuration: 0.15
 --- !u!114 &5120045067717801669
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -243,8 +226,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerAttack
   maxComboStep: 3
   comboResetTime: 0.8
-  hitboxOffset: {x: 0.6, y: 0}
-  hitboxSize: {x: 0.8, y: 0.6}
+  hitboxOffset: {x: 0.72, y: 0.72}
+  hitboxSize: {x: 1.05, y: 0.85}
   enemyLayer:
     serializedVersion: 2
     m_Bits: 256
@@ -253,6 +236,14 @@ MonoBehaviour:
   - 0.3
   - 0.4
   attackBufferTime: 0.35
+  attackDamageMultipliers:
+  - 1
+  - 1
+  - 1.2
+  attackPoiseDamage:
+  - 8
+  - 10
+  - 14
 --- !u!114 &8906075615336048985
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -295,6 +286,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerExecute
   executeDamageMultiplier: 5
   executeDuration: 0.8
+  executeRange: 1.5
   enemyLayer:
     serializedVersion: 2
     m_Bits: 256
@@ -383,8 +375,8 @@ CapsuleCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
-  m_Size: {x: 1.100625, y: 1.679125}
+  m_Offset: {x: 0.06, y: 0.78}
+  m_Size: {x: 0.62, y: 1.45}
   m_Direction: 0
 --- !u!114 &4958669382040133731
 MonoBehaviour:
@@ -424,7 +416,7 @@ Transform:
   m_GameObject: {fileID: 7988265542604628047}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.866075, z: 0}
+  m_LocalPosition: {x: 0.06, y: 0.04, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

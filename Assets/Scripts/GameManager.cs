@@ -16,6 +16,7 @@ public class GameManager : MonoBehaviour
     {
         if (Instance != null) { Destroy(gameObject); return; }
         Instance = this;
+        transform.SetParent(null);
         DontDestroyOnLoad(gameObject);
     }
 
@@ -37,9 +38,16 @@ public class GameManager : MonoBehaviour
     public void RestartScene()
     {
         IsGameOver = false;
+        IsPaused = false;
         Time.timeScale = 1f;
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
-    public void LoadScene(string sceneName) => SceneManager.LoadScene(sceneName);
+    public void LoadScene(string sceneName)
+    {
+        IsGameOver = false;
+        IsPaused = false;
+        Time.timeScale = 1f;
+        SceneManager.LoadScene(sceneName);
+    }
 }

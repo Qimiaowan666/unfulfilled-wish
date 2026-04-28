@@ -48,7 +48,7 @@ SpriteRenderer:
   m_ReceiveShadows: 0
   m_DynamicOccludee: 1
   m_StaticShadowCaster: 0
-  m_MotionVectors: 1
+  m_MotionVectors: 2
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 0
@@ -152,9 +152,69 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6dce74855f7b05c42a0fcce6bf7e8907, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ShopSystem
-  itemStock: []
-  equipmentStock: []
-  skillStock: []
+  itemStock:
+  - {fileID: 11400000, guid: 0dd68f939e564f64fb7e9de2de3d031d, type: 2}
+  - {fileID: 11400000, guid: f2afa30a005aa8942964765e840b11b8, type: 2}
+  - {fileID: 11400000, guid: 581f38a9de27f4942a2d151e36345dfa, type: 2}
+  - {fileID: 11400000, guid: bf9a33a78071deb40a475338382c7cf8, type: 2}
+  equipmentStock:
+  - {fileID: 11400000, guid: b8e81863d994ee34387e4765263ff504, type: 2}
+  - {fileID: 11400000, guid: f319f40eab14a8f4d8d398c78cd28276, type: 2}
+  - {fileID: 11400000, guid: 3504c52a57e926d4e91f9e6ff7036003, type: 2}
+  - {fileID: 11400000, guid: 407fcb92e7bad9b4493e9d33dcf6f0c1, type: 2}
+  - {fileID: 11400000, guid: 65da10819a017a64ca3f491c7995b252, type: 2}
+  - {fileID: 11400000, guid: 467d641e6a6d98b478f414c35c1f9219, type: 2}
+  - {fileID: 11400000, guid: a944789afe91b82499f4030316670fa1, type: 2}
+  - {fileID: 11400000, guid: 595135ef7564bcc47bf56c5c57d6f17d, type: 2}
+  - {fileID: 11400000, guid: 5b4923b1cbfcb0649b3b80f7fe2b222d, type: 2}
+  - {fileID: 11400000, guid: bed0423c3e27acf4a8376a8ca52d2094, type: 2}
+  skillStock:
+  - {fileID: 11400000, guid: 6e7ab5ff83adb9c4b91cd63e9df8bc34, type: 2}
+  - {fileID: 11400000, guid: 14f2399a82279d640b82f531a3a94337, type: 2}
+  - {fileID: 11400000, guid: f68380beeccb6ca42aefbd29bb7ef0c4, type: 2}
+  - {fileID: 11400000, guid: 9f51e4b884b816c4b830bd9bfe47321a, type: 2}
+  - {fileID: 11400000, guid: 40c967800ab2d924a8794aa08ed35c17, type: 2}
+  itemEntries:
+  - item: {fileID: 11400000, guid: 0dd68f939e564f64fb7e9de2de3d031d, type: 2}
+    quantity: 5
+  - item: {fileID: 11400000, guid: f2afa30a005aa8942964765e840b11b8, type: 2}
+    quantity: 3
+  - item: {fileID: 11400000, guid: 581f38a9de27f4942a2d151e36345dfa, type: 2}
+    quantity: 2
+  - item: {fileID: 11400000, guid: bf9a33a78071deb40a475338382c7cf8, type: 2}
+    quantity: 2
+  equipmentEntries:
+  - equipment: {fileID: 11400000, guid: b8e81863d994ee34387e4765263ff504, type: 2}
+    quantity: 1
+  - equipment: {fileID: 11400000, guid: f319f40eab14a8f4d8d398c78cd28276, type: 2}
+    quantity: 1
+  - equipment: {fileID: 11400000, guid: 3504c52a57e926d4e91f9e6ff7036003, type: 2}
+    quantity: 1
+  - equipment: {fileID: 11400000, guid: 407fcb92e7bad9b4493e9d33dcf6f0c1, type: 2}
+    quantity: 1
+  - equipment: {fileID: 11400000, guid: 65da10819a017a64ca3f491c7995b252, type: 2}
+    quantity: 1
+  - equipment: {fileID: 11400000, guid: 467d641e6a6d98b478f414c35c1f9219, type: 2}
+    quantity: 1
+  - equipment: {fileID: 11400000, guid: a944789afe91b82499f4030316670fa1, type: 2}
+    quantity: 1
+  - equipment: {fileID: 11400000, guid: 595135ef7564bcc47bf56c5c57d6f17d, type: 2}
+    quantity: 1
+  - equipment: {fileID: 11400000, guid: 5b4923b1cbfcb0649b3b80f7fe2b222d, type: 2}
+    quantity: 1
+  - equipment: {fileID: 11400000, guid: bed0423c3e27acf4a8376a8ca52d2094, type: 2}
+    quantity: 1
+  skillEntries:
+  - skill: {fileID: 11400000, guid: 6e7ab5ff83adb9c4b91cd63e9df8bc34, type: 2}
+    quantity: 1
+  - skill: {fileID: 11400000, guid: 14f2399a82279d640b82f531a3a94337, type: 2}
+    quantity: 1
+  - skill: {fileID: 11400000, guid: f68380beeccb6ca42aefbd29bb7ef0c4, type: 2}
+    quantity: 1
+  - skill: {fileID: 11400000, guid: 9f51e4b884b816c4b830bd9bfe47321a, type: 2}
+    quantity: 1
+  - skill: {fileID: 11400000, guid: 40c967800ab2d924a8794aa08ed35c17, type: 2}
+    quantity: 1
 --- !u!114 &8345193854223710325
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -167,3 +227,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 23981c322189f584f81ff9400b858fa5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ShopNPCTrigger
+  prompt: F Trade

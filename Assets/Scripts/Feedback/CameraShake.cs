@@ -5,6 +5,7 @@ public class CameraShake : MonoBehaviour
 {
     public static CameraShake Instance { get; private set; }
 
+    public bool enableShake = false;
     public float defaultDuration = 0.1f;
     public float defaultMagnitude = 0.06f;
 
@@ -24,6 +25,7 @@ public class CameraShake : MonoBehaviour
 
     public void Shake(float duration, float magnitude)
     {
+        if (!enableShake) return;
         if (!isActiveAndEnabled) return;
         if (activeShake != null) StopCoroutine(activeShake);
         activeShake = StartCoroutine(ShakeRoutine(duration, magnitude));

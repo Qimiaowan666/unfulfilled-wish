@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5b8459a54b768840ab93aa00236bcc9, type: 3}
   m_Name: HealthPotion
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
-  itemName: Health Potion
-  description: Restores 30 HP.
+  itemName: "\u751F\u547D\u836F\u6C34"
+  description: "\u56DE\u590D 30 \u70B9\u751F\u547D\u3002"
   icon: {fileID: 0}
   type: 0
   price: 50

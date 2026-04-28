@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections;
+using System;
 
 [RequireComponent(typeof(PlayerController))]
 public class PlayerAttack : MonoBehaviour
@@ -18,17 +19,36 @@ public class PlayerAttack : MonoBehaviour
     public float[] attackDurations = { 0.3f, 0.3f, 0.4f };
     public float attackBufferTime = 0.35f;
 
+    [Header("Damage")]
+    public float[] attackDamageMultipliers = { 1f, 1f, 1.2f };
+    public float[] attackPoiseDamage = { 8f, 10f, 14f };
+
     PlayerController controller;
     PlayerInputBuffer inputBuffer;
+    PlayerAnimationEvents animationEvents;
     int comboStep;
     float comboTimer;
     bool isAttacking;
+    bool hitFrameReached;
+    bool actionFinished;
 
     void Awake()
     {
         controller = GetComponent<PlayerController>();
         inputBuffer = GetComponent<PlayerInputBuffer>();
         if (inputBuffer == null) inputBuffer = gameObject.AddComponent<PlayerInputBuffer>();
+
+        animationEvents = GetComponent<PlayerAnimationEvents>();
+        if (animationEvents == null) animationEvents = gameObject.AddComponent<PlayerAnimationEvents>();
+        animationEvents.HitFrameReached += OnAnimationHit;
+        animationEvents.ActionFinished += OnAnimationFinish;
+    }
+
+    void OnDestroy()
+    {
+        if (animationEvents == null) return;
+        animationEvents.HitFrameReached -= OnAnimationHit;
+        animationEvents.ActionFinished -= OnAnimationFinish;
     }
 
     void Update()
@@ -59,14 +79,18 @@ public class PlayerAttack : MonoBehaviour
     IEnumerator AttackRoutine()
     {
         isAttacking = true;
+        hitFrameReached = false;
+        actionFinished = false;
+
         controller.SetAnimInteger("AttackStep", comboStep + 1);
         controller.SetState(PlayerState.Attacking);
         controller.Rb.linearVelocity = new Vector2(0f, controller.Rb.linearVelocity.y);
 
-        yield return new WaitForSeconds(attackDurations[comboStep] * 0.4f);
+        float duration = GetComboValue(attackDurations, comboStep, 0.35f);
+        yield return WaitForAnimationSignal(() => hitFrameReached, duration * 0.75f);
         DoHit();
 
-        yield return new WaitForSeconds(attackDurations[comboStep] * 0.6f);
+        yield return WaitForAnimationSignal(() => actionFinished, duration * 1.8f);
 
         comboStep = (comboStep + 1) % maxComboStep;
         comboTimer = comboResetTime;
@@ -74,6 +98,25 @@ public class PlayerAttack : MonoBehaviour
         if (controller.IsGrounded) controller.SetLocomotionState();
         else controller.SetState(PlayerState.Falling);
         isAttacking = false;
+    }
+
+    IEnumerator WaitForAnimationSignal(Func<bool> signal, float fallbackSeconds)
+    {
+        float endTime = Time.time + Mathf.Max(0.05f, fallbackSeconds);
+        while (!signal() && Time.time < endTime)
+            yield return null;
+    }
+
+    void OnAnimationHit()
+    {
+        if (!isAttacking) return;
+        hitFrameReached = true;
+    }
+
+    void OnAnimationFinish()
+    {
+        if (!isAttacking) return;
+        actionFinished = true;
     }
 
     void DoHit()
@@ -89,7 +132,9 @@ public class PlayerAttack : MonoBehaviour
             var enemy = hit.GetComponent<EnemyBase>();
             if (enemy != null)
             {
-                enemy.TakeDamage(controller.Stats.attack);
+                float damage = controller.Stats.attack * GetComboValue(attackDamageMultipliers, comboStep, 1f);
+                float poiseDamage = GetComboValue(attackPoiseDamage, comboStep, 0f);
+                enemy.TakeDamage(damage, poiseDamage);
                 hit.GetComponent<DamageFeedback>()?.ApplyKnockback(transform.position, 4f);
                 controller.Stats.OnAttackHit();
                 AudioManager.Instance?.PlayHit();
@@ -119,5 +164,12 @@ public class PlayerAttack : MonoBehaviour
         if (controller != null) return controller.FacingRight ? 1f : -1f;
 
         return transform.lossyScale.x >= 0f ? 1f : -1f;
+    }
+
+    float GetComboValue(float[] values, int index, float fallback)
+    {
+        if (values == null || values.Length == 0) return fallback;
+        if (index >= 0 && index < values.Length) return values[index];
+        return values[values.Length - 1];
     }
 }
