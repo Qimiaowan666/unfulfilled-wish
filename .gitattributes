@@ -1,0 +1,24 @@
+* text=auto
+
+# Unity YAML assets should stay text-mergeable
+*.meta text eol=lf
+*.unity text eol=lf
+*.prefab text eol=lf
+*.asset text eol=lf
+*.anim text eol=lf
+*.controller text eol=lf
+*.mat text eol=lf
+*.physicsMaterial2D text eol=lf
+
+# Binary assets
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.psd binary
+*.wav binary
+*.mp3 binary
+*.zip binary
+*.fbx binary
+*.ttf binary
+*.otf binary
+
