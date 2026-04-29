@@ -1,17 +1,19 @@
-using System.Text;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
+using System.Collections.Generic;
 
 public class CharacterPanelUI : MonoBehaviour
 {
+    public static bool IsOpen { get; private set; }
+
     enum CharacterTab
     {
-        Status,
-        Equipment,
-        Inventory,
-        Skills
+        Status = 0,
+        Equipment = 1,
+        Inventory = 2,
+        Skills = 3
     }
 
     public GameObject panel;
@@ -34,15 +36,26 @@ public class CharacterPanelUI : MonoBehaviour
     public Image accessory1Icon;
     public Image accessory2Icon;
 
+    CharacterPanelUIFactory ui;
+    CharacterPanelPage[] pages;
+    PlayerStats subscribedStats;
+    EquipmentSystem subscribedEquipment;
+    InventorySystem subscribedInventory;
+    SkillSystem subscribedSkills;
     bool isOpen;
     bool pausedByPanel;
+    bool hasSubscribed;
     float previousTimeScale = 1f;
     CharacterTab currentTab = CharacterTab.Status;
+    readonly List<GameObject> hiddenHudRoots = new List<GameObject>();
+    readonly List<bool> hiddenHudPreviousStates = new List<bool>();
 
     void Start()
     {
         EnsureUI();
+        BuildPages();
         BindButtons();
+        Resubscribe();
         SetOpen(false);
     }
 
@@ -56,6 +69,13 @@ public class CharacterPanelUI : MonoBehaviour
         if (pausedByPanel)
             ResumeGameTime();
 
+        RestoreGameplayHud();
+        if (isOpen)
+        {
+            isOpen = false;
+            IsOpen = false;
+        }
+
         Unsubscribe();
     }
 
@@ -63,7 +83,8 @@ public class CharacterPanelUI : MonoBehaviour
     {
         var keyboard = Keyboard.current;
         if (keyboard == null) return;
-        if (ShopUI.IsOpen) return;
+
+        if (!isOpen && ShopUI.IsOpen) return;
 
         if (keyboard.cKey.wasPressedThisFrame)
             Toggle();
@@ -82,24 +103,34 @@ public class CharacterPanelUI : MonoBehaviour
 
     void SetOpen(bool value)
     {
-        if (isOpen == value)
+        if (!value && !isOpen)
         {
-            if (panel != null) panel.SetActive(isOpen);
+            IsOpen = false;
+            RestoreGameplayHud();
+            if (panel != null) panel.SetActive(false);
             return;
         }
 
+        if (value && ShopUI.IsOpen) return;
+
         isOpen = value;
+        IsOpen = value;
         PlayerInputBuffer.ClearAll();
+
         if (panel != null) panel.SetActive(isOpen);
 
         if (isOpen)
         {
+            Resubscribe();
+            HideGameplayHud();
             PauseGameTime();
             Refresh();
         }
         else
         {
+            HideAllPages();
             ResumeGameTime();
+            RestoreGameplayHud();
         }
     }
 
@@ -132,16 +163,38 @@ public class CharacterPanelUI : MonoBehaviour
     void Refresh()
     {
         if (!isOpen) return;
-        if (titleText != null) titleText.text = GetTabTitle();
-        if (contentText != null) contentText.text = BuildTabText();
+        if (pages == null) BuildPages();
+        if (pages == null) return;
+
+        if (titleText != null) titleText.text = GetTabTitle(currentTab);
+        if (contentText != null) contentText.gameObject.SetActive(false);
+        if (equipmentActionParent != null) equipmentActionParent.gameObject.SetActive(false);
+
+        for (int i = 0; i < pages.Length; i++)
+        {
+            if (pages[i] == null) continue;
+
+            if (i == (int)currentTab)
+                pages[i].Show();
+            else
+                pages[i].Hide();
+        }
+
         RefreshLegacyFields();
         UpdateButtonStates();
-        RefreshActionButtons();
     }
 
-    string GetTabTitle()
+    void HideAllPages()
     {
-        switch (currentTab)
+        if (pages == null) return;
+
+        foreach (var page in pages)
+            page?.Hide();
+    }
+
+    string GetTabTitle(CharacterTab tab)
+    {
+        switch (tab)
         {
             case CharacterTab.Status: return "状态";
             case CharacterTab.Equipment: return "装备";
@@ -151,367 +204,114 @@ public class CharacterPanelUI : MonoBehaviour
         }
     }
 
-    string BuildTabText()
-    {
-        switch (currentTab)
-        {
-            case CharacterTab.Status: return BuildStatusText();
-            case CharacterTab.Equipment: return BuildEquipmentText();
-            case CharacterTab.Inventory: return BuildInventoryText();
-            case CharacterTab.Skills: return BuildSkillsText();
-            default: return string.Empty;
-        }
-    }
-
-    string BuildStatusText()
-    {
-        var stats = FindAnyObjectByType<PlayerStats>();
-        var controller = FindAnyObjectByType<PlayerController>();
-        if (stats == null) return "未找到玩家状态。";
-
-        var sb = new StringBuilder();
-        sb.AppendLine($"HP: {stats.CurrentHP:F0} / {stats.maxHP:F0}");
-        sb.AppendLine($"虚血: {stats.CurrentGhostHP:F0}");
-        sb.AppendLine($"攻击: {stats.attack:F0}");
-        sb.AppendLine($"防御: {stats.defense:F0}");
-        sb.AppendLine($"金币: {stats.gold}");
-        if (controller != null)
-        {
-            sb.AppendLine();
-            sb.AppendLine($"当前状态: {controller.State}");
-            sb.AppendLine($"在地面: {(controller.IsGrounded ? "是" : "否")}");
-            sb.AppendLine($"朝向: {(controller.FacingRight ? "右" : "左")}");
-        }
-
-        return sb.ToString();
-    }
-
-    string BuildEquipmentText()
-    {
-        var eq = EquipmentSystem.Instance;
-        if (eq == null) return "未找到装备系统。";
-
-        var sb = new StringBuilder();
-        AppendEquipment(sb, "武器", eq.weapon);
-        AppendEquipment(sb, "防具", eq.armor);
-        AppendEquipment(sb, "饰品 1", eq.accessory1);
-        AppendEquipment(sb, "饰品 2", eq.accessory2);
-        sb.AppendLine();
-        sb.AppendLine("已有装备：");
-
-        if (eq.ownedEquipment.Count == 0)
-        {
-            sb.AppendLine("暂无。");
-        }
-        else
-        {
-            for (int i = 0; i < eq.ownedEquipment.Count; i++)
-            {
-                var equipment = eq.ownedEquipment[i];
-                if (equipment == null) continue;
-                string state = IsEquipped(eq, equipment) ? "已装备" : "可装备";
-                sb.AppendLine($"{i + 1}. {equipment.equipmentName} [{GetSlotName(equipment.slot)}] - {state}");
-            }
-        }
-
-        sb.AppendLine();
-        sb.AppendLine("点击下方按钮切换装备。");
-        return sb.ToString();
-    }
-
-    void AppendEquipment(StringBuilder sb, string label, EquipmentData equipment)
-    {
-        if (equipment == null)
-        {
-            sb.AppendLine($"{label}: 未装备");
-            return;
-        }
-
-        sb.AppendLine($"{label}: {equipment.equipmentName}");
-        if (!string.IsNullOrWhiteSpace(equipment.description))
-            sb.AppendLine($"  {equipment.description}");
-        sb.AppendLine($"  攻击 +{equipment.attackBonus:F0}  防御 +{equipment.defenseBonus:F0}  HP +{equipment.maxHPBonus:F0}");
-    }
-
-    string BuildInventoryText()
-    {
-        var inventory = InventorySystem.Instance;
-        if (inventory == null) return "未找到背包系统。";
-        if (inventory.items.Count == 0) return "背包为空。";
-
-        var sb = new StringBuilder();
-        sb.AppendLine($"容量: {inventory.items.Count} / {inventory.maxSlots}");
-        sb.AppendLine("点击下方按钮使用道具。");
-        sb.AppendLine();
-        for (int i = 0; i < inventory.items.Count; i++)
-        {
-            var item = inventory.items[i];
-            if (item == null)
-            {
-                sb.AppendLine($"{i + 1}. <空物品>");
-                continue;
-            }
-
-            sb.AppendLine($"{i + 1}. {item.itemName} [{item.type}]");
-            if (!string.IsNullOrWhiteSpace(item.description))
-                sb.AppendLine($"   {item.description}");
-            if (item.healAmount > 0f)
-                sb.AppendLine($"   回复 HP: {item.healAmount:F0}");
-        }
-
-        return sb.ToString();
-    }
-
-    string BuildSkillsText()
-    {
-        var skills = SkillSystem.GetOrCreate();
-        if (skills == null) return "未找到技能系统。";
-        if (skills.learnedSkills.Count == 0) return "尚未学习技能。";
-
-        var sb = new StringBuilder();
-        for (int i = 0; i < skills.learnedSkills.Count; i++)
-        {
-            var skill = skills.learnedSkills[i];
-            if (skill == null)
-            {
-                sb.AppendLine($"{i + 1}. <空技能>");
-                continue;
-            }
-
-            sb.AppendLine($"{i + 1}. {skill.skillName} [{skill.type}]");
-            if (!string.IsNullOrWhiteSpace(skill.description))
-                sb.AppendLine($"   {skill.description}");
-            if (skill.type == SkillType.Active)
-                sb.AppendLine($"   伤害: {skill.damage:F0}  韧性伤害: {skill.poiseDamage:F0}  冷却: {skill.cooldown:F1}s");
-            else
-                sb.AppendLine($"   攻击 +{skill.attackPercent:F0}%  防御 +{skill.defensePercent:F0}%");
-        }
-
-        return sb.ToString();
-    }
-
     void RefreshLegacyFields()
     {
-        var stats = FindAnyObjectByType<PlayerStats>();
-        if (stats != null)
-        {
-            if (hpText != null) hpText.text = $"HP: {stats.CurrentHP:F0} / {stats.maxHP:F0}";
-            if (attackText != null) attackText.text = $"ATK: {stats.attack:F0}";
-            if (defenseText != null) defenseText.text = $"DEF: {stats.defense:F0}";
-            if (goldText != null) goldText.text = $"Gold: {stats.gold}";
-        }
+        SetLegacyObjectActive(hpText, false);
+        SetLegacyObjectActive(attackText, false);
+        SetLegacyObjectActive(defenseText, false);
+        SetLegacyObjectActive(goldText, false);
+        SetLegacyObjectActive(weaponIcon, false);
+        SetLegacyObjectActive(armorIcon, false);
+        SetLegacyObjectActive(accessory1Icon, false);
+        SetLegacyObjectActive(accessory2Icon, false);
+    }
 
-        var eq = EquipmentSystem.Instance;
-        if (eq == null) return;
-        if (weaponIcon != null) weaponIcon.sprite = eq.weapon != null ? eq.weapon.icon : null;
-        if (armorIcon != null) armorIcon.sprite = eq.armor != null ? eq.armor.icon : null;
-        if (accessory1Icon != null) accessory1Icon.sprite = eq.accessory1 != null ? eq.accessory1.icon : null;
-        if (accessory2Icon != null) accessory2Icon.sprite = eq.accessory2 != null ? eq.accessory2.icon : null;
+    void SetLegacyObjectActive(Graphic graphic, bool value)
+    {
+        if (graphic != null)
+            graphic.gameObject.SetActive(value);
     }
 
     void UpdateButtonStates()
     {
-        SetButtonColor(statusButton, currentTab == CharacterTab.Status);
-        SetButtonColor(equipmentButton, currentTab == CharacterTab.Equipment);
-        SetButtonColor(inventoryButton, currentTab == CharacterTab.Inventory);
-        SetButtonColor(skillsButton, currentTab == CharacterTab.Skills);
-    }
-
-    void RefreshActionButtons()
-    {
-        if (equipmentActionParent == null) return;
-
-        foreach (Transform child in equipmentActionParent)
-            Destroy(child.gameObject);
-
-        bool show = isOpen && (currentTab == CharacterTab.Equipment || currentTab == CharacterTab.Inventory || currentTab == CharacterTab.Skills);
-        equipmentActionParent.gameObject.SetActive(show);
-        if (!show) return;
-
-        if (currentTab == CharacterTab.Skills)
-        {
-            RefreshSkillButtons();
-            return;
-        }
-
-        if (currentTab == CharacterTab.Inventory)
-        {
-            RefreshInventoryButtons();
-            return;
-        }
-
-        var eq = EquipmentSystem.Instance;
-        if (eq == null || eq.ownedEquipment.Count == 0) return;
-
-        int buttonIndex = 0;
-        foreach (var equipment in eq.ownedEquipment)
-        {
-            if (equipment == null) continue;
-            CreateEquipmentActionButton(equipmentActionParent, equipment, buttonIndex++);
-        }
-    }
-
-    void RefreshInventoryButtons()
-    {
-        var inventory = InventorySystem.Instance;
-        if (inventory == null || inventory.items.Count == 0) return;
-
-        for (int i = 0; i < inventory.items.Count; i++)
-        {
-            var item = inventory.items[i];
-            if (item == null) continue;
-            CreateInventoryActionButton(equipmentActionParent, item, i);
-        }
-    }
-
-    void CreateInventoryActionButton(Transform parent, ItemData item, int index)
-    {
-        var buttonObject = CreateUIObject(item.itemName + "UseButton", parent);
-        var rect = buttonObject.GetComponent<RectTransform>();
-        rect.anchorMin = new Vector2(0f, 1f);
-        rect.anchorMax = new Vector2(1f, 1f);
-        rect.pivot = new Vector2(0.5f, 1f);
-        rect.anchoredPosition = new Vector2(0f, -index * 38f);
-        rect.sizeDelta = new Vector2(0f, 32f);
-
-        var image = buttonObject.AddComponent<Image>();
-        image.color = new Color(0.22f, 0.34f, 0.26f, 0.95f);
-
-        var button = buttonObject.AddComponent<Button>();
-        button.onClick.AddListener(() =>
-        {
-            var stats = FindAnyObjectByType<PlayerStats>();
-            InventorySystem.Instance?.UseItem(item, stats);
-            Refresh();
-        });
-
-        var text = CreateText("Text", buttonObject.transform, $"使用 {item.itemName}", 16, TextAnchor.MiddleCenter);
-        SetRect(text.rectTransform, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-    }
-
-    void RefreshSkillButtons()
-    {
-        var skills = SkillSystem.GetOrCreate();
-        if (skills == null || skills.learnedSkills.Count == 0) return;
-
-        for (int i = 0; i < skills.learnedSkills.Count; i++)
-        {
-            var skill = skills.learnedSkills[i];
-            if (skill == null) continue;
-            CreateSkillStatusButton(equipmentActionParent, skill, i);
-        }
-    }
-
-    void CreateSkillStatusButton(Transform parent, SkillData skill, int index)
-    {
-        var buttonObject = CreateUIObject(skill.skillName + "LearnedButton", parent);
-        var rect = buttonObject.GetComponent<RectTransform>();
-        rect.anchorMin = new Vector2(0f, 1f);
-        rect.anchorMax = new Vector2(1f, 1f);
-        rect.pivot = new Vector2(0.5f, 1f);
-        rect.anchoredPosition = new Vector2(0f, -index * 38f);
-        rect.sizeDelta = new Vector2(0f, 32f);
-
-        var image = buttonObject.AddComponent<Image>();
-        image.color = skill.type == SkillType.Active
-            ? new Color(0.26f, 0.28f, 0.44f, 0.95f)
-            : new Color(0.26f, 0.42f, 0.28f, 0.95f);
-
-        var button = buttonObject.AddComponent<Button>();
-        button.interactable = false;
-
-        var text = CreateText("Text", buttonObject.transform, $"已学 {skill.skillName}", 16, TextAnchor.MiddleCenter);
-        SetRect(text.rectTransform, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-    }
-
-    void CreateEquipmentActionButton(Transform parent, EquipmentData equipment, int index)
-    {
-        var buttonObject = CreateUIObject(equipment.equipmentName + "Button", parent);
-        var rect = buttonObject.GetComponent<RectTransform>();
-        rect.anchorMin = new Vector2(0f, 1f);
-        rect.anchorMax = new Vector2(1f, 1f);
-        rect.pivot = new Vector2(0.5f, 1f);
-        rect.anchoredPosition = new Vector2(0f, -index * 38f);
-        rect.sizeDelta = new Vector2(0f, 32f);
-
-        var image = buttonObject.AddComponent<Image>();
-        var eq = EquipmentSystem.Instance;
-        bool equipped = eq != null && IsEquipped(eq, equipment);
-        image.color = equipped ? new Color(0.26f, 0.42f, 0.28f, 0.95f) : new Color(0.2f, 0.23f, 0.3f, 0.95f);
-
-        var button = buttonObject.AddComponent<Button>();
-        button.interactable = !equipped;
-        button.onClick.AddListener(() =>
-        {
-            EquipmentSystem.Instance?.EquipOwned(equipment);
-            Refresh();
-        });
-
-        string prefix = equipped ? "已装备" : "装备";
-        var text = CreateText("Text", buttonObject.transform, $"{prefix} {equipment.equipmentName}", 16, TextAnchor.MiddleCenter);
-        SetRect(text.rectTransform, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-    }
-
-    bool IsEquipped(EquipmentSystem eq, EquipmentData equipment)
-    {
-        return eq.weapon == equipment || eq.armor == equipment || eq.accessory1 == equipment || eq.accessory2 == equipment;
-    }
-
-    string GetSlotName(EquipmentSlot slot)
-    {
-        switch (slot)
-        {
-            case EquipmentSlot.Weapon: return "武器";
-            case EquipmentSlot.Armor: return "防具";
-            case EquipmentSlot.Accessory: return "饰品";
-            default: return slot.ToString();
-        }
-    }
-
-    void SetButtonColor(Button button, bool selected)
-    {
-        if (button == null) return;
-        var image = button.GetComponent<Image>();
-        if (image == null) return;
-        image.color = selected ? new Color(0.35f, 0.45f, 0.62f, 0.95f) : new Color(0.18f, 0.2f, 0.25f, 0.95f);
+        ui?.SetButtonState(statusButton, currentTab == CharacterTab.Status);
+        ui?.SetButtonState(equipmentButton, currentTab == CharacterTab.Equipment);
+        ui?.SetButtonState(inventoryButton, currentTab == CharacterTab.Inventory);
+        ui?.SetButtonState(skillsButton, currentTab == CharacterTab.Skills);
     }
 
     void Subscribe()
     {
-        if (EquipmentSystem.Instance != null) EquipmentSystem.Instance.OnEquipmentChanged += Refresh;
-        if (InventorySystem.Instance != null) InventorySystem.Instance.OnInventoryChanged += Refresh;
-        SkillSystem.GetOrCreate().OnSkillsChanged += Refresh;
+        if (!isActiveAndEnabled || hasSubscribed) return;
+
+        subscribedStats = FindAnyObjectByType<PlayerStats>();
+        if (subscribedStats != null) subscribedStats.OnStatsChanged += Refresh;
+
+        subscribedEquipment = EquipmentSystem.Instance != null
+            ? EquipmentSystem.Instance
+            : FindAnyObjectByType<EquipmentSystem>();
+        if (subscribedEquipment != null) subscribedEquipment.OnEquipmentChanged += Refresh;
+
+        subscribedInventory = InventorySystem.Instance != null
+            ? InventorySystem.Instance
+            : FindAnyObjectByType<InventorySystem>();
+        if (subscribedInventory != null) subscribedInventory.OnInventoryChanged += Refresh;
+
+        subscribedSkills = SkillSystem.Instance != null
+            ? SkillSystem.Instance
+            : FindAnyObjectByType<SkillSystem>();
+        if (subscribedSkills != null) subscribedSkills.OnSkillsChanged += Refresh;
+
+        hasSubscribed = true;
+    }
+
+    void Resubscribe()
+    {
+        Unsubscribe();
+        Subscribe();
     }
 
     void Unsubscribe()
     {
-        if (EquipmentSystem.Instance != null) EquipmentSystem.Instance.OnEquipmentChanged -= Refresh;
-        if (InventorySystem.Instance != null) InventorySystem.Instance.OnInventoryChanged -= Refresh;
-        if (SkillSystem.Instance != null) SkillSystem.Instance.OnSkillsChanged -= Refresh;
+        if (!hasSubscribed) return;
+
+        if (subscribedStats != null) subscribedStats.OnStatsChanged -= Refresh;
+        subscribedStats = null;
+
+        if (subscribedEquipment != null) subscribedEquipment.OnEquipmentChanged -= Refresh;
+        subscribedEquipment = null;
+
+        if (subscribedInventory != null) subscribedInventory.OnInventoryChanged -= Refresh;
+        subscribedInventory = null;
+
+        if (subscribedSkills != null) subscribedSkills.OnSkillsChanged -= Refresh;
+        subscribedSkills = null;
+
+        hasSubscribed = false;
     }
 
     void BindButtons()
     {
-        if (statusButton != null) statusButton.onClick.AddListener(() => SetTab(CharacterTab.Status));
-        if (equipmentButton != null) equipmentButton.onClick.AddListener(() => SetTab(CharacterTab.Equipment));
-        if (inventoryButton != null) inventoryButton.onClick.AddListener(() => SetTab(CharacterTab.Inventory));
-        if (skillsButton != null) skillsButton.onClick.AddListener(() => SetTab(CharacterTab.Skills));
+        BindTabButton(statusButton, CharacterTab.Status);
+        BindTabButton(equipmentButton, CharacterTab.Equipment);
+        BindTabButton(inventoryButton, CharacterTab.Inventory);
+        BindTabButton(skillsButton, CharacterTab.Skills);
+    }
+
+    void BindTabButton(Button button, CharacterTab tab)
+    {
+        if (button == null) return;
+
+        button.onClick.RemoveAllListeners();
+        button.onClick.AddListener(() => SetTab(tab));
     }
 
     void EnsureUI()
     {
+        ui = new CharacterPanelUIFactory();
+
         if (panel == null)
             panel = CreatePanel(transform);
         else
             ConfigurePanel(panel);
 
-        if (titleText == null || contentText == null || equipmentActionParent == null || statusButton == null || equipmentButton == null || inventoryButton == null || skillsButton == null)
-            BuildGeneratedContent(panel.transform);
+        BuildGeneratedContent(panel.transform);
     }
 
     GameObject CreatePanel(Transform parent)
     {
-        var createdPanel = CreateUIObject("CharacterPanel", parent);
+        var createdPanel = new GameObject("CharacterPanel", typeof(RectTransform));
+        createdPanel.transform.SetParent(parent, false);
         ConfigurePanel(createdPanel);
         return createdPanel;
     }
@@ -529,7 +329,43 @@ public class CharacterPanelUI : MonoBehaviour
 
         var image = targetPanel.GetComponent<Image>();
         if (image == null) image = targetPanel.AddComponent<Image>();
-        image.color = new Color(0.06f, 0.07f, 0.09f, 0.97f);
+        image.color = new Color(0.05f, 0.06f, 0.08f, 0.99f);
+    }
+
+    void HideGameplayHud()
+    {
+        RestoreGameplayHud();
+
+        string[] names =
+        {
+            "HUD_Canvas",
+            "HUD",
+            "CombatHUDCanvas",
+            "ExecutePromptCanvas",
+            "TeleportCanvas"
+        };
+
+        foreach (string hudName in names)
+        {
+            GameObject hud = GameObject.Find(hudName);
+            if (hud == null || hud == panel) continue;
+
+            hiddenHudRoots.Add(hud);
+            hiddenHudPreviousStates.Add(hud.activeSelf);
+            hud.SetActive(false);
+        }
+    }
+
+    void RestoreGameplayHud()
+    {
+        for (int i = 0; i < hiddenHudRoots.Count; i++)
+        {
+            if (hiddenHudRoots[i] != null)
+                hiddenHudRoots[i].SetActive(hiddenHudPreviousStates[i]);
+        }
+
+        hiddenHudRoots.Clear();
+        hiddenHudPreviousStates.Clear();
     }
 
     void BuildGeneratedContent(Transform parent)
@@ -538,83 +374,62 @@ public class CharacterPanelUI : MonoBehaviour
         if (old != null)
             Destroy(old.gameObject);
 
-        var root = CreateUIObject("GeneratedCharacterMenu", parent);
-        SetRect(root.GetComponent<RectTransform>(), Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+        var root = ui.CreateUIObject("GeneratedCharacterMenu", parent);
+        ui.SetRect(root.GetComponent<RectTransform>(), Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
 
-        titleText = CreateText("Title", root.transform, "人物信息", 34, TextAnchor.MiddleLeft);
-        SetRect(titleText.rectTransform, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(54f, -92f), new Vector2(-54f, -28f));
+        titleText = ui.CreateText("Title", root.transform, "人物信息", 34, TextAnchor.MiddleLeft);
+        ui.SetRect(titleText.rectTransform, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(54f, -92f), new Vector2(-54f, -28f));
 
-        var hintText = CreateText("Hint", root.transform, "C 关闭    1 状态    2 装备    3 背包    4 技能", 16, TextAnchor.MiddleLeft);
-        hintText.color = new Color(0.66f, 0.7f, 0.78f, 1f);
-        SetRect(hintText.rectTransform, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(54f, -126f), new Vector2(-54f, -96f));
+        var hintText = ui.CreateText("Hint", root.transform, "C 关闭    1 状态    2 装备    3 背包    4 技能", 16, TextAnchor.MiddleLeft);
+        hintText.color = ui.MutedTextColor;
+        ui.SetRect(hintText.rectTransform, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(54f, -126f), new Vector2(-54f, -96f));
 
-        var tabRoot = CreateUIObject("Tabs", root.transform);
-        SetRect(tabRoot.GetComponent<RectTransform>(), new Vector2(0f, 0f), new Vector2(0f, 1f), new Vector2(54f, 56f), new Vector2(254f, -156f));
+        var tabRoot = ui.CreateUIObject("Tabs", root.transform);
+        ui.SetRect(tabRoot.GetComponent<RectTransform>(), new Vector2(0f, 0f), new Vector2(0f, 1f), new Vector2(54f, 56f), new Vector2(254f, -156f));
         statusButton = CreateTabButton(tabRoot.transform, "状态", 0);
         equipmentButton = CreateTabButton(tabRoot.transform, "装备", 1);
         inventoryButton = CreateTabButton(tabRoot.transform, "背包", 2);
         skillsButton = CreateTabButton(tabRoot.transform, "技能", 3);
 
-        var contentBackground = CreateUIObject("ContentBackground", root.transform);
-        var backgroundImage = contentBackground.AddComponent<Image>();
-        backgroundImage.color = new Color(0.1f, 0.11f, 0.15f, 0.82f);
-        SetRect(contentBackground.GetComponent<RectTransform>(), new Vector2(0f, 0f), new Vector2(1f, 1f), new Vector2(286f, 56f), new Vector2(-54f, -156f));
+        var contentBackground = ui.CreatePanel("ContentBackground", root.transform, ui.PanelColor);
+        ui.SetRect(contentBackground.rectTransform, new Vector2(0f, 0f), Vector2.one, new Vector2(286f, 56f), new Vector2(-54f, -156f));
 
-        contentText = CreateText("Content", contentBackground.transform, string.Empty, 20, TextAnchor.UpperLeft);
-        contentText.horizontalOverflow = HorizontalWrapMode.Wrap;
-        contentText.verticalOverflow = VerticalWrapMode.Overflow;
-        contentText.lineSpacing = 1.15f;
-        SetRect(contentText.rectTransform, Vector2.zero, Vector2.one, new Vector2(28f, 190f), new Vector2(-28f, -24f));
+        contentText = ui.CreateText("Content", contentBackground.transform, string.Empty, 20, TextAnchor.UpperLeft);
+        ui.SetRect(contentText.rectTransform, Vector2.zero, Vector2.one, new Vector2(28f, 24f), new Vector2(-28f, -24f));
+        contentText.gameObject.SetActive(false);
 
-        var equipmentActions = CreateUIObject("EquipmentActions", contentBackground.transform);
+        var equipmentActions = ui.CreateUIObject("EquipmentActions", contentBackground.transform);
         equipmentActionParent = equipmentActions.transform;
-        SetRect(equipmentActions.GetComponent<RectTransform>(), new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(28f, 24f), new Vector2(-28f, 178f));
+        ui.SetRect(equipmentActions.GetComponent<RectTransform>(), new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(28f, 24f), new Vector2(-28f, 178f));
         equipmentActions.SetActive(false);
+
+        pages = new CharacterPanelPage[]
+        {
+            new CharacterStatusPageUI(),
+            new CharacterEquipmentPageUI(),
+            new CharacterInventoryPageUI(),
+            new CharacterSkillsPageUI()
+        };
+
+        foreach (var page in pages)
+            page.Build(contentBackground.transform, ui);
+    }
+
+    void BuildPages()
+    {
+        if (pages != null) return;
+        EnsureUI();
     }
 
     Button CreateTabButton(Transform parent, string label, int index)
     {
-        var buttonObject = CreateUIObject(label + "Button", parent);
-        var rect = buttonObject.GetComponent<RectTransform>();
+        var button = ui.CreateButton(label + "Button", parent, label, 20);
+        var rect = button.GetComponent<RectTransform>();
         rect.anchorMin = new Vector2(0f, 1f);
         rect.anchorMax = new Vector2(1f, 1f);
         rect.pivot = new Vector2(0.5f, 1f);
         rect.anchoredPosition = new Vector2(0f, -index * 58f);
         rect.sizeDelta = new Vector2(0f, 46f);
-
-        var image = buttonObject.AddComponent<Image>();
-        image.color = new Color(0.18f, 0.2f, 0.25f, 0.95f);
-        var button = buttonObject.AddComponent<Button>();
-
-        var text = CreateText("Text", buttonObject.transform, label, 20, TextAnchor.MiddleCenter);
-        SetRect(text.rectTransform, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
         return button;
-    }
-
-    Text CreateText(string name, Transform parent, string text, int fontSize, TextAnchor alignment)
-    {
-        var textObject = CreateUIObject(name, parent);
-        var textComponent = textObject.AddComponent<Text>();
-        textComponent.text = text;
-        textComponent.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-        textComponent.fontSize = fontSize;
-        textComponent.alignment = alignment;
-        textComponent.color = new Color(0.92f, 0.93f, 0.95f, 1f);
-        return textComponent;
-    }
-
-    GameObject CreateUIObject(string name, Transform parent)
-    {
-        var go = new GameObject(name, typeof(RectTransform));
-        go.transform.SetParent(parent, false);
-        return go;
-    }
-
-    void SetRect(RectTransform rect, Vector2 anchorMin, Vector2 anchorMax, Vector2 offsetMin, Vector2 offsetMax)
-    {
-        rect.anchorMin = anchorMin;
-        rect.anchorMax = anchorMax;
-        rect.offsetMin = offsetMin;
-        rect.offsetMax = offsetMax;
     }
 }

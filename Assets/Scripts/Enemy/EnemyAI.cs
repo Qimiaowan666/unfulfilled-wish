@@ -30,6 +30,7 @@ public class EnemyAI : MonoBehaviour
     EnemyBase enemy;
     Rigidbody2D rb;
     Animator anim;
+    SpriteRenderer[] spriteRenderers;
     Transform player;
 
     Vector2 patrolOrigin;
@@ -52,6 +53,7 @@ public class EnemyAI : MonoBehaviour
         enemy = GetComponent<EnemyBase>();
         rb = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
+        spriteRenderers = GetComponentsInChildren<SpriteRenderer>(true);
         patrolOrigin = transform.position;
         specialTimer = specialAttackCooldown;
 
@@ -60,6 +62,19 @@ public class EnemyAI : MonoBehaviour
             playerLayer = 1 << playerLayerIndex;
 
         GetComponent<PoiseMeter>().OnPoiseBroken += OnStunned;
+    }
+
+    public void ResetAIState()
+    {
+        StopAllCoroutines();
+        player = null;
+        attackTimer = 0f;
+        specialTimer = specialAttackCooldown;
+        patrolDir = 1f;
+        patrolOrigin = transform.position;
+        if (rb == null) rb = GetComponent<Rigidbody2D>();
+        if (rb != null) rb.linearVelocity = Vector2.zero;
+        SetAIState(AIState.Patrol);
     }
 
     void Update()
@@ -91,19 +106,24 @@ public class EnemyAI : MonoBehaviour
             player = hit.transform;
             float dist = GetHorizontalDistanceToPlayer();
 
-            if (dist <= attackRange && attackTimer <= 0f)
+            if (dist <= attackRange)
             {
-                if (specialTimer <= 0f)
-                    StartCoroutine(SpecialAttackRoutine());
-                else
-                    StartCoroutine(NormalAttackRoutine());
-            }
-            else if (dist <= preferredCombatDistance)
-            {
-                SetAIState(AIState.Chase);
                 rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
+                FaceDirection(player.position.x - transform.position.x);
+
+                if (attackTimer <= 0f)
+                {
+                    if (specialTimer <= 0f)
+                        StartCoroutine(SpecialAttackRoutine());
+                    else
+                        StartCoroutine(NormalAttackRoutine());
+                }
+                else
+                {
+                    SetAIState(AIState.Chase);
+                }
             }
-            else if (dist > attackRange)
+            else
             {
                 SetAIState(AIState.Chase);
             }
@@ -121,6 +141,7 @@ public class EnemyAI : MonoBehaviour
         float dist = Mathf.Abs(transform.position.x - targetX);
 
         rb.linearVelocity = new Vector2(patrolDir * moveSpeed, rb.linearVelocity.y);
+        FaceDirection(patrolDir);
 
         if (dist < 0.1f) patrolDir *= -1f;
     }
@@ -131,6 +152,7 @@ public class EnemyAI : MonoBehaviour
         float deltaX = player.position.x - transform.position.x;
         float absX = GetHorizontalDistanceToPlayer();
         float dir = Mathf.Sign(deltaX);
+        FaceDirection(dir);
 
         if (absX < retreatDistance)
         {
@@ -147,6 +169,20 @@ public class EnemyAI : MonoBehaviour
         rb.linearVelocity = new Vector2(dir * moveSpeed, rb.linearVelocity.y);
     }
 
+    void FaceDirection(float direction)
+    {
+        if (spriteRenderers == null || spriteRenderers.Length == 0)
+            spriteRenderers = GetComponentsInChildren<SpriteRenderer>(true);
+        if (Mathf.Abs(direction) < 0.01f) return;
+
+        bool faceLeft = direction < 0f;
+        for (int i = 0; i < spriteRenderers.Length; i++)
+        {
+            if (spriteRenderers[i] != null)
+                spriteRenderers[i].flipX = faceLeft;
+        }
+    }
+
     float GetHorizontalDistanceToPlayer()
     {
         if (player == null) return Mathf.Infinity;
@@ -158,6 +194,7 @@ public class EnemyAI : MonoBehaviour
         SetAIState(AIState.Attack);
         attackTimer = attackCooldown;
         rb.linearVelocity = Vector2.zero;
+        AudioManager.Instance?.PlayEnemyAttack();
 
         yield return new WaitForSeconds(0.2f);
         HitPlayer(enemy.attack, enemy.attack * 0.5f);
@@ -172,6 +209,7 @@ public class EnemyAI : MonoBehaviour
         attackTimer = attackCooldown;
         specialTimer = specialAttackCooldown;
         rb.linearVelocity = Vector2.zero;
+        AudioManager.Instance?.PlayEnemyAttack();
 
         // Warning window — player can counter during this delay
         yield return new WaitForSeconds(specialAttackWarningDuration);

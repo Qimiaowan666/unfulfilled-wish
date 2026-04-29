@@ -5,6 +5,9 @@ public enum SkillType { Active, Passive }
 [CreateAssetMenu(fileName = "NewSkill", menuName = "Game/Skill")]
 public class SkillData : ScriptableObject
 {
+    [Header("Save")]
+    public string saveID;
+
     public string skillName;
     public string description;
     public Sprite icon;

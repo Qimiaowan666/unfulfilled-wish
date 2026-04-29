@@ -42,6 +42,9 @@ Desktop.ini
 .playwright-mcp/
 .codex_video_frames/
 
+# Unity AI generation cache. Final imported assets live under Assets/.
+GeneratedAssets/
+
 # Local reference projects used for analysis, not part of the playable Unity project
 ReferenceProjects/
 

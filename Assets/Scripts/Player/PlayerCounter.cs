@@ -100,6 +100,7 @@ public class PlayerCounter : MonoBehaviour
     {
         if (!IsCountering) return false;
 
+        AudioManager.Instance?.PlayCounter();
         var poise = enemy.GetComponent<PoiseMeter>();
         if (poise != null) poise.TakePoiseDamage(poiseDamageOnSuccess);
 

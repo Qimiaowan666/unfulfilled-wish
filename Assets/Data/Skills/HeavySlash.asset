@@ -12,9 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 457fe927cd7afe642a13ab2b44fe4b91, type: 3}
   m_Name: HeavySlash
   m_EditorClassIdentifier: Assembly-CSharp::SkillData
+  saveID: 
   skillName: "\u91CD\u65A9"
   description: "\u4E3B\u52A8\uFF1A\u9AD8\u4F24\u5BB3\u91CD\u653B\u51FB\u3002"
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 45bd2ba00d662cf45a5c2278061a72fe, type: 3}
   type: 0
   price: 200
   cooldown: 5

@@ -12,12 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f6411a44f3b4a7d4a87dad3e00641536, type: 3}
   m_Name: RubyRing
   m_EditorClassIdentifier: Assembly-CSharp::EquipmentData
+  saveID: 
   equipmentName: "\u7EA2\u5B9D\u77F3\u6212\u6307"
   description: "\u9970\u54C1\uFF0C\u653B\u51FB +4\u3002"
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 784602af0e6f8714082f60c362098913, type: 3}
   slot: 2
   price: 160
   attackBonus: 4
   defenseBonus: 0
   maxHPBonus: 0
-  maxGhostHPBonus: 0

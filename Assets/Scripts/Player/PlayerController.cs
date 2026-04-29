@@ -71,7 +71,11 @@ public class PlayerController : MonoBehaviour
         if (State != PlayerState.Falling && State != PlayerState.Jumping) return;
 
         bool justLanded = !wasGrounded || Mathf.Abs(Rb.linearVelocity.y) < 0.05f;
-        if (justLanded) SetLocomotionState();
+        if (justLanded)
+        {
+            if (State == PlayerState.Falling) AudioManager.Instance?.PlayLand();
+            SetLocomotionState();
+        }
     }
 
     void UpdateFallState()

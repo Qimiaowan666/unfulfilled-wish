@@ -4,6 +4,9 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(Collider2D))]
 public class LockedDoor : MonoBehaviour
 {
+    [Header("Save")]
+    public string saveID;
+
     public Transform destination;
     public string lockedPrompt = "需要两把钥匙";
     public string openPrompt = "F 开门";
@@ -12,6 +15,8 @@ public class LockedDoor : MonoBehaviour
 
     bool playerInRange;
     Transform player;
+    public bool IsOpen { get; private set; }
+    public string SaveID => SaveIdUtility.GetSceneObjectID(this, saveID);
 
     void Reset()
     {
@@ -58,11 +63,9 @@ public class LockedDoor : MonoBehaviour
     void Open()
     {
         PlayerInputBuffer.ClearAll();
-
-        if (blockingCollider != null)
-            blockingCollider.enabled = false;
-        if (doorRenderer != null)
-            doorRenderer.enabled = false;
+        SaveSystem.Instance?.MarkDoorOpened(SaveID);
+        SetOpenState(true);
+        AudioManager.Instance?.PlayDoorOpen();
 
         if (destination != null)
         {
@@ -71,8 +74,22 @@ public class LockedDoor : MonoBehaviour
             if (rb != null)
                 rb.linearVelocity = Vector2.zero;
         }
+    }
 
-        enabled = false;
+    public void LoadOpened(bool opened)
+    {
+        SetOpenState(opened);
+    }
+
+    void SetOpenState(bool opened)
+    {
+        IsOpen = opened;
+        if (blockingCollider != null)
+            blockingCollider.enabled = !opened;
+        if (doorRenderer != null)
+            doorRenderer.enabled = !opened;
+
+        enabled = !opened;
     }
 
     void OnGUI()

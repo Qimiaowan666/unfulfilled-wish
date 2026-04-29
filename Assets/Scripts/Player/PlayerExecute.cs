@@ -80,6 +80,7 @@ public class PlayerExecute : MonoBehaviour
 
         controller.SetState(PlayerState.Executing);
         controller.Stats.SetInvulnerable(true);
+        AudioManager.Instance?.PlayExecuteDraw();
 
         yield return WaitForAnimationSignal(() => hitFrameReached, executeDuration * 0.65f);
         ApplyExecutionHit();
@@ -107,7 +108,10 @@ public class PlayerExecute : MonoBehaviour
         executionApplied = true;
 
         if (pendingEnemy != null && pendingEnemy.IsExecutable)
+        {
             pendingEnemy.OnExecuted(controller.Stats.attack * executeDamageMultiplier);
+            AudioManager.Instance?.PlayExecuteStrike();
+        }
     }
 
     void OnAnimationHit()

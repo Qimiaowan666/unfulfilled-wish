@@ -18,6 +18,8 @@ public class LevelManager : MonoBehaviour
 
     void Start()
     {
+        StartCoroutine(LoadSaveAfterSystemsReady());
+
         if (boss != null)
         {
             AudioManager.Instance?.PlayBossBGM();
@@ -27,6 +29,14 @@ public class LevelManager : MonoBehaviour
         var stats = FindAnyObjectByType<PlayerStats>();
         if (stats != null)
             stats.OnDeath += OnPlayerDeath;
+    }
+
+    IEnumerator LoadSaveAfterSystemsReady()
+    {
+        yield return null;
+
+        if (SaveSystem.Instance != null && SaveSystem.Instance.HasSave())
+            SaveSystem.Instance.LoadAndApply();
     }
 
     IEnumerator WatchBoss()

@@ -22,17 +22,21 @@ public class HUDController : MonoBehaviour
         stats.OnGhostHPChanged += UpdateGhostHP;
 
         UpdateHP(stats.CurrentHP, stats.maxHP);
-        UpdateGhostHP(stats.CurrentGhostHP, stats.maxGhostHP);
+        UpdateGhostHP(stats.CurrentGhostHP, stats.maxHP);
     }
 
     void UpdateHP(float current, float max)
     {
         if (hpFill != null) hpFill.fillAmount = current / max;
+        if (stats != null) UpdateGhostHP(stats.CurrentGhostHP, max);
     }
 
     void UpdateGhostHP(float current, float max)
     {
-        if (ghostHPFill != null) ghostHPFill.fillAmount = max > 0 ? current / max : 0f;
+        if (ghostHPFill == null) return;
+
+        float total = stats != null ? stats.CurrentHP + current : current;
+        ghostHPFill.fillAmount = max > 0f ? Mathf.Clamp01(total / max) : 0f;
     }
 
     public void ShowEnemyPoise(PoiseMeter poise)

@@ -147,7 +147,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerStats
   maxHP: 100
-  maxGhostHP: 50
   attack: 10
   defense: 5
   ghostHPBlockRatio: 0.5

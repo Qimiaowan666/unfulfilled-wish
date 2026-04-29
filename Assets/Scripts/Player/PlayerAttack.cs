@@ -85,6 +85,7 @@ public class PlayerAttack : MonoBehaviour
         controller.SetAnimInteger("AttackStep", comboStep + 1);
         controller.SetState(PlayerState.Attacking);
         controller.Rb.linearVelocity = new Vector2(0f, controller.Rb.linearVelocity.y);
+        AudioManager.Instance?.PlayAttackWhoosh(comboStep);
 
         float duration = GetComboValue(attackDurations, comboStep, 0.35f);
         yield return WaitForAnimationSignal(() => hitFrameReached, duration * 0.75f);
@@ -121,8 +122,6 @@ public class PlayerAttack : MonoBehaviour
 
     void DoHit()
     {
-        AudioManager.Instance?.PlayAttack();
-
         float dir = controller.FacingRight ? 1f : -1f;
         Vector2 origin = (Vector2)transform.position + new Vector2(hitboxOffset.x * dir, hitboxOffset.y);
 
@@ -137,7 +136,7 @@ public class PlayerAttack : MonoBehaviour
                 enemy.TakeDamage(damage, poiseDamage);
                 hit.GetComponent<DamageFeedback>()?.ApplyKnockback(transform.position, 4f);
                 controller.Stats.OnAttackHit();
-                AudioManager.Instance?.PlayHit();
+                if (comboStep == 2) AudioManager.Instance?.PlayAttack3Impact();
             }
         }
     }

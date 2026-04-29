@@ -34,6 +34,9 @@ public class ShopSkillEntry
 
 public class ShopSystem : MonoBehaviour
 {
+    [Header("Save")]
+    public string shopID;
+
     [Header("Legacy Stock")]
     public List<ItemData> itemStock = new List<ItemData>();
     public List<EquipmentData> equipmentStock = new List<EquipmentData>();
@@ -43,6 +46,7 @@ public class ShopSystem : MonoBehaviour
     public List<ShopItemEntry> itemEntries = new List<ShopItemEntry>();
     public List<ShopEquipmentEntry> equipmentEntries = new List<ShopEquipmentEntry>();
     public List<ShopSkillEntry> skillEntries = new List<ShopSkillEntry>();
+    public string SaveID => SaveIdUtility.GetSceneObjectID(this, shopID);
 
     public IEnumerable<ShopItemEntry> AvailableItems
     {
@@ -88,7 +92,7 @@ public class ShopSystem : MonoBehaviour
         if (stats.gold < entry.item.price) return false;
         if (!InventorySystem.Instance.AddItem(entry.item)) return false;
 
-        stats.gold -= entry.item.price;
+        stats.AddGold(-entry.item.price);
         Consume(entry);
         return true;
     }
@@ -108,7 +112,7 @@ public class ShopSystem : MonoBehaviour
         }
 
         if (stats.gold < entry.equipment.price) return false;
-        stats.gold -= entry.equipment.price;
+        stats.AddGold(-entry.equipment.price);
         equipmentSystem.AddEquipment(entry.equipment, true);
         Consume(entry);
         return true;
@@ -128,7 +132,7 @@ public class ShopSystem : MonoBehaviour
         if (stats.gold < entry.skill.price) return false;
         if (!skillSystem.LearnSkill(entry.skill)) return false;
 
-        stats.gold -= entry.skill.price;
+        stats.AddGold(-entry.skill.price);
         Consume(entry);
         return true;
     }
@@ -151,6 +155,28 @@ public class ShopSystem : MonoBehaviour
     public string FormatPrice(int price, int quantity)
     {
         return quantity > -1 ? $"{price}G x{quantity}" : $"{price}G";
+    }
+
+    public ShopSaveData CaptureSaveData()
+    {
+        EnsureEntriesFromLegacyLists();
+        return new ShopSaveData
+        {
+            id = SaveID,
+            itemEntries = CaptureItemEntries(),
+            equipmentEntries = CaptureEquipmentEntries(),
+            skillEntries = CaptureSkillEntries()
+        };
+    }
+
+    public void LoadSaveData(ShopSaveData data)
+    {
+        if (data == null) return;
+
+        EnsureEntriesFromLegacyLists();
+        ApplyItemEntryQuantities(data.itemEntries);
+        ApplyEquipmentEntryQuantities(data.equipmentEntries);
+        ApplySkillEntryQuantities(data.skillEntries);
     }
 
     void Consume(ShopItemEntry entry)
@@ -222,6 +248,90 @@ public class ShopSystem : MonoBehaviour
             foreach (var skill in skillStock)
                 if (skill != null)
                     skillEntries.Add(new ShopSkillEntry { skill = skill, quantity = 1 });
+        }
+    }
+
+    ShopStockEntrySaveData[] CaptureItemEntries()
+    {
+        var result = new List<ShopStockEntrySaveData>();
+        foreach (var entry in itemEntries)
+        {
+            if (entry?.item == null) continue;
+            result.Add(new ShopStockEntrySaveData
+            {
+                assetID = SaveIdUtility.GetAssetID(entry.item),
+                quantity = entry.quantity
+            });
+        }
+
+        return result.ToArray();
+    }
+
+    ShopStockEntrySaveData[] CaptureEquipmentEntries()
+    {
+        var result = new List<ShopStockEntrySaveData>();
+        foreach (var entry in equipmentEntries)
+        {
+            if (entry?.equipment == null) continue;
+            result.Add(new ShopStockEntrySaveData
+            {
+                assetID = SaveIdUtility.GetAssetID(entry.equipment),
+                quantity = entry.quantity
+            });
+        }
+
+        return result.ToArray();
+    }
+
+    ShopStockEntrySaveData[] CaptureSkillEntries()
+    {
+        var result = new List<ShopStockEntrySaveData>();
+        foreach (var entry in skillEntries)
+        {
+            if (entry?.skill == null) continue;
+            result.Add(new ShopStockEntrySaveData
+            {
+                assetID = SaveIdUtility.GetAssetID(entry.skill),
+                quantity = entry.quantity
+            });
+        }
+
+        return result.ToArray();
+    }
+
+    void ApplyItemEntryQuantities(ShopStockEntrySaveData[] savedEntries)
+    {
+        if (savedEntries == null) return;
+
+        foreach (var savedEntry in savedEntries)
+        {
+            if (savedEntry == null) continue;
+            var entry = itemEntries.Find(candidate => candidate?.item != null && SaveIdUtility.MatchesAssetID(candidate.item, savedEntry.assetID));
+            if (entry != null) entry.quantity = savedEntry.quantity;
+        }
+    }
+
+    void ApplyEquipmentEntryQuantities(ShopStockEntrySaveData[] savedEntries)
+    {
+        if (savedEntries == null) return;
+
+        foreach (var savedEntry in savedEntries)
+        {
+            if (savedEntry == null) continue;
+            var entry = equipmentEntries.Find(candidate => candidate?.equipment != null && SaveIdUtility.MatchesAssetID(candidate.equipment, savedEntry.assetID));
+            if (entry != null) entry.quantity = savedEntry.quantity;
+        }
+    }
+
+    void ApplySkillEntryQuantities(ShopStockEntrySaveData[] savedEntries)
+    {
+        if (savedEntries == null) return;
+
+        foreach (var savedEntry in savedEntries)
+        {
+            if (savedEntry == null) continue;
+            var entry = skillEntries.Find(candidate => candidate?.skill != null && SaveIdUtility.MatchesAssetID(candidate.skill, savedEntry.assetID));
+            if (entry != null) entry.quantity = savedEntry.quantity;
         }
     }
 }

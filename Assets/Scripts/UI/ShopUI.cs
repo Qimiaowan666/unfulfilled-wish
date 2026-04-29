@@ -84,9 +84,15 @@ public class ShopUI : MonoBehaviour
             btn.interactable = interactable;
             btn.onClick.AddListener(() =>
             {
+                AudioManager.Instance?.PlayUIClick();
                 bool bought = buyAction();
+                if (bought)
+                    AudioManager.Instance?.PlayShopBuy();
                 if (!bought)
+                {
+                    AudioManager.Instance?.PlayShopFail();
                     Debug.LogWarning($"购买失败：{label}");
+                }
                 Refresh();
             });
         }

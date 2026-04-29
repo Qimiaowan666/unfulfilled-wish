@@ -39,9 +39,16 @@ public class LevelKeyManager : MonoBehaviour
         return CollectedKeys >= requiredKeys;
     }
 
+    public void LoadCollectedKeys(int count)
+    {
+        CollectedKeys = Mathf.Clamp(count, 0, requiredKeys);
+        OnKeysChanged?.Invoke(CollectedKeys, requiredKeys);
+    }
+
     void OnGUI()
     {
         if (!showHud) return;
+        if (CharacterPanelUI.IsOpen || Time.timeScale <= 0f) return;
 
         var style = new GUIStyle(GUI.skin.label)
         {

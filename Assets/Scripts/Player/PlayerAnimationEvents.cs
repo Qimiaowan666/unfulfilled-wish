@@ -21,4 +21,9 @@ public class PlayerAnimationEvents : MonoBehaviour
     {
         ActionFinished?.Invoke();
     }
+
+    public void AnimationFootstep()
+    {
+        AudioManager.Instance?.PlayFootstep();
+    }
 }

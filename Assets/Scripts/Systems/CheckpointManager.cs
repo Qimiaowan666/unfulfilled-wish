@@ -42,6 +42,8 @@ public class CheckpointManager : MonoBehaviour
 
         PlayerInputBuffer.ClearAll();
 
+        SaveSystem.Instance?.RefreshRespawnableEnemies();
+
         if (stats != null && player != null)
             SaveSystem.Instance?.Save(stats, player.transform, this);
 
@@ -56,6 +58,21 @@ public class CheckpointManager : MonoBehaviour
         var arr = new string[unlockedIDs.Count];
         unlockedIDs.CopyTo(arr);
         return arr;
+    }
+
+    public void LoadState(string[] ids, string lastCheckpointID)
+    {
+        unlockedIDs.Clear();
+        if (ids != null)
+        {
+            foreach (string id in ids)
+            {
+                if (!string.IsNullOrWhiteSpace(id))
+                    unlockedIDs.Add(id);
+            }
+        }
+
+        LastCheckpointID = string.IsNullOrWhiteSpace(lastCheckpointID) ? null : lastCheckpointID;
     }
 
     public void TeleportPlayer(Vector2 destination)

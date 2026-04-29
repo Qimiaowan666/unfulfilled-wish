@@ -5,10 +5,13 @@ public class PlayerStats : MonoBehaviour
 {
     [Header("Health")]
     public float maxHP = 100f;
-    public float maxGhostHP = 50f;
 
     [Header("Combat")]
+    public float baseAttack = 10f;
+    public float baseDefense = 5f;
+    [HideInInspector]
     public float attack = 10f;
+    [HideInInspector]
     public float defense = 5f;
 
     [Header("Ghost HP")]
@@ -23,16 +26,28 @@ public class PlayerStats : MonoBehaviour
     public float CurrentGhostHP { get; private set; }
     public bool IsInvulnerable { get; private set; }
     public bool IsDead => deathTriggered;
+    public float EquipmentAttackBonus => equipmentAttackBonus;
+    public float EquipmentDefenseBonus => equipmentDefenseBonus;
+    public float SkillAttackPercent => skillAttackPercent;
+    public float SkillDefensePercent => skillDefensePercent;
+    public float SkillAttackBonus => baseAttack * skillAttackPercent / 100f;
+    public float SkillDefenseBonus => baseDefense * skillDefensePercent / 100f;
 
     public event Action<float, float> OnHPChanged;
     public event Action<float, float> OnGhostHPChanged;
+    public event Action OnStatsChanged;
     public event Action<float> OnDamaged;
     public event Action OnDeath;
 
     bool deathTriggered;
+    float equipmentAttackBonus;
+    float equipmentDefenseBonus;
+    float skillAttackPercent;
+    float skillDefensePercent;
 
     void Awake()
     {
+        RecalculateCombatStats(false);
         CurrentHP = maxHP;
         CurrentGhostHP = 0f;
         deathTriggered = false;
@@ -52,7 +67,7 @@ public class PlayerStats : MonoBehaviour
             OnDamaged?.Invoke(actualGhostGain);
         }
 
-        OnGhostHPChanged?.Invoke(CurrentGhostHP, maxGhostHP);
+        NotifyGhostHPChanged();
 
         if (CurrentHP <= 0f) Die();
     }
@@ -62,7 +77,7 @@ public class PlayerStats : MonoBehaviour
         float amount = Mathf.Min(perfectBlockHealAmount, CurrentGhostHP);
         CurrentGhostHP -= amount;
         Heal(amount);
-        OnGhostHPChanged?.Invoke(CurrentGhostHP, maxGhostHP);
+        NotifyGhostHPChanged();
     }
 
     public void OnAttackHit()
@@ -71,7 +86,7 @@ public class PlayerStats : MonoBehaviour
         float amount = Mathf.Min(attackHealAmount, CurrentGhostHP);
         CurrentGhostHP -= amount;
         Heal(amount);
-        OnGhostHPChanged?.Invoke(CurrentGhostHP, maxGhostHP);
+        NotifyGhostHPChanged();
     }
 
     public void TakeDamage(float damage)
@@ -79,9 +94,14 @@ public class PlayerStats : MonoBehaviour
         if (damage < 0f) { Heal(-damage); return; }
         if (IsInvulnerable || deathTriggered) return;
 
+        if (damage >= maxHP * 0.25f)
+            AudioManager.Instance?.PlayHitHeavy();
+        else
+            AudioManager.Instance?.PlayHitLight();
+
         float penalty = CurrentGhostHP;
         CurrentGhostHP = 0f;
-        OnGhostHPChanged?.Invoke(CurrentGhostHP, maxGhostHP);
+        NotifyGhostHPChanged();
 
         float total = damage + penalty;
         CurrentHP = Mathf.Max(CurrentHP - total, 0f);
@@ -100,14 +120,135 @@ public class PlayerStats : MonoBehaviour
         IsInvulnerable = value;
     }
 
+    public void ApplyStatBonus(float attackDelta, float defenseDelta, float maxHPDelta, bool healMaxHPIncrease = false)
+    {
+        baseAttack += attackDelta;
+        baseDefense += defenseDelta;
+        RecalculateCombatStats(false);
+
+        if (!Mathf.Approximately(maxHPDelta, 0f))
+        {
+            maxHP = Mathf.Max(1f, maxHP + maxHPDelta);
+
+            if (maxHPDelta > 0f && healMaxHPIncrease)
+                CurrentHP = Mathf.Min(CurrentHP + maxHPDelta, maxHP);
+            else
+                CurrentHP = Mathf.Min(CurrentHP, maxHP);
+        }
+
+        NotifyStatsChanged();
+    }
+
+    public void ApplyEquipmentBonus(float attackDelta, float defenseDelta)
+    {
+        equipmentAttackBonus += attackDelta;
+        equipmentDefenseBonus += defenseDelta;
+        RecalculateCombatStats();
+    }
+
+    public void SetEquipmentBonuses(float attackBonus, float defenseBonus)
+    {
+        equipmentAttackBonus = attackBonus;
+        equipmentDefenseBonus = defenseBonus;
+        RecalculateCombatStats();
+    }
+
+    public void SetSkillBonusPercent(float attackPercent, float defensePercent)
+    {
+        skillAttackPercent = attackPercent;
+        skillDefensePercent = defensePercent;
+        RecalculateCombatStats();
+    }
+
+    public void ApplyStatMultiplier(float attackPercent, float defensePercent)
+    {
+        SetSkillBonusPercent(skillAttackPercent + attackPercent, skillDefensePercent + defensePercent);
+    }
+
+    void RecalculateCombatStats(bool notify = true)
+    {
+        attack = baseAttack + equipmentAttackBonus + SkillAttackBonus;
+        defense = baseDefense + equipmentDefenseBonus + SkillDefenseBonus;
+
+        if (notify)
+            NotifyStatsChanged();
+    }
+
+    public void GetAttackBreakdown(out float baseValue, out float equipmentBonus, out float skillBonus)
+    {
+        baseValue = baseAttack;
+        equipmentBonus = equipmentAttackBonus;
+        skillBonus = SkillAttackBonus;
+    }
+
+    public void GetDefenseBreakdown(out float baseValue, out float equipmentBonus, out float skillBonus)
+    {
+        baseValue = baseDefense;
+        equipmentBonus = equipmentDefenseBonus;
+        skillBonus = SkillDefenseBonus;
+    }
+
+    public void RebuildSkillBonuses()
+    {
+        float attackPercent = 0f;
+        float defensePercent = 0f;
+        var skills = SkillSystem.Instance;
+        if (skills != null)
+        {
+            foreach (var skill in skills.learnedSkills)
+            {
+                if (skill == null || skill.type != SkillType.Passive) continue;
+                attackPercent += skill.attackPercent;
+                defensePercent += skill.defensePercent;
+            }
+        }
+
+        skillAttackPercent = attackPercent;
+        skillDefensePercent = defensePercent;
+        RecalculateCombatStats(false);
+        NotifyStatsChanged();
+    }
+
+    public void LoadBaseStats(float baseAttackValue, float baseDefenseValue, float baseMaxHPValue)
+    {
+        baseAttack = Mathf.Max(0f, baseAttackValue);
+        baseDefense = Mathf.Max(0f, baseDefenseValue);
+        maxHP = Mathf.Max(1f, baseMaxHPValue);
+        equipmentAttackBonus = 0f;
+        equipmentDefenseBonus = 0f;
+        skillAttackPercent = 0f;
+        skillDefensePercent = 0f;
+        CurrentHP = Mathf.Min(CurrentHP, maxHP);
+        RecalculateCombatStats(false);
+        NotifyStatsChanged();
+    }
+
+    public void LoadSavedVitals(float currentHP, float currentGhostHP, int savedGold)
+    {
+        deathTriggered = false;
+        IsInvulnerable = false;
+        CurrentHP = Mathf.Clamp(currentHP, 0f, maxHP);
+        CurrentGhostHP = Mathf.Max(0f, currentGhostHP);
+        gold = Mathf.Max(0, savedGold);
+        NotifyStatsChanged();
+
+        if (CurrentHP <= 0f)
+            Die();
+    }
+
+    public void AddGold(int amount)
+    {
+        gold = Mathf.Max(0, gold + amount);
+        NotifyStatsChanged();
+    }
+
     public void RestoreAll()
     {
         deathTriggered = false;
         IsInvulnerable = false;
         CurrentHP = maxHP;
         CurrentGhostHP = 0f;
-        OnHPChanged?.Invoke(CurrentHP, maxHP);
-        OnGhostHPChanged?.Invoke(CurrentGhostHP, maxGhostHP);
+        NotifyStatsChanged();
     }
 
     public void Kill()
@@ -117,7 +258,7 @@ public class PlayerStats : MonoBehaviour
         IsInvulnerable = false;
         CurrentGhostHP = 0f;
         CurrentHP = 0f;
-        OnGhostHPChanged?.Invoke(CurrentGhostHP, maxGhostHP);
+        NotifyGhostHPChanged();
         OnHPChanged?.Invoke(CurrentHP, maxHP);
         OnDamaged?.Invoke(maxHP);
         Die();
@@ -131,11 +272,24 @@ public class PlayerStats : MonoBehaviour
         OnHPChanged?.Invoke(CurrentHP, maxHP);
     }
 
+    void NotifyGhostHPChanged()
+    {
+        OnGhostHPChanged?.Invoke(CurrentGhostHP, maxHP);
+    }
+
+    void NotifyStatsChanged()
+    {
+        OnHPChanged?.Invoke(CurrentHP, maxHP);
+        NotifyGhostHPChanged();
+        OnStatsChanged?.Invoke();
+    }
+
     void Die()
     {
         if (deathTriggered) return;
 
         deathTriggered = true;
+        AudioManager.Instance?.PlayDeath();
         OnDeath?.Invoke();
     }
 }

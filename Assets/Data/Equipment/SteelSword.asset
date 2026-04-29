@@ -12,12 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f6411a44f3b4a7d4a87dad3e00641536, type: 3}
   m_Name: SteelSword
   m_EditorClassIdentifier: Assembly-CSharp::EquipmentData
+  saveID: 
   equipmentName: "\u94A2\u5251"
   description: "\u8FDB\u9636\u6B66\u5668\uFF0C\u653B\u51FB +10\u3002"
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: b2322b68fab24574c8e7ae6efdb31c12, type: 3}
   slot: 0
   price: 180
   attackBonus: 10
   defenseBonus: 0
   maxHPBonus: 0
-  maxGhostHPBonus: 0

@@ -58,6 +58,7 @@ public class PlayerDash : MonoBehaviour
         isDashing = true;
         actionFinished = false;
         controller.SetState(PlayerState.Dashing);
+        AudioManager.Instance?.PlayDash();
 
         float dir = GetDashDirection();
         controller.SetFacing(dir);

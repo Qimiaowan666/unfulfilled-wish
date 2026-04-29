@@ -4,6 +4,9 @@ using UnityEngine.UI;
 
 public class InventoryUI : MonoBehaviour
 {
+    [Header("Legacy")]
+    public bool allowLegacyToggle = false;
+
     public GameObject panel;
     public Transform slotParent;
     public GameObject slotPrefab;
@@ -22,6 +25,8 @@ public class InventoryUI : MonoBehaviour
 
     void Update()
     {
+        if (!allowLegacyToggle) return;
+
         var kb = Keyboard.current;
         if (ShopUI.IsOpen) return;
         if (kb != null && kb.iKey.wasPressedThisFrame)

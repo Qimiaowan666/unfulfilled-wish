@@ -12,12 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f6411a44f3b4a7d4a87dad3e00641536, type: 3}
   m_Name: GuardianMedal
   m_EditorClassIdentifier: Assembly-CSharp::EquipmentData
+  saveID: 
   equipmentName: "\u5B88\u62A4\u5FBD\u7AE0"
   description: "\u9970\u54C1\uFF0C\u9632\u5FA1 +5\uFF0CHP +10\u3002"
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: bde19c0921052594193376296ee484c4, type: 3}
   slot: 2
   price: 190
   attackBonus: 0
   defenseBonus: 5
   maxHPBonus: 10
-  maxGhostHPBonus: 0

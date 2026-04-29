@@ -55,6 +55,22 @@ public class BossAI : MonoBehaviour
         GetComponent<PoiseMeter>().OnPoiseBroken += OnStunned;
     }
 
+    public void ResetAIState()
+    {
+        StopAllCoroutines();
+        player = null;
+        isPhase2 = false;
+        enraged = false;
+        attackTimer = 0f;
+        specialTimer = specialAttackCooldown;
+        rushTimer = rushAttackCooldown;
+        state = BossState.Idle;
+        if (rb == null) rb = GetComponent<Rigidbody2D>();
+        if (rb != null) rb.linearVelocity = Vector2.zero;
+        enemy = enemy != null ? enemy : GetComponent<EnemyBase>();
+        enemy?.SetAnimationState(0);
+    }
+
     void Update()
     {
         if (enemy.CurrentHP <= 0f) return;
@@ -105,6 +121,7 @@ public class BossAI : MonoBehaviour
         if (enemy.CurrentHP / enemy.maxHP < phase2HPThreshold)
         {
             isPhase2 = true;
+            AudioManager.Instance?.PlayBossPhaseChange();
             StartCoroutine(EnrageRoutine());
         }
     }
@@ -125,6 +142,7 @@ public class BossAI : MonoBehaviour
         enemy.SetAnimationState(2);
         attackTimer = normalAttackCooldown;
         rb.linearVelocity = Vector2.zero;
+        AudioManager.Instance?.PlayBossAttack();
 
         yield return new WaitForSeconds(0.25f);
         float mult = isPhase2 ? phase2AttackMultiplier : 1f;
@@ -141,6 +159,7 @@ public class BossAI : MonoBehaviour
         attackTimer = normalAttackCooldown;
         specialTimer = specialAttackCooldown;
         rb.linearVelocity = Vector2.zero;
+        AudioManager.Instance?.PlayBossAttack();
 
         // Telegraph window — player can counter here
         yield return new WaitForSeconds(0.8f);
@@ -169,6 +188,7 @@ public class BossAI : MonoBehaviour
         rushTimer = rushAttackCooldown;
         attackTimer = normalAttackCooldown;
         rb.linearVelocity = Vector2.zero;
+        AudioManager.Instance?.PlayBossRush();
 
         yield return new WaitForSeconds(0.4f);
 

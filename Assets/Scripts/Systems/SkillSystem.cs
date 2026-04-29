@@ -26,6 +26,11 @@ public class SkillSystem : MonoBehaviour
         Instance = this;
     }
 
+    void Start()
+    {
+        ReapplyPassives();
+    }
+
     void OnDestroy()
     {
         if (Instance == this)
@@ -54,19 +59,47 @@ public class SkillSystem : MonoBehaviour
         if (learnedSkills.Contains(skill)) return true;
 
         learnedSkills.Add(skill);
-        ApplyPassives(skill);
+        ReapplyPassives();
         OnSkillsChanged?.Invoke();
         return true;
     }
 
-    void ApplyPassives(SkillData skill)
+    public void LoadSkills(IEnumerable<SkillData> savedSkills)
     {
-        if (skill.type != SkillType.Passive) return;
+        learnedSkills.Clear();
+        if (savedSkills != null)
+        {
+            foreach (var skill in savedSkills)
+            {
+                if (skill != null && !learnedSkills.Contains(skill))
+                    learnedSkills.Add(skill);
+            }
+        }
+
+        ReapplyPassives();
+        OnSkillsChanged?.Invoke();
+    }
+
+    public void GetPassiveBonusPercents(out float attackPercent, out float defensePercent)
+    {
+        attackPercent = 0f;
+        defensePercent = 0f;
+
+        foreach (var skill in learnedSkills)
+        {
+            if (skill == null || skill.type != SkillType.Passive) continue;
+            attackPercent += skill.attackPercent;
+            defensePercent += skill.defensePercent;
+        }
+    }
+
+    void ReapplyPassives()
+    {
         var stats = FindAnyObjectByType<PlayerStats>();
         if (stats == null) return;
 
-        stats.attack  *= 1f + skill.attackPercent  / 100f;
-        stats.defense *= 1f + skill.defensePercent / 100f;
+        GetPassiveBonusPercents(out float attackPercent, out float defensePercent);
+        stats.SetSkillBonusPercent(attackPercent, defensePercent);
     }
 
     public bool ApplyActiveSkill(SkillData skill, EnemyBase target)

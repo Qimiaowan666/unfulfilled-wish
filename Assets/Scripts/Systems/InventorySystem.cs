@@ -57,18 +57,29 @@ public class InventorySystem : MonoBehaviour
             stats.TakeDamage(-item.healAmount);
 
         if (item.attackBonus != 0f)
-            stats.attack += item.attackBonus;
+            stats.ApplyStatBonus(item.attackBonus, 0f, 0f);
 
         if (item.defenseBonus != 0f)
-            stats.defense += item.defenseBonus;
+            stats.ApplyStatBonus(0f, item.defenseBonus, 0f);
 
         if (item.maxHPBonus != 0f)
-        {
-            stats.maxHP += item.maxHPBonus;
-            if (item.maxHPBonus > 0f)
-                stats.TakeDamage(-item.maxHPBonus);
-        }
+            stats.ApplyStatBonus(0f, 0f, item.maxHPBonus, true);
 
         RemoveItem(item);
+    }
+
+    public void LoadItems(IEnumerable<ItemData> savedItems)
+    {
+        items.Clear();
+        if (savedItems != null)
+        {
+            foreach (var item in savedItems)
+            {
+                if (item != null && items.Count < maxSlots)
+                    items.Add(item);
+            }
+        }
+
+        OnInventoryChanged?.Invoke();
     }
 }

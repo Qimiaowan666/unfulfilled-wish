@@ -1,0 +1,82 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &6898718972237386664
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 247670870146674549}
+  - component: {fileID: 3036780037225669093}
+  m_Layer: 0
+  m_Name: AudioManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &247670870146674549
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6898718972237386664}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3036780037225669093
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6898718972237386664}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 654ffcefd1343f54faf0deb23ef3ba5b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AudioManager
+  attack1WhooshClip: {fileID: 8300000, guid: fb823e49a44ce294aa940e7e85468290, type: 3}
+  attack2WhooshClip: {fileID: 8300000, guid: 928d91b0a53dc304394aa3d87b8e9068, type: 3}
+  attack3WhooshClip: {fileID: 8300000, guid: 2c3a3e5675d4eb24f98d7b9844ca78e5, type: 3}
+  attack3ImpactClip: {fileID: 8300000, guid: 672ccc38cb76ba74da6ece3e2b8bb064, type: 3}
+  blockClip: {fileID: 8300000, guid: 508d493044909b64082e397203c0c334, type: 3}
+  perfectBlockClip: {fileID: 8300000, guid: 09f0e9b9bce57ca4c88dd3e57f2e82c9, type: 3}
+  perfectBlockTailClip: {fileID: 8300000, guid: 3bd60d1dbd0cd564db0a897be6415608, type: 3}
+  counterClip: {fileID: 8300000, guid: 61e6affa280d802408544f8f4e406fe7, type: 3}
+  hitLightClip: {fileID: 8300000, guid: 2f650f5b33f5f6c4f9e1c8ab2866ee40, type: 3}
+  hitHeavyClip: {fileID: 8300000, guid: 1689bf1abced31d43990660ca84bf671, type: 3}
+  executeDrawClip: {fileID: 8300000, guid: bf7048c604729e64ebf148c465bd8ca9, type: 3}
+  executeStrikeClip: {fileID: 8300000, guid: 67a38ba581d671f4aa6777bc5005227c, type: 3}
+  executeTailClip: {fileID: 8300000, guid: 0a5ccb7c9e59aae4e84f60ea98a0b70b, type: 3}
+  footstepClip: {fileID: 8300000, guid: 01dd41b6647165b4ca0d8c1e1bfd60b2, type: 3}
+  jumpClip: {fileID: 8300000, guid: 18ae18e128c36f94ebceb4b398fb6356, type: 3}
+  dashClip: {fileID: 8300000, guid: 8a9d96d62876e8f438600242a754ce99, type: 3}
+  landClip: {fileID: 8300000, guid: 7ef90320dc6abc34983a4987fceaf3ec, type: 3}
+  deathClip: {fileID: 8300000, guid: 455013c51a42832428d6968b70ccda55, type: 3}
+  checkpointClip: {fileID: 8300000, guid: 63a24bea6bf9a074dbe301df17d521e5, type: 3}
+  keyPickupClip: {fileID: 8300000, guid: 0a7043e07fc11184d940d0de1eee2753, type: 3}
+  doorOpenClip: {fileID: 8300000, guid: 7352e490a0a29f040844d304c86a41ee, type: 3}
+  shopBuyClip: {fileID: 8300000, guid: b9f67c45ec5ac814cbbc4ee0b406ecbb, type: 3}
+  shopFailClip: {fileID: 8300000, guid: ad2c26efb6503c64996d4626d3240da9, type: 3}
+  uiClickClip: {fileID: 8300000, guid: 5aaaf5b1d0069354caf41d4832bd3763, type: 3}
+  enemyAttackClip: {fileID: 8300000, guid: 819447cd9baa4714ebf3298e33a22bc5, type: 3}
+  enemyHitClip: {fileID: 8300000, guid: 0bb7ae326fb661940b94235d7195c796, type: 3}
+  enemyDeathClip: {fileID: 8300000, guid: d0887229b94d7c04095711dd98f99f76, type: 3}
+  bossAttackClip: {fileID: 8300000, guid: 3b4bbc6267900cd47bcd0eda0c71fadb, type: 3}
+  bossRushClip: {fileID: 8300000, guid: 8a9d96d62876e8f438600242a754ce99, type: 3}
+  bossPhaseChangeClip: {fileID: 8300000, guid: 2b04cc76708d0db4aba86c968e37cecf, type: 3}
+  menuBGMClip: {fileID: 8300000, guid: 62997103bbbc57445b739e0f392fe0d4, type: 3}
+  bgmClip: {fileID: 8300000, guid: ae2ba66104513d349b7e2f8dd7dd8146, type: 3}
+  bossBGMClip: {fileID: 8300000, guid: 162fd5171cd93f14d972303fe2b8f310, type: 3}
+  futureBossBGMClip: {fileID: 8300000, guid: 42b740ed19da2a7419e39d6dd0787794, type: 3}
+  bgmVolume: 0.5
+  sfxVolume: 0.8
