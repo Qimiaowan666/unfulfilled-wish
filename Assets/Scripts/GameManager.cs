@@ -16,6 +16,9 @@ public class GameManager : MonoBehaviour
     {
         if (Instance != null) { Destroy(gameObject); return; }
         Instance = this;
+        IsGameOver = false;
+        IsPaused = false;
+        Time.timeScale = 1f;
         transform.SetParent(null);
         DontDestroyOnLoad(gameObject);
     }

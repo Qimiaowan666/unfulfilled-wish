@@ -50,18 +50,22 @@ public class CharacterPanelUI : MonoBehaviour
     readonly List<GameObject> hiddenHudRoots = new List<GameObject>();
     readonly List<bool> hiddenHudPreviousStates = new List<bool>();
 
+    void Awake()
+    {
+        isOpen = false;
+        IsOpen = false;
+        pausedByPanel = false;
+    }
+
     void Start()
     {
-        EnsureUI();
-        BuildPages();
-        BindButtons();
-        Resubscribe();
         SetOpen(false);
     }
 
     void OnEnable()
     {
-        Subscribe();
+        if (isOpen)
+            Subscribe();
     }
 
     void OnDisable()
@@ -112,6 +116,12 @@ public class CharacterPanelUI : MonoBehaviour
         }
 
         if (value && ShopUI.IsOpen) return;
+
+        if (value)
+        {
+            BuildPages();
+            BindButtons();
+        }
 
         isOpen = value;
         IsOpen = value;

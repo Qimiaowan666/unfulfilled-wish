@@ -16,8 +16,17 @@ public class ShopUI : MonoBehaviour
     bool pausedByShop;
     float previousTimeScale = 1f;
 
+    void Awake()
+    {
+        IsOpen = false;
+        pausedByShop = false;
+    }
+
     void Start()
     {
+        if (panel != null)
+            panel.SetActive(false);
+
         EnsureExitButton();
     }
 
