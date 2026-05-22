@@ -596,6 +596,8 @@ MonoBehaviour:
   hpFill: {fileID: 594280177}
   ghostFill: {fileID: 1924902695}
   hpText: {fileID: 1906037283}
+  poiseFill: {fileID: 0}
+  poiseBarRoot: {fileID: 0}
 --- !u!1 &264271507
 GameObject:
   m_ObjectHideFlags: 0
@@ -1888,8 +1890,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e3db6b89eb003a64d9e38375c4679319, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PauseUI
-  panel: {fileID: 1862483227}
-  resumeButton: {fileID: 0}
+  pauseArtwork: {fileID: 0}
 --- !u!114 &507036253
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3442,6 +3443,37 @@ MonoBehaviour:
   groundLayer:
     serializedVersion: 2
     m_Bits: 1
+  moveSpeed: 6
+  jumpForce: 12
+  dashSpeed: 20
+  dashDuration: 0.15
+  dashCooldown: 1
+  maxComboStep: 3
+  comboResetTime: 0.8
+  attackDurations:
+  - 0.3
+  - 0.3
+  - 0.4
+  attackDamageMultipliers:
+  - 1
+  - 1
+  - 1.2
+  attackPoiseDamage:
+  - 8
+  - 10
+  - 14
+  hitboxOffset: {x: 0.6, y: 0}
+  hitboxSize: {x: 0.8, y: 0.6}
+  enemyLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  perfectBlockWindow: 0.15
+  counterWindow: 0.3
+  counterCooldown: 0.5
+  counterPoiseDamage: 60
+  executeDamageMultiplier: 5
+  executeDuration: 0.8
+  executeRange: 1.5
 --- !u!114 &837104284
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4831,7 +4863,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e9c44ff9fc91ff4d978ecad8eb99176, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ExecutePromptUI
-  playerExecute: {fileID: 0}
+  playerController: {fileID: 0}
   promptText: {fileID: 105591430}
   canvasGroup: {fileID: 105591429}
   prompt: "F \u5904\u51B3"
@@ -8373,7 +8405,7 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 3679522732958485095, guid: 27233f5aa9ae6144bb18133794f9846f, type: 3}
   m_PrefabInstance: {fileID: 2150462569874733334}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2091490178}
+  m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ff1ab51b06d0d5345be52f15b8ff316c, type: 3}
@@ -8384,6 +8416,21 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 1720833578063682150, guid: 27233f5aa9ae6144bb18133794f9846f, type: 3}
   m_PrefabInstance: {fileID: 2150462569874733334}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &2150462569874733337
+MonoBehaviour:
+  m_ObjectHideFlags: 8
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c243bfd3573c654a98db555441019a0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PoiseMeter
+  maxPoise: 100
+  poiseRegenRate: 10
+  regenDelay: 3
 --- !u!1001 &6414302639434539825
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -199,7 +199,7 @@ public class SaveSystem : MonoBehaviour
             player.transform.position = new Vector3(data.playerX, data.playerY, player.transform.position.z);
             if (player.Rb != null)
                 player.Rb.linearVelocity = Vector2.zero;
-            player.SetLocomotionState();
+            player.stateMachine.ChangeState(player.idleState);
         }
 
         if (stats != null)

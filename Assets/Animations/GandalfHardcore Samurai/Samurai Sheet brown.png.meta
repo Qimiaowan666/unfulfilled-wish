@@ -1,0 +1,3133 @@
+fileFormatVersion: 2
+guid: f101cac5b70d4524b843071b02dd722e
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 1560729812927920873
+    second: Samurai Sheet brown_0
+  - first:
+      213: 7194660137724898123
+    second: Samurai Sheet brown_1
+  - first:
+      213: -6749732200222113699
+    second: Samurai Sheet brown_2
+  - first:
+      213: -8920869276585490915
+    second: Samurai Sheet brown_3
+  - first:
+      213: 3492326678995236018
+    second: Samurai Sheet brown_4
+  - first:
+      213: -7031298318929341746
+    second: Samurai Sheet brown_5
+  - first:
+      213: 8975492642335298424
+    second: Samurai Sheet brown_6
+  - first:
+      213: 8866508958329269948
+    second: Samurai Sheet brown_7
+  - first:
+      213: 410004549413933947
+    second: Samurai Sheet brown_8
+  - first:
+      213: 8181071291476025057
+    second: Samurai Sheet brown_9
+  - first:
+      213: 7522019574792313589
+    second: Samurai Sheet brown_10
+  - first:
+      213: 8082930131868073930
+    second: Samurai Sheet brown_11
+  - first:
+      213: 3622619860792411367
+    second: Samurai Sheet brown_12
+  - first:
+      213: 4443240701521080454
+    second: Samurai Sheet brown_13
+  - first:
+      213: -220304968609436052
+    second: Samurai Sheet brown_14
+  - first:
+      213: 5678207154576708094
+    second: Samurai Sheet brown_15
+  - first:
+      213: -6615524152560881539
+    second: Samurai Sheet brown_16
+  - first:
+      213: -3649040562397922269
+    second: Samurai Sheet brown_17
+  - first:
+      213: 6074424308948074434
+    second: Samurai Sheet brown_18
+  - first:
+      213: 5169688637791743037
+    second: Samurai Sheet brown_19
+  - first:
+      213: 1740827485793419225
+    second: Samurai Sheet brown_20
+  - first:
+      213: -231336838770243432
+    second: Samurai Sheet brown_21
+  - first:
+      213: -2937743494049635655
+    second: Samurai Sheet brown_22
+  - first:
+      213: -5038988758873018547
+    second: Samurai Sheet brown_23
+  - first:
+      213: 5582543527261577967
+    second: Samurai Sheet brown_24
+  - first:
+      213: -126763022266448707
+    second: Samurai Sheet brown_25
+  - first:
+      213: -4149849549025039692
+    second: Samurai Sheet brown_26
+  - first:
+      213: 5368777671816044767
+    second: Samurai Sheet brown_27
+  - first:
+      213: 1436327832079175280
+    second: Samurai Sheet brown_28
+  - first:
+      213: 8673093855907771627
+    second: Samurai Sheet brown_29
+  - first:
+      213: 2727866792626620493
+    second: Samurai Sheet brown_30
+  - first:
+      213: -6369938902779975443
+    second: Samurai Sheet brown_31
+  - first:
+      213: 7583511144249786724
+    second: Samurai Sheet brown_32
+  - first:
+      213: 5944785076292951507
+    second: Samurai Sheet brown_33
+  - first:
+      213: 5794686347664343052
+    second: Samurai Sheet brown_34
+  - first:
+      213: 7675420315774579800
+    second: Samurai Sheet brown_35
+  - first:
+      213: 5439284979341667074
+    second: Samurai Sheet brown_36
+  - first:
+      213: -6849322456757469518
+    second: Samurai Sheet brown_37
+  - first:
+      213: 3701575573338637014
+    second: Samurai Sheet brown_38
+  - first:
+      213: -6507753456021362059
+    second: Samurai Sheet brown_39
+  - first:
+      213: 6847160241795082539
+    second: Samurai Sheet brown_40
+  - first:
+      213: 8702425867738254249
+    second: Samurai Sheet brown_41
+  - first:
+      213: 7024548622650137252
+    second: Samurai Sheet brown_42
+  - first:
+      213: 5486443398944723276
+    second: Samurai Sheet brown_43
+  - first:
+      213: -7783406546555050608
+    second: Samurai Sheet brown_44
+  - first:
+      213: 7519321305509647183
+    second: Samurai Sheet brown_45
+  - first:
+      213: 2894965301861198647
+    second: Samurai Sheet brown_46
+  - first:
+      213: 5932405903358399373
+    second: Samurai Sheet brown_47
+  - first:
+      213: -2566346853497011044
+    second: Samurai Sheet brown_48
+  - first:
+      213: 6422184781977532637
+    second: Samurai Sheet brown_49
+  - first:
+      213: 3147188377565797550
+    second: Samurai Sheet brown_50
+  - first:
+      213: -175733890715507388
+    second: Samurai Sheet brown_51
+  - first:
+      213: -3018331970887066943
+    second: Samurai Sheet brown_52
+  - first:
+      213: -7388604987091319878
+    second: Samurai Sheet brown_53
+  - first:
+      213: -5831243487536682617
+    second: Samurai Sheet brown_54
+  - first:
+      213: -6640220724308521413
+    second: Samurai Sheet brown_55
+  - first:
+      213: 2222026641514151497
+    second: Samurai Sheet brown_56
+  - first:
+      213: 3039227165901796891
+    second: Samurai Sheet brown_57
+  - first:
+      213: -9069155593601387636
+    second: Samurai Sheet brown_58
+  - first:
+      213: 8479699920284767949
+    second: Samurai Sheet brown_59
+  - first:
+      213: -2767156253354686834
+    second: Samurai Sheet brown_60
+  - first:
+      213: 6845198922784462348
+    second: Samurai Sheet brown_61
+  - first:
+      213: 4493153913755400890
+    second: Samurai Sheet brown_62
+  - first:
+      213: -1818256461637210650
+    second: Samurai Sheet brown_63
+  - first:
+      213: -5105260208521894434
+    second: Samurai Sheet brown_64
+  - first:
+      213: -6809962430665420960
+    second: Samurai Sheet brown_65
+  - first:
+      213: -9078594204767154878
+    second: Samurai Sheet brown_66
+  - first:
+      213: -4173152951093245855
+    second: Samurai Sheet brown_67
+  - first:
+      213: -3299021447373677442
+    second: Samurai Sheet brown_68
+  - first:
+      213: -8210551548822680552
+    second: Samurai Sheet brown_69
+  - first:
+      213: -8603262025240724293
+    second: Samurai Sheet brown_70
+  - first:
+      213: -1835649861704680816
+    second: Samurai Sheet brown_71
+  - first:
+      213: 6555980002562262538
+    second: Samurai Sheet brown_72
+  - first:
+      213: -9103448200013001854
+    second: Samurai Sheet brown_73
+  - first:
+      213: 4597347012654338363
+    second: Samurai Sheet brown_74
+  - first:
+      213: -274727366662926703
+    second: Samurai Sheet brown_75
+  - first:
+      213: -6376430412879483846
+    second: Samurai Sheet brown_76
+  - first:
+      213: -1056891449825427373
+    second: Samurai Sheet brown_77
+  - first:
+      213: -8332911317223671435
+    second: Samurai Sheet brown_78
+  - first:
+      213: 8748239754633987569
+    second: Samurai Sheet brown_79
+  - first:
+      213: 121174119233883007
+    second: Samurai Sheet brown_80
+  - first:
+      213: -2113146147425575389
+    second: Samurai Sheet brown_81
+  - first:
+      213: -3743887724381846660
+    second: Samurai Sheet brown_82
+  - first:
+      213: 5483241689704074248
+    second: Samurai Sheet brown_83
+  - first:
+      213: 8990413099361577043
+    second: Samurai Sheet brown_84
+  - first:
+      213: -5873550204975210876
+    second: Samurai Sheet brown_85
+  - first:
+      213: 5956084623536725909
+    second: Samurai Sheet brown_86
+  - first:
+      213: 5641294069190048012
+    second: Samurai Sheet brown_87
+  - first:
+      213: -2264010767674924729
+    second: Samurai Sheet brown_88
+  - first:
+      213: 2087788719798949980
+    second: Samurai Sheet brown_89
+  - first:
+      213: 2305371190550151966
+    second: Samurai Sheet brown_90
+  - first:
+      213: 6585689990837038646
+    second: Samurai Sheet brown_91
+  - first:
+      213: 2749140974893765137
+    second: Samurai Sheet brown_92
+  - first:
+      213: -7746403618928621977
+    second: Samurai Sheet brown_93
+  - first:
+      213: -5600991403297888556
+    second: Samurai Sheet brown_94
+  - first:
+      213: 5795907593783934467
+    second: Samurai Sheet brown_95
+  - first:
+      213: 3242650515363098014
+    second: Samurai Sheet brown_96
+  - first:
+      213: 1884378081691794277
+    second: Samurai Sheet brown_97
+  - first:
+      213: -2813101205698888286
+    second: Samurai Sheet brown_98
+  - first:
+      213: 3056982402410748521
+    second: Samurai Sheet brown_99
+  - first:
+      213: -5113029105064145649
+    second: Samurai Sheet brown_100
+  - first:
+      213: -7983426718002273657
+    second: Samurai Sheet brown_101
+  - first:
+      213: -6960682209183703363
+    second: Samurai Sheet brown_102
+  - first:
+      213: -2819665192458160861
+    second: Samurai Sheet brown_103
+  - first:
+      213: 3367433305648715841
+    second: Samurai Sheet brown_104
+  - first:
+      213: 3525379620243209271
+    second: Samurai Sheet brown_105
+  - first:
+      213: -1672370071877164053
+    second: Samurai Sheet brown_106
+  - first:
+      213: 5918855282509100077
+    second: Samurai Sheet brown_107
+  - first:
+      213: -9020438608332437251
+    second: Samurai Sheet brown_108
+  - first:
+      213: 764001927394505074
+    second: Samurai Sheet brown_109
+  - first:
+      213: -2380523142570376324
+    second: Samurai Sheet brown_110
+  - first:
+      213: -7864256686263630778
+    second: Samurai Sheet brown_111
+  - first:
+      213: -2741445771162326323
+    second: Samurai Sheet brown_112
+  - first:
+      213: 543531393365228744
+    second: Samurai Sheet brown_113
+  - first:
+      213: 5232783227513698936
+    second: Samurai Sheet brown_114
+  - first:
+      213: -5217066249545176464
+    second: Samurai Sheet brown_115
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Samurai Sheet brown_0
+      rect:
+        serializedVersion: 2
+        x: 34
+        y: 1087
+        width: 39
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9ea3ee9ee73d8a510800000000000000
+      internalID: 1560729812927920873
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_1
+      rect:
+        serializedVersion: 2
+        x: 129
+        y: 1087
+        width: 41
+        height: 45
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b4b61ccb64198d360800000000000000
+      internalID: 7194660137724898123
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_2
+      rect:
+        serializedVersion: 2
+        x: 225
+        y: 1087
+        width: 42
+        height: 44
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d50ceb453522452a0800000000000000
+      internalID: -6749732200222113699
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_3
+      rect:
+        serializedVersion: 2
+        x: 322
+        y: 1087
+        width: 40
+        height: 44
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d160d6168a4b23480800000000000000
+      internalID: -8920869276585490915
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_4
+      rect:
+        serializedVersion: 2
+        x: 418
+        y: 1087
+        width: 39
+        height: 45
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2b471258c9c377030800000000000000
+      internalID: 3492326678995236018
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_5
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 1023
+        width: 39
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ec25a6eae6fcb6e90800000000000000
+      internalID: -7031298318929341746
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_6
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 1023
+        width: 39
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8731786010b5f8c70800000000000000
+      internalID: 8975492642335298424
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_7
+      rect:
+        serializedVersion: 2
+        x: 225
+        y: 1024
+        width: 38
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cbee80bbbea2c0b70800000000000000
+      internalID: 8866508958329269948
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_8
+      rect:
+        serializedVersion: 2
+        x: 320
+        y: 1023
+        width: 39
+        height: 49
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b739c1427f0a0b500800000000000000
+      internalID: 410004549413933947
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_9
+      rect:
+        serializedVersion: 2
+        x: 415
+        y: 1023
+        width: 41
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1ee13929ef0098170800000000000000
+      internalID: 8181071291476025057
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_10
+      rect:
+        serializedVersion: 2
+        x: 511
+        y: 1023
+        width: 42
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5fad70d23f4936860800000000000000
+      internalID: 7522019574792313589
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_11
+      rect:
+        serializedVersion: 2
+        x: 608
+        y: 1024
+        width: 40
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: acf3c4631265c2070800000000000000
+      internalID: 8082930131868073930
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_12
+      rect:
+        serializedVersion: 2
+        x: 704
+        y: 1023
+        width: 39
+        height: 49
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7e48ec6e191264230800000000000000
+      internalID: 3622619860792411367
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_13
+      rect:
+        serializedVersion: 2
+        x: 33
+        y: 959
+        width: 39
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 680b8b170ef89ad30800000000000000
+      internalID: 4443240701521080454
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_14
+      rect:
+        serializedVersion: 2
+        x: 129
+        y: 959
+        width: 39
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c6ee7cb5cc151fcf0800000000000000
+      internalID: -220304968609436052
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_15
+      rect:
+        serializedVersion: 2
+        x: 198
+        y: 878
+        width: 65
+        height: 81
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ef150a9925b0dce40800000000000000
+      internalID: 5678207154576708094
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_16
+      rect:
+        serializedVersion: 2
+        x: 226
+        y: 959
+        width: 38
+        height: 49
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d70779375dfe034a0800000000000000
+      internalID: -6615524152560881539
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_17
+      rect:
+        serializedVersion: 2
+        x: 315
+        y: 895
+        width: 44
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 32cb74321f00c5dc0800000000000000
+      internalID: -3649040562397922269
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_18
+      rect:
+        serializedVersion: 2
+        x: 321
+        y: 959
+        width: 39
+        height: 49
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2cff8dda9b0bc4450800000000000000
+      internalID: 6074424308948074434
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_19
+      rect:
+        serializedVersion: 2
+        x: 385
+        y: 895
+        width: 78
+        height: 65
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d3c23f60d6c6eb740800000000000000
+      internalID: 5169688637791743037
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_20
+      rect:
+        serializedVersion: 2
+        x: 416
+        y: 959
+        width: 41
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9dff3f10069a82810800000000000000
+      internalID: 1740827485793419225
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_21
+      rect:
+        serializedVersion: 2
+        x: 504
+        y: 952
+        width: 50
+        height: 55
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 89843adee502accf0800000000000000
+      internalID: -231336838770243432
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_22
+      rect:
+        serializedVersion: 2
+        x: 599
+        y: 952
+        width: 50
+        height: 56
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9b2e4f36bd90b37d0800000000000000
+      internalID: -2937743494049635655
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_23
+      rect:
+        serializedVersion: 2
+        x: 705
+        y: 959
+        width: 39
+        height: 49
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d4fef28eb6ae11ab0800000000000000
+      internalID: -5038988758873018547
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_24
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 895
+        width: 73
+        height: 53
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fe2259da2cd297d40800000000000000
+      internalID: 5582543527261577967
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_25
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 895
+        width: 71
+        height: 55
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: db4472fe3b5ad3ef0800000000000000
+      internalID: -126763022266448707
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_26
+      rect:
+        serializedVersion: 2
+        x: 482
+        y: 921
+        width: 7
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4ba2c0f62d5c866c0800000000000000
+      internalID: -4149849549025039692
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_27
+      rect:
+        serializedVersion: 2
+        x: 483
+        y: 855
+        width: 99
+        height: 88
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fd0e4a6f8dab18a40800000000000000
+      internalID: 5368777671816044767
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_28
+      rect:
+        serializedVersion: 2
+        x: 599
+        y: 886
+        width: 51
+        height: 58
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 07e0614ad8cdee310800000000000000
+      internalID: 1436327832079175280
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_29
+      rect:
+        serializedVersion: 2
+        x: 707
+        y: 895
+        width: 43
+        height: 49
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: be47101f8e40d5870800000000000000
+      internalID: 8673093855907771627
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_30
+      rect:
+        serializedVersion: 2
+        x: 591
+        y: 902
+        width: 21
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d48081125645bd520800000000000000
+      internalID: 2727866792626620493
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_31
+      rect:
+        serializedVersion: 2
+        x: 636
+        y: 898
+        width: 21
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: de8abda315e6997a0800000000000000
+      internalID: -6369938902779975443
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_32
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 831
+        width: 73
+        height: 53
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 461893fd43b0e3960800000000000000
+      internalID: 7583511144249786724
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_33
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 831
+        width: 71
+        height: 55
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3dd1c72b78e108250800000000000000
+      internalID: 5944785076292951507
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_34
+      rect:
+        serializedVersion: 2
+        x: 203
+        y: 831
+        width: 60
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c00c659188cda6050800000000000000
+      internalID: 5794686347664343052
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_35
+      rect:
+        serializedVersion: 2
+        x: 315
+        y: 831
+        width: 44
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8547f8f6c12948a60800000000000000
+      internalID: 7675420315774579800
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_36
+      rect:
+        serializedVersion: 2
+        x: 385
+        y: 831
+        width: 77
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 20b27c1ced83c7b40800000000000000
+      internalID: 5439284979341667074
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_37
+      rect:
+        serializedVersion: 2
+        x: 482
+        y: 855
+        width: 7
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2be7ddcc38152f0a0800000000000000
+      internalID: -6849322456757469518
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_38
+      rect:
+        serializedVersion: 2
+        x: 483
+        y: 831
+        width: 79
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6d2cc164f53ae5330800000000000000
+      internalID: 3701575573338637014
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_39
+      rect:
+        serializedVersion: 2
+        x: 610
+        y: 831
+        width: 40
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 57aa60816b0dfa5a0800000000000000
+      internalID: -6507753456021362059
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_40
+      rect:
+        serializedVersion: 2
+        x: 707
+        y: 831
+        width: 43
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b29af5c46fff50f50800000000000000
+      internalID: 6847160241795082539
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_41
+      rect:
+        serializedVersion: 2
+        x: 591
+        y: 836
+        width: 21
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9ab85b2283a35c870800000000000000
+      internalID: 8702425867738254249
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_42
+      rect:
+        serializedVersion: 2
+        x: 636
+        y: 832
+        width: 21
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4aa558031c53c7160800000000000000
+      internalID: 7024548622650137252
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_43
+      rect:
+        serializedVersion: 2
+        x: 34
+        y: 769
+        width: 39
+        height: 49
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c411362f333c32c40800000000000000
+      internalID: 5486443398944723276
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_44
+      rect:
+        serializedVersion: 2
+        x: 130
+        y: 769
+        width: 39
+        height: 49
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 095e222fbf8cbf390800000000000000
+      internalID: -7783406546555050608
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_45
+      rect:
+        serializedVersion: 2
+        x: 226
+        y: 769
+        width: 40
+        height: 49
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f43dde663eef95860800000000000000
+      internalID: 7519321305509647183
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_46
+      rect:
+        serializedVersion: 2
+        x: 322
+        y: 769
+        width: 39
+        height: 49
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 73ba4869a9bfc2820800000000000000
+      internalID: 2894965301861198647
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_47
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 698
+        width: 42
+        height: 54
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d839b15ecb3245250800000000000000
+      internalID: 5932405903358399373
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_48
+      rect:
+        serializedVersion: 2
+        x: 130
+        y: 704
+        width: 40
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c948ed24221826cd0800000000000000
+      internalID: -2566346853497011044
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_49
+      rect:
+        serializedVersion: 2
+        x: 224
+        y: 645
+        width: 36
+        height: 53
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dd8b0b3780f202950800000000000000
+      internalID: 6422184781977532637
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_50
+      rect:
+        serializedVersion: 2
+        x: 226
+        y: 704
+        width: 40
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: eac1c06a72f0dab20800000000000000
+      internalID: 3147188377565797550
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_51
+      rect:
+        serializedVersion: 2
+        x: 320
+        y: 696
+        width: 42
+        height: 56
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 445a7ec15faaf8df0800000000000000
+      internalID: -175733890715507388
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_52
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 645
+        width: 36
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1ca5215701bbc16d0800000000000000
+      internalID: -3018331970887066943
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_53
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 645
+        width: 36
+        height: 50
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ab30eb629e6667990800000000000000
+      internalID: -7388604987091319878
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_54
+      rect:
+        serializedVersion: 2
+        x: 320
+        y: 645
+        width: 36
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 789e09e71f2431fa0800000000000000
+      internalID: -5831243487536682617
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_55
+      rect:
+        serializedVersion: 2
+        x: 33
+        y: 575
+        width: 42
+        height: 44
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b3e4761ce6239d3a0800000000000000
+      internalID: -6640220724308521413
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_56
+      rect:
+        serializedVersion: 2
+        x: 129
+        y: 575
+        width: 42
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 94eb7e8257936de10800000000000000
+      internalID: 2222026641514151497
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_57
+      rect:
+        serializedVersion: 2
+        x: 225
+        y: 575
+        width: 42
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b163b4f31018d2a20800000000000000
+      internalID: 3039227165901796891
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_58
+      rect:
+        serializedVersion: 2
+        x: 322
+        y: 575
+        width: 40
+        height: 44
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c8374aeb903e32280800000000000000
+      internalID: -9069155593601387636
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_59
+      rect:
+        serializedVersion: 2
+        x: 418
+        y: 575
+        width: 39
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dc65b7e6622fda570800000000000000
+      internalID: 8479699920284767949
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_60
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 447
+        width: 71
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e860bc07c061999d0800000000000000
+      internalID: -2767156253354686834
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_61
+      rect:
+        serializedVersion: 2
+        x: 33
+        y: 511
+        width: 42
+        height: 44
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c06547127280ffe50800000000000000
+      internalID: 6845198922784462348
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_62
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 457
+        width: 54
+        height: 54
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: abafb86cda3ea5e30800000000000000
+      internalID: 4493153913755400890
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_63
+      rect:
+        serializedVersion: 2
+        x: 129
+        y: 511
+        width: 42
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6ed2e85b16144c6e0800000000000000
+      internalID: -1818256461637210650
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_64
+      rect:
+        serializedVersion: 2
+        x: 225
+        y: 507
+        width: 42
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ed5ad11a3e87629b0800000000000000
+      internalID: -5105260208521894434
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_65
+      rect:
+        serializedVersion: 2
+        x: 322
+        y: 507
+        width: 41
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 06f8e6200472e71a0800000000000000
+      internalID: -6809962430665420960
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_66
+      rect:
+        serializedVersion: 2
+        x: 419
+        y: 507
+        width: 42
+        height: 45
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 24d0fe4dbaa520280800000000000000
+      internalID: -9078594204767154878
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_67
+      rect:
+        serializedVersion: 2
+        x: 515
+        y: 511
+        width: 43
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 168c6b4508bf516c0800000000000000
+      internalID: -4173152951093245855
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_68
+      rect:
+        serializedVersion: 2
+        x: 576
+        y: 511
+        width: 74
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e7c95eaf8758732d0800000000000000
+      internalID: -3299021447373677442
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_69
+      rect:
+        serializedVersion: 2
+        x: 672
+        y: 511
+        width: 72
+        height: 54
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 81c04622ed24e0e80800000000000000
+      internalID: -8210551548822680552
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_70
+      rect:
+        serializedVersion: 2
+        x: 222
+        y: 502
+        width: 10
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bbc3be325c21b9880800000000000000
+      internalID: -8603262025240724293
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_71
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 451
+        width: 7
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 09af81d2d267686e0800000000000000
+      internalID: -1835649861704680816
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_72
+      rect:
+        serializedVersion: 2
+        x: 121
+        y: 447
+        width: 76
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a06c947c3158bfa50800000000000000
+      internalID: 6555980002562262538
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_73
+      rect:
+        serializedVersion: 2
+        x: 223
+        y: 447
+        width: 42
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 28b4e0f181e0aa180800000000000000
+      internalID: -9103448200013001854
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_74
+      rect:
+        serializedVersion: 2
+        x: 321
+        y: 447
+        width: 40
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b31177e00ce0dcf30800000000000000
+      internalID: 4597347012654338363
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_75
+      rect:
+        serializedVersion: 2
+        x: 418
+        y: 447
+        width: 39
+        height: 45
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 19e4af36ae8ff2cf0800000000000000
+      internalID: -274727366662926703
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_76
+      rect:
+        serializedVersion: 2
+        x: 27
+        y: 383
+        width: 46
+        height: 50
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a3c2251c25e5287a0800000000000000
+      internalID: -6376430412879483846
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_77
+      rect:
+        serializedVersion: 2
+        x: 123
+        y: 383
+        width: 46
+        height: 50
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 350020773da2551f0800000000000000
+      internalID: -1056891449825427373
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_78
+      rect:
+        serializedVersion: 2
+        x: 219
+        y: 383
+        width: 46
+        height: 49
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 579fc008e4d8b5c80800000000000000
+      internalID: -8332911317223671435
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_79
+      rect:
+        serializedVersion: 2
+        x: 315
+        y: 383
+        width: 46
+        height: 50
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1f5c8e8e4bdf76970800000000000000
+      internalID: 8748239754633987569
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_80
+      rect:
+        serializedVersion: 2
+        x: 17
+        y: 319
+        width: 56
+        height: 50
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f7b08ec283f7ea100800000000000000
+      internalID: 121174119233883007
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_81
+      rect:
+        serializedVersion: 2
+        x: 118
+        y: 319
+        width: 51
+        height: 50
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 32e963c56c89ca2e0800000000000000
+      internalID: -2113146147425575389
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_82
+      rect:
+        serializedVersion: 2
+        x: 212
+        y: 319
+        width: 53
+        height: 49
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c73464d53f90b0cc0800000000000000
+      internalID: -3743887724381846660
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_83
+      rect:
+        serializedVersion: 2
+        x: 308
+        y: 319
+        width: 53
+        height: 50
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 80c8c6ce343681c40800000000000000
+      internalID: 5483241689704074248
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_84
+      rect:
+        serializedVersion: 2
+        x: 15
+        y: 255
+        width: 56
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3582773a41d54cc70800000000000000
+      internalID: 8990413099361577043
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_85
+      rect:
+        serializedVersion: 2
+        x: 117
+        y: 255
+        width: 51
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 48e970e3535fc7ea0800000000000000
+      internalID: -5873550204975210876
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_86
+      rect:
+        serializedVersion: 2
+        x: 217
+        y: 255
+        width: 53
+        height: 45
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 59f921e886348a250800000000000000
+      internalID: 5956084623536725909
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_87
+      rect:
+        serializedVersion: 2
+        x: 315
+        y: 258
+        width: 53
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c09379b2117e94e40800000000000000
+      internalID: 5641294069190048012
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_88
+      rect:
+        serializedVersion: 2
+        x: 356
+        y: 255
+        width: 15
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 741a319b33e9490e0800000000000000
+      internalID: -2264010767674924729
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_89
+      rect:
+        serializedVersion: 2
+        x: 415
+        y: 255
+        width: 56
+        height: 49
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c581fa177c059fc10800000000000000
+      internalID: 2087788719798949980
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_90
+      rect:
+        serializedVersion: 2
+        x: 512
+        y: 255
+        width: 58
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e13492822e25eff10800000000000000
+      internalID: 2305371190550151966
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_91
+      rect:
+        serializedVersion: 2
+        x: 30
+        y: 191
+        width: 43
+        height: 39
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 63eefa87722156b50800000000000000
+      internalID: 6585689990837038646
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_92
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 191
+        width: 41
+        height: 39
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 112930ea629e62620800000000000000
+      internalID: 2749140974893765137
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_93
+      rect:
+        serializedVersion: 2
+        x: 225
+        y: 191
+        width: 40
+        height: 39
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 76685f663fe3f7490800000000000000
+      internalID: -7746403618928621977
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_94
+      rect:
+        serializedVersion: 2
+        x: 321
+        y: 191
+        width: 40
+        height: 39
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4d6a9687ef74542b0800000000000000
+      internalID: -5600991403297888556
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_95
+      rect:
+        serializedVersion: 2
+        x: 415
+        y: 191
+        width: 42
+        height: 39
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 30efa7e9f333f6050800000000000000
+      internalID: 5795907593783934467
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_96
+      rect:
+        serializedVersion: 2
+        x: 34
+        y: 127
+        width: 39
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e9d64f2a675300d20800000000000000
+      internalID: 3242650515363098014
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_97
+      rect:
+        serializedVersion: 2
+        x: 129
+        y: 127
+        width: 41
+        height: 45
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 56b75c5a1e7a62a10800000000000000
+      internalID: 1884378081691794277
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_98
+      rect:
+        serializedVersion: 2
+        x: 226
+        y: 127
+        width: 40
+        height: 44
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2ad381d9b5bd5f8d0800000000000000
+      internalID: -2813101205698888286
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_99
+      rect:
+        serializedVersion: 2
+        x: 322
+        y: 127
+        width: 39
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 96a10546c459c6a20800000000000000
+      internalID: 3056982402410748521
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_100
+      rect:
+        serializedVersion: 2
+        x: 417
+        y: 127
+        width: 39
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f0d0b627e1fda09b0800000000000000
+      internalID: -5113029105064145649
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_101
+      rect:
+        serializedVersion: 2
+        x: 510
+        y: 127
+        width: 6
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 782ac1fa2bb253190800000000000000
+      internalID: -7983426718002273657
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_102
+      rect:
+        serializedVersion: 2
+        x: 513
+        y: 127
+        width: 39
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dbe5937f860b66f90800000000000000
+      internalID: -6960682209183703363
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_103
+      rect:
+        serializedVersion: 2
+        x: 606
+        y: 127
+        width: 42
+        height: 39
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3257ff952798ed8d0800000000000000
+      internalID: -2819665192458160861
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_104
+      rect:
+        serializedVersion: 2
+        x: 701
+        y: 127
+        width: 43
+        height: 39
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 148d20400c68bbe20800000000000000
+      internalID: 3367433305648715841
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_105
+      rect:
+        serializedVersion: 2
+        x: 29
+        y: 63
+        width: 43
+        height: 39
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 73c7ffa161aace030800000000000000
+      internalID: 3525379620243209271
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_106
+      rect:
+        serializedVersion: 2
+        x: 121
+        y: 63
+        width: 47
+        height: 39
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: be364ccb74c8ac8e0800000000000000
+      internalID: -1672370071877164053
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_107
+      rect:
+        serializedVersion: 2
+        x: 221
+        y: 63
+        width: 43
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d2436ee158ff32250800000000000000
+      internalID: 5918855282509100077
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_108
+      rect:
+        serializedVersion: 2
+        x: 311
+        y: 83
+        width: 9
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: df84028c0e6f0d280800000000000000
+      internalID: -9020438608332437251
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_109
+      rect:
+        serializedVersion: 2
+        x: 311
+        y: 77
+        width: 8
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 271301284b74a9a00800000000000000
+      internalID: 764001927394505074
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_110
+      rect:
+        serializedVersion: 2
+        x: 319
+        y: 63
+        width: 39
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c730f7b70dea6fed0800000000000000
+      internalID: -2380523142570376324
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_111
+      rect:
+        serializedVersion: 2
+        x: 403
+        y: 63
+        width: 50
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 64404c0e53c8cd290800000000000000
+      internalID: -7864256686263630778
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_112
+      rect:
+        serializedVersion: 2
+        x: 497
+        y: 63
+        width: 53
+        height: 35
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dca6fde889d64f9d0800000000000000
+      internalID: -2741445771162326323
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_113
+      rect:
+        serializedVersion: 2
+        x: 591
+        y: 63
+        width: 47
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8ccbec92ce20b8700800000000000000
+      internalID: 543531393365228744
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_114
+      rect:
+        serializedVersion: 2
+        x: 687
+        y: 63
+        width: 47
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 87a7396fe949e9840800000000000000
+      internalID: 5232783227513698936
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Samurai Sheet brown_115
+      rect:
+        serializedVersion: 2
+        x: 15
+        y: 0
+        width: 47
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 07a2e2223e14997b0800000000000000
+      internalID: -5217066249545176464
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Samurai Sheet brown_0: 1560729812927920873
+      Samurai Sheet brown_1: 7194660137724898123
+      Samurai Sheet brown_10: 7522019574792313589
+      Samurai Sheet brown_100: -5113029105064145649
+      Samurai Sheet brown_101: -7983426718002273657
+      Samurai Sheet brown_102: -6960682209183703363
+      Samurai Sheet brown_103: -2819665192458160861
+      Samurai Sheet brown_104: 3367433305648715841
+      Samurai Sheet brown_105: 3525379620243209271
+      Samurai Sheet brown_106: -1672370071877164053
+      Samurai Sheet brown_107: 5918855282509100077
+      Samurai Sheet brown_108: -9020438608332437251
+      Samurai Sheet brown_109: 764001927394505074
+      Samurai Sheet brown_11: 8082930131868073930
+      Samurai Sheet brown_110: -2380523142570376324
+      Samurai Sheet brown_111: -7864256686263630778
+      Samurai Sheet brown_112: -2741445771162326323
+      Samurai Sheet brown_113: 543531393365228744
+      Samurai Sheet brown_114: 5232783227513698936
+      Samurai Sheet brown_115: -5217066249545176464
+      Samurai Sheet brown_12: 3622619860792411367
+      Samurai Sheet brown_13: 4443240701521080454
+      Samurai Sheet brown_14: -220304968609436052
+      Samurai Sheet brown_15: 5678207154576708094
+      Samurai Sheet brown_16: -6615524152560881539
+      Samurai Sheet brown_17: -3649040562397922269
+      Samurai Sheet brown_18: 6074424308948074434
+      Samurai Sheet brown_19: 5169688637791743037
+      Samurai Sheet brown_2: -6749732200222113699
+      Samurai Sheet brown_20: 1740827485793419225
+      Samurai Sheet brown_21: -231336838770243432
+      Samurai Sheet brown_22: -2937743494049635655
+      Samurai Sheet brown_23: -5038988758873018547
+      Samurai Sheet brown_24: 5582543527261577967
+      Samurai Sheet brown_25: -126763022266448707
+      Samurai Sheet brown_26: -4149849549025039692
+      Samurai Sheet brown_27: 5368777671816044767
+      Samurai Sheet brown_28: 1436327832079175280
+      Samurai Sheet brown_29: 8673093855907771627
+      Samurai Sheet brown_3: -8920869276585490915
+      Samurai Sheet brown_30: 2727866792626620493
+      Samurai Sheet brown_31: -6369938902779975443
+      Samurai Sheet brown_32: 7583511144249786724
+      Samurai Sheet brown_33: 5944785076292951507
+      Samurai Sheet brown_34: 5794686347664343052
+      Samurai Sheet brown_35: 7675420315774579800
+      Samurai Sheet brown_36: 5439284979341667074
+      Samurai Sheet brown_37: -6849322456757469518
+      Samurai Sheet brown_38: 3701575573338637014
+      Samurai Sheet brown_39: -6507753456021362059
+      Samurai Sheet brown_4: 3492326678995236018
+      Samurai Sheet brown_40: 6847160241795082539
+      Samurai Sheet brown_41: 8702425867738254249
+      Samurai Sheet brown_42: 7024548622650137252
+      Samurai Sheet brown_43: 5486443398944723276
+      Samurai Sheet brown_44: -7783406546555050608
+      Samurai Sheet brown_45: 7519321305509647183
+      Samurai Sheet brown_46: 2894965301861198647
+      Samurai Sheet brown_47: 5932405903358399373
+      Samurai Sheet brown_48: -2566346853497011044
+      Samurai Sheet brown_49: 6422184781977532637
+      Samurai Sheet brown_5: -7031298318929341746
+      Samurai Sheet brown_50: 3147188377565797550
+      Samurai Sheet brown_51: -175733890715507388
+      Samurai Sheet brown_52: -3018331970887066943
+      Samurai Sheet brown_53: -7388604987091319878
+      Samurai Sheet brown_54: -5831243487536682617
+      Samurai Sheet brown_55: -6640220724308521413
+      Samurai Sheet brown_56: 2222026641514151497
+      Samurai Sheet brown_57: 3039227165901796891
+      Samurai Sheet brown_58: -9069155593601387636
+      Samurai Sheet brown_59: 8479699920284767949
+      Samurai Sheet brown_6: 8975492642335298424
+      Samurai Sheet brown_60: -2767156253354686834
+      Samurai Sheet brown_61: 6845198922784462348
+      Samurai Sheet brown_62: 4493153913755400890
+      Samurai Sheet brown_63: -1818256461637210650
+      Samurai Sheet brown_64: -5105260208521894434
+      Samurai Sheet brown_65: -6809962430665420960
+      Samurai Sheet brown_66: -9078594204767154878
+      Samurai Sheet brown_67: -4173152951093245855
+      Samurai Sheet brown_68: -3299021447373677442
+      Samurai Sheet brown_69: -8210551548822680552
+      Samurai Sheet brown_7: 8866508958329269948
+      Samurai Sheet brown_70: -8603262025240724293
+      Samurai Sheet brown_71: -1835649861704680816
+      Samurai Sheet brown_72: 6555980002562262538
+      Samurai Sheet brown_73: -9103448200013001854
+      Samurai Sheet brown_74: 4597347012654338363
+      Samurai Sheet brown_75: -274727366662926703
+      Samurai Sheet brown_76: -6376430412879483846
+      Samurai Sheet brown_77: -1056891449825427373
+      Samurai Sheet brown_78: -8332911317223671435
+      Samurai Sheet brown_79: 8748239754633987569
+      Samurai Sheet brown_8: 410004549413933947
+      Samurai Sheet brown_80: 121174119233883007
+      Samurai Sheet brown_81: -2113146147425575389
+      Samurai Sheet brown_82: -3743887724381846660
+      Samurai Sheet brown_83: 5483241689704074248
+      Samurai Sheet brown_84: 8990413099361577043
+      Samurai Sheet brown_85: -5873550204975210876
+      Samurai Sheet brown_86: 5956084623536725909
+      Samurai Sheet brown_87: 5641294069190048012
+      Samurai Sheet brown_88: -2264010767674924729
+      Samurai Sheet brown_89: 2087788719798949980
+      Samurai Sheet brown_9: 8181071291476025057
+      Samurai Sheet brown_90: 2305371190550151966
+      Samurai Sheet brown_91: 6585689990837038646
+      Samurai Sheet brown_92: 2749140974893765137
+      Samurai Sheet brown_93: -7746403618928621977
+      Samurai Sheet brown_94: -5600991403297888556
+      Samurai Sheet brown_95: 5795907593783934467
+      Samurai Sheet brown_96: 3242650515363098014
+      Samurai Sheet brown_97: 1884378081691794277
+      Samurai Sheet brown_98: -2813101205698888286
+      Samurai Sheet brown_99: 3056982402410748521
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

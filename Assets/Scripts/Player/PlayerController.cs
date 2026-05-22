@@ -1,161 +1,134 @@
-﻿using UnityEngine;
-
-public enum PlayerState
-{
-    Idle = 0,
-    Running = 1,
-    Jumping = 2,
-    Falling = 3,
-    Dashing = 4,
-    Attacking = 6,
-    Blocking = 7,
-    Countering = 8,
-    Executing = 9,
-    Stunned = 10,
-    Dead = 11
-}
+using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(PlayerStats))]
-public class PlayerController : MonoBehaviour
+public class PlayerController : Entity
 {
-    public PlayerState State { get; private set; } = PlayerState.Idle;
+    // ── State Machine ────────────────────────────────────────────────
+    public PlayerStateMachine  stateMachine  { get; private set; }
+    public Player_IdleState    idleState     { get; private set; }
+    public Player_MoveState    moveState     { get; private set; }
+    public Player_JumpState    jumpState     { get; private set; }
+    public Player_FallState    fallState     { get; private set; }
+    public Player_DashState    dashState     { get; private set; }
+    public Player_AttackState  attackState   { get; private set; }
+    public Player_BlockState   blockState    { get; private set; }
+    public Player_CounterState counterState  { get; private set; }
+    public Player_ExecuteState executeState  { get; private set; }
+    public Player_StunnedState stunnedState  { get; private set; }
+    public Player_DeadState    deadState     { get; private set; }
 
-    public bool IsGrounded { get; private set; }
-    public bool FacingRight { get; private set; } = true;
-    public bool CanAct => !ShopUI.IsOpen && State != PlayerState.Stunned && State != PlayerState.Dead && State != PlayerState.Executing;
-    public bool CanMove => !ShopUI.IsOpen && (State == PlayerState.Idle || State == PlayerState.Running || State == PlayerState.Jumping || State == PlayerState.Falling);
-    public bool CanStartAction => !ShopUI.IsOpen && (State == PlayerState.Idle || State == PlayerState.Running || State == PlayerState.Jumping || State == PlayerState.Falling);
+    // ── Player-specific Components ───────────────────────────────────
+    public PlayerStats       Stats       { get; private set; }
+    public PlayerInputBuffer InputBuffer { get; private set; }
+    public PlayerInput       Input       { get; private set; }
 
-    [Header("Ground Detection")]
-    public Transform groundCheck;
-    public float groundCheckRadius = 0.1f;
-    public LayerMask groundLayer;
+    // ── Cooldown Timers ──────────────────────────────────────────────
+    public float dashCooldownTimer    { get; private set; }
+    public float counterCooldownTimer { get; private set; }
 
-    public Rigidbody2D Rb { get; private set; }
-    public PlayerStats Stats { get; private set; }
-    public Animator Animator { get; private set; }
-    bool wasGrounded;
+    // ── Inspector Config ─────────────────────────────────────────────
+    [Header("Movement")]
+    public float moveSpeed = 6f;
 
-    void Awake()
+    [Header("Jump")]
+    public float jumpForce = 12f;
+
+    [Header("Dash")]
+    public float dashSpeed    = 20f;
+    public float dashDuration = 0.15f;
+    public float dashCooldown = 1f;
+
+    [Header("Attack")]
+    public int   maxComboStep   = 3;
+    public float comboResetTime = 0.8f;
+    public float[] attackDurations         = { 0.3f, 0.3f, 0.4f };
+    public float[] attackDamageMultipliers = { 1f,   1f,   1.2f };
+    public float[] attackPoiseDamage       = { 8f,   10f,  14f  };
+    public Vector2  hitboxOffset = new Vector2(0.6f, 0f);
+    public Vector2  hitboxSize   = new Vector2(0.8f, 0.6f);
+    public LayerMask enemyLayer;
+
+    [Header("Block")]
+    public float perfectBlockWindow = 0.15f;
+
+    [Header("Counter")]
+    public float counterWindow      = 0.3f;
+    public float counterCooldown    = 0.5f;
+    public float counterPoiseDamage = 60f;
+
+    [Header("Execute")]
+    public float executeDamageMultiplier = 5f;
+    public float executeDuration         = 0.8f;
+    public float executeRange            = 1.5f;
+
+    // ── External Queries ─────────────────────────────────────────────
+    public bool IsBlocking           => stateMachine.currentState == blockState;
+    public bool IsCountering         => stateMachine.currentState == counterState;
+    public bool InPerfectBlockWindow => IsBlocking && blockState.InPerfectWindow;
+
+    public bool TryCounter(EnemyBase enemy)   => counterState.TryCounter(enemy);
+    public void ReceiveBlockHit(float damage) { if (IsBlocking) blockState.ReceiveAttack(damage); }
+
+    // ── Lifecycle ────────────────────────────────────────────────────
+    protected override void Awake()
     {
-        Rb = GetComponent<Rigidbody2D>();
-        Stats = GetComponent<PlayerStats>();
-        Animator = GetComponent<Animator>();
+        base.Awake();
+        Stats       = GetComponent<PlayerStats>();
+        InputBuffer = GetComponent<PlayerInputBuffer>();
+        if (InputBuffer == null) InputBuffer = gameObject.AddComponent<PlayerInputBuffer>();
+        Input = GetComponent<PlayerInput>();
+        if (Input == null) Input = gameObject.AddComponent<PlayerInput>();
 
-        Stats.OnDeath += () => SetState(PlayerState.Dead);
+        stateMachine  = new PlayerStateMachine();
+        idleState     = new Player_IdleState(this, stateMachine);
+        moveState     = new Player_MoveState(this, stateMachine);
+        jumpState     = new Player_JumpState(this, stateMachine);
+        fallState     = new Player_FallState(this, stateMachine);
+        dashState     = new Player_DashState(this, stateMachine);
+        attackState   = new Player_AttackState(this, stateMachine);
+        blockState    = new Player_BlockState(this, stateMachine);
+        counterState  = new Player_CounterState(this, stateMachine);
+        executeState  = new Player_ExecuteState(this, stateMachine);
+        stunnedState  = new Player_StunnedState(this, stateMachine);
+        deadState     = new Player_DeadState(this, stateMachine);
+
+        stateMachine.Initialize(idleState);
+        Stats.OnDeath += () => stateMachine.ChangeState(deadState);
     }
 
-    void Update()
+    protected override void Update()
     {
-        CheckGrounded();
-        UpdateLandingState();
-        UpdateFallState();
+        base.Update();
+        if (dashCooldownTimer    > 0f) dashCooldownTimer    -= Time.deltaTime;
+        if (counterCooldownTimer > 0f) counterCooldownTimer -= Time.deltaTime;
+        stateMachine.Update();
     }
 
-    void FixedUpdate()
+    // ── Called by State Classes ──────────────────────────────────────
+    public void StartDashCooldown()    => dashCooldownTimer    = dashCooldown;
+    public void StartCounterCooldown() => counterCooldownTimer = counterCooldown;
+
+    public void Stun(float duration)
     {
-        StabilizeLockedStateVelocity();
+        stunnedState.Duration = duration;
+        stateMachine.ChangeState(stunnedState);
     }
 
-    void CheckGrounded()
+    // ── Called by PlayerAnimationEvents ─────────────────────────────
+    public void AnimFinished()      => stateMachine.currentState?.OnAnimationFinished();
+    public void AnimHitFrame()      => stateMachine.currentState?.OnHitFrame();
+    public void AnimCounterClosed() => stateMachine.currentState?.OnCounterWindowClosed();
+
+    protected override void OnDrawGizmos()
     {
-        wasGrounded = IsGrounded;
-        if (groundCheck == null) return;
-        IsGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
-    }
-
-    void UpdateLandingState()
-    {
-        if (!IsGrounded) return;
-        if (State != PlayerState.Falling && State != PlayerState.Jumping) return;
-
-        bool justLanded = !wasGrounded || Mathf.Abs(Rb.linearVelocity.y) < 0.05f;
-        if (justLanded)
-        {
-            if (State == PlayerState.Falling) AudioManager.Instance?.PlayLand();
-            SetLocomotionState();
-        }
-    }
-
-    void UpdateFallState()
-    {
-        if (!IsGrounded && Rb.linearVelocity.y < -0.1f && State == PlayerState.Jumping)
-            SetState(PlayerState.Falling);
-    }
-
-    public void SetState(PlayerState newState)
-    {
-        if (State == PlayerState.Dead && newState != PlayerState.Dead) return;
-        if (State == newState) return;
-        State = newState;
-        if (Animator != null && Animator.runtimeAnimatorController != null)
-            Animator.SetInteger("State", (int)newState);
-    }
-
-    public void SetLocomotionState()
-    {
-        SetState(Mathf.Abs(Rb.linearVelocity.x) > 0.05f ? PlayerState.Running : PlayerState.Idle);
-    }
-
-    void StabilizeLockedStateVelocity()
-    {
-        if (CanMove || State == PlayerState.Dashing) return;
-        Rb.linearVelocity = new Vector2(0f, Rb.linearVelocity.y);
-    }
-
-    public void SetAnimInteger(string name, int value)
-    {
-        if (Animator == null || Animator.runtimeAnimatorController == null) return;
-
-        foreach (var parameter in Animator.parameters)
-        {
-            if (parameter.type == AnimatorControllerParameterType.Int && parameter.name == name)
-            {
-                Animator.SetInteger(name, value);
-                return;
-            }
-        }
-    }
-
-    public void SetAnimTrigger(string name)
-    {
-        if (Animator == null || Animator.runtimeAnimatorController == null) return;
-
-        foreach (var parameter in Animator.parameters)
-        {
-            if (parameter.type == AnimatorControllerParameterType.Trigger && parameter.name == name)
-            {
-                Animator.SetTrigger(name);
-                return;
-            }
-        }
-    }
-
-    public void SetFacing(float horizontalInput)
-    {
-        if (horizontalInput > 0 && !FacingRight) Flip();
-        else if (horizontalInput < 0 && FacingRight) Flip();
-    }
-
-    void Flip()
-    {
-        FacingRight = !FacingRight;
-        Vector3 scale = transform.localScale;
-        scale.x *= -1;
-        transform.localScale = scale;
-    }
-
-    void OnDrawGizmosSelected()
-    {
-        Gizmos.color = Color.yellow;
-
-        Vector3 origin = transform.position;
-        Vector3 target = groundCheck != null
-            ? groundCheck.position
-            : origin + Vector3.down * groundCheckRadius;
-
-        Gizmos.DrawLine(origin, target);
-        Gizmos.DrawWireSphere(target, groundCheckRadius);
+        base.OnDrawGizmos();
+        float dir = FacingRight ? 1f : -1f;
+        Vector2 origin = (Vector2)transform.position +
+                         new Vector2(hitboxOffset.x * dir, hitboxOffset.y);
+        Gizmos.color = new Color(1f, 0.3f, 0f, 0.5f);
+        Gizmos.DrawCube(origin, hitboxSize);
+        Gizmos.color = new Color(1f, 0.3f, 0f, 1f);
+        Gizmos.DrawWireCube(origin, hitboxSize);
     }
 }

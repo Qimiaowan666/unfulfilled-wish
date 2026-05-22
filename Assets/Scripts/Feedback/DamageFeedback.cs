@@ -28,20 +28,41 @@ public class DamageFeedback : MonoBehaviour
         flashRoutine = StartCoroutine(FlashRoutine());
     }
 
+    public void FlashWarning(float duration = 0.4f)
+    {
+        if (renderers.Length == 0) return;
+        if (flashRoutine != null) StopCoroutine(flashRoutine);
+        flashRoutine = StartCoroutine(FlashRoutine(Color.red, duration));
+    }
+
+    Coroutine knockbackRoutine;
+
     public void ApplyKnockback(Vector3 sourcePosition, float force)
     {
         if (rb == null || force <= 0f) return;
         float direction = Mathf.Sign(transform.position.x - sourcePosition.x);
         if (Mathf.Approximately(direction, 0f)) direction = 1f;
-        rb.AddForce(new Vector2(direction * force, force * 0.25f), ForceMode2D.Impulse);
+        if (knockbackRoutine != null) StopCoroutine(knockbackRoutine);
+        knockbackRoutine = StartCoroutine(KnockbackRoutine(direction * force));
     }
 
-    IEnumerator FlashRoutine()
+    IEnumerator KnockbackRoutine(float horizontalSpeed)
     {
-        for (int i = 0; i < renderers.Length; i++)
-            if (renderers[i] != null) renderers[i].color = flashColor;
+        rb.linearVelocity = new Vector2(horizontalSpeed, rb.linearVelocity.y);
+        yield return new WaitForSeconds(0.12f);
+        rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
+        knockbackRoutine = null;
+    }
 
-        yield return new WaitForSeconds(flashDuration);
+    IEnumerator FlashRoutine(Color? color = null, float duration = -1f)
+    {
+        Color c = color ?? flashColor;
+        float d = duration > 0f ? duration : flashDuration;
+
+        for (int i = 0; i < renderers.Length; i++)
+            if (renderers[i] != null) renderers[i].color = c;
+
+        yield return new WaitForSeconds(d);
 
         for (int i = 0; i < renderers.Length; i++)
             if (renderers[i] != null) renderers[i].color = originalColors[i];

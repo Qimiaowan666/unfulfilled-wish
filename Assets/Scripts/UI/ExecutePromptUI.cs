@@ -3,7 +3,7 @@ using UnityEngine.UI;
 
 public class ExecutePromptUI : MonoBehaviour
 {
-    public PlayerExecute playerExecute;
+    public PlayerController playerController;
     public Text promptText;
     public CanvasGroup canvasGroup;
     public string prompt = "F 处决";
@@ -27,8 +27,8 @@ public class ExecutePromptUI : MonoBehaviour
 
     void LateUpdate()
     {
-        if (playerExecute == null)
-            playerExecute = FindAnyObjectByType<PlayerExecute>();
+        if (playerController == null)
+            playerController = FindAnyObjectByType<PlayerController>();
 
         currentTarget = FindExecutableTarget();
         if (currentTarget == null)
@@ -42,13 +42,13 @@ public class ExecutePromptUI : MonoBehaviour
 
     EnemyBase FindExecutableTarget()
     {
-        if (playerExecute == null) return null;
+        if (playerController == null) return null;
 
-        LayerMask layerMask = playerExecute.enemyLayer;
-        float range = playerExecute.executeRange;
+        LayerMask layerMask = playerController.enemyLayer;
+        float range = playerController.executeRange;
         Collider2D[] nearby = layerMask.value == 0
-            ? Physics2D.OverlapCircleAll(playerExecute.transform.position, range)
-            : Physics2D.OverlapCircleAll(playerExecute.transform.position, range, layerMask);
+            ? Physics2D.OverlapCircleAll(playerController.transform.position, range)
+            : Physics2D.OverlapCircleAll(playerController.transform.position, range, layerMask);
 
         EnemyBase closest = null;
         float closestSqrDistance = float.MaxValue;
@@ -58,7 +58,7 @@ public class ExecutePromptUI : MonoBehaviour
             var enemy = col.GetComponent<EnemyBase>();
             if (enemy == null || !enemy.IsExecutable) continue;
 
-            float sqrDistance = (enemy.transform.position - playerExecute.transform.position).sqrMagnitude;
+            float sqrDistance = (enemy.transform.position - playerController.transform.position).sqrMagnitude;
             if (sqrDistance >= closestSqrDistance) continue;
 
             closest = enemy;

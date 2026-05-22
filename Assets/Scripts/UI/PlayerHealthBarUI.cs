@@ -3,28 +3,48 @@ using UnityEngine.UI;
 
 public class PlayerHealthBarUI : MonoBehaviour
 {
+    [Header("HP")]
     public Image hpFill;
     public Image ghostFill;
     public Text hpText;
 
+    [Header("Poise")]
+    public Image poiseFill;
+    public GameObject poiseBarRoot;
+
     PlayerStats stats;
+    PoiseMeter poise;
 
     void Start()
     {
-        Bind(FindAnyObjectByType<PlayerStats>());
+        var player = FindAnyObjectByType<PlayerStats>();
+        if (player == null) return;
+        Bind(player);
+        poise = player.GetComponent<PoiseMeter>();
+        if (poise != null)
+        {
+            poise.OnPoiseChanged += HandlePoiseChanged;
+            RefreshPoise();
+        }
+        else if (poiseBarRoot != null)
+        {
+            poiseBarRoot.SetActive(false);
+        }
     }
 
     void OnDestroy()
     {
-        if (stats == null) return;
-        stats.OnHPChanged -= HandleHPChanged;
-        stats.OnGhostHPChanged -= HandleGhostHPChanged;
+        if (stats != null)
+        {
+            stats.OnHPChanged -= HandleHPChanged;
+            stats.OnGhostHPChanged -= HandleGhostHPChanged;
+        }
+        if (poise != null)
+            poise.OnPoiseChanged -= HandlePoiseChanged;
     }
 
     void Bind(PlayerStats target)
     {
-        if (target == null) return;
-
         stats = target;
         stats.OnHPChanged += HandleHPChanged;
         stats.OnGhostHPChanged += HandleGhostHPChanged;
@@ -33,17 +53,20 @@ public class PlayerHealthBarUI : MonoBehaviour
 
     void HandleHPChanged(float current, float max) => Refresh();
     void HandleGhostHPChanged(float current, float max) => Refresh();
+    void HandlePoiseChanged(float current, float max) => RefreshPoise();
 
     void Refresh()
     {
         if (stats == null) return;
-
         float maxHP = Mathf.Max(stats.maxHP, 1f);
-        float hpAmount = Mathf.Clamp01(stats.CurrentHP / maxHP);
-        float ghostAmount = Mathf.Clamp01((stats.CurrentHP + stats.CurrentGhostHP) / maxHP);
+        if (ghostFill != null) ghostFill.fillAmount = Mathf.Clamp01((stats.CurrentHP + stats.CurrentGhostHP) / maxHP);
+        if (hpFill != null)    hpFill.fillAmount    = Mathf.Clamp01(stats.CurrentHP / maxHP);
+        if (hpText != null)    hpText.text          = $"HP {stats.CurrentHP:F0}/{stats.maxHP:F0}";
+    }
 
-        if (ghostFill != null) ghostFill.fillAmount = ghostAmount;
-        if (hpFill != null) hpFill.fillAmount = hpAmount;
-        if (hpText != null) hpText.text = $"HP {stats.CurrentHP:F0}/{stats.maxHP:F0}";
+    void RefreshPoise()
+    {
+        if (poise == null || poiseFill == null) return;
+        poiseFill.fillAmount = poise.maxPoise > 0f ? Mathf.Clamp01(poise.CurrentPoise / poise.maxPoise) : 0f;
     }
 }

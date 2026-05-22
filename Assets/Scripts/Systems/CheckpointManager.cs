@@ -37,7 +37,7 @@ public class CheckpointManager : MonoBehaviour
         if (player != null)
         {
             player.Rb.linearVelocity = Vector2.zero;
-            player.SetLocomotionState();
+            player.stateMachine.ChangeState(player.idleState);
         }
 
         PlayerInputBuffer.ClearAll();
