@@ -53,7 +53,7 @@ public class EnemyBase : Entity
     public Vector2   PatrolOrigin         { get; private set; }
 
     public bool IsDefeated          => CurrentHP <= 0f;
-    public bool SavesPermanentDeath => permanentDeath || GetComponent<BossAI>() != null;
+    public bool SavesPermanentDeath => permanentDeath || GetComponent<MinotaurBoss>() != null;
     public bool RespawnsAtCheckpoint => !SavesPermanentDeath;
     public bool IsExecutable        => GetComponent<PoiseMeter>().IsBroken && CurrentHP > 0f;
     public string SaveID            => SaveIdUtility.GetSceneObjectID(this, saveID);
@@ -110,13 +110,14 @@ public class EnemyBase : Entity
         ApplyHitToCollider(player.GetComponent<Collider2D>() ?? player.GetComponentInChildren<Collider2D>(), damage, isSpecialAttack);
     }
 
-    public void PerformAttack(float damage, bool isSpecialAttack = false)
+    public bool PerformAttack(float damage, bool isSpecialAttack = false)
     {
         Vector2 origin = (Vector2)transform.position +
                          new Vector2(attackCheckOffset.x * FacingDir, attackCheckOffset.y);
         var hits = Physics2D.OverlapBoxAll(origin, attackHitboxSize, 0f, playerLayer);
         foreach (var hit in hits)
             ApplyHitToCollider(hit, damage, isSpecialAttack);
+        return hits.Length > 0;
     }
 
     void ApplyHitToCollider(Collider2D hit, float damage, bool isSpecialAttack = false)
@@ -259,18 +260,18 @@ public class EnemyBase : Entity
         player               = null;
 
         OnHPChanged?.Invoke(CurrentHP, maxHP);
-        GetComponent<BossAI>()?.ResetAIState();
         OnRespawn();
     }
 
     // ── Animation Bool Helper (used by BossAI) ───────────────────────
-    static readonly string[] animBoolNames = { "isIdle", "isMoving", "isAttacking", "isStunned", "isDead" };
-
     public virtual void SetAnimBool(string boolName)
     {
         if (Anim == null || Anim.runtimeAnimatorController == null) return;
-        foreach (var name in animBoolNames)
-            Anim.SetBool(name, name == boolName);
+        foreach (var param in Anim.parameters)
+        {
+            if (param.type == AnimatorControllerParameterType.Bool)
+                Anim.SetBool(param.name, param.name == boolName);
+        }
     }
 
     protected override void OnDrawGizmos()

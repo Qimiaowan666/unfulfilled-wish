@@ -14,10 +14,7 @@ public class BossHealthBarUI : MonoBehaviour
     {
         if (root == null) root = gameObject;
         if (boss == null)
-        {
-            var bossAI = FindAnyObjectByType<BossAI>();
-            if (bossAI != null) boss = bossAI.GetComponent<EnemyBase>();
-        }
+            boss = FindAnyObjectByType<MinotaurBoss>();
 
         if (boss == null)
         {

@@ -1,9 +1,12 @@
+using System.Collections;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(PlayerStats))]
 public class PlayerController : Entity
 {
+    Coroutine queuedAttackCo;
+
     // ── State Machine ────────────────────────────────────────────────
     public PlayerStateMachine  stateMachine  { get; private set; }
     public Player_IdleState    idleState     { get; private set; }
@@ -108,6 +111,19 @@ public class PlayerController : Entity
     // ── Called by State Classes ──────────────────────────────────────
     public void StartDashCooldown()    => dashCooldownTimer    = dashCooldown;
     public void StartCounterCooldown() => counterCooldownTimer = counterCooldown;
+
+    public void EnterAttackStateWithDelay()
+    {
+        if (queuedAttackCo != null) StopCoroutine(queuedAttackCo);
+        queuedAttackCo = StartCoroutine(EnterAttackStateWithDelayCo());
+    }
+
+    IEnumerator EnterAttackStateWithDelayCo()
+    {
+        yield return new WaitForEndOfFrame();
+        stateMachine.ChangeState(attackState);
+        queuedAttackCo = null;
+    }
 
     public void Stun(float duration)
     {

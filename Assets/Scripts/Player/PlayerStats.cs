@@ -99,14 +99,15 @@ public class PlayerStats : MonoBehaviour
         else
             AudioManager.Instance?.PlayHitLight();
 
-        float penalty = CurrentGhostHP;
-        CurrentGhostHP = 0f;
-        NotifyGhostHPChanged();
+        if (CurrentGhostHP > 0f)
+        {
+            CurrentGhostHP = 0f;
+            NotifyGhostHPChanged();
+        }
 
-        float total = damage + penalty;
-        CurrentHP = Mathf.Max(CurrentHP - total, 0f);
+        CurrentHP = Mathf.Max(CurrentHP - damage, 0f);
         OnHPChanged?.Invoke(CurrentHP, maxHP);
-        OnDamaged?.Invoke(total);
+        OnDamaged?.Invoke(damage);
 
         var feedback = GetComponent<DamageFeedback>();
         if (feedback != null) feedback.Flash();

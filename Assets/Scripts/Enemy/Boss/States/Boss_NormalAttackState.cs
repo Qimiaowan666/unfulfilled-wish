@@ -1,0 +1,69 @@
+using UnityEngine;
+
+public class Boss_NormalAttackState : BossBaseState
+{
+    bool useAtk2;
+    bool inHitWindow;       // 当前窗口是否开放
+    bool hitInThisWindow;   // 本窗口内是否已命中
+    bool animFinished;
+    int  windowCount;       // 已完成窗口数
+
+    public Boss_NormalAttackState(MinotaurBoss b, BossStateMachine sm) : base(b, sm, "isAttacking") {}
+
+    public override void Enter()
+    {
+        useAtk2 = (Random.value > 0.5f && boss.IsPhase2);
+        animBoolName = useAtk2 ? "isAttacking2" : "isAttacking";
+
+        base.Enter();
+        boss.StartAttackCooldown();
+        rb.linearVelocity = Vector2.zero;
+        AudioManager.Instance?.PlayBossAttack();
+
+        stateTimer      = 5f;
+        inHitWindow     = false;    // 默认关闭，等 AnimHitOpen 触发才开
+        hitInThisWindow = false;
+        animFinished    = false;
+        windowCount     = 0;
+    }
+
+    public override void Update()
+    {
+        base.Update();
+        TryHit();
+        if (!animFinished && stateTimer < 0f) OnAnimationFinished();
+    }
+
+    public override void OnHitWindowOpen()
+    {
+        inHitWindow     = true;
+        hitInThisWindow = false;
+        TryHit();              // Open 帧立即检测一次
+    }
+
+    public override void OnHitWindowClose()
+    {
+        TryHit();              // Close 帧关闭前再检测一次
+        if (hitInThisWindow) windowCount++;
+        inHitWindow = false;
+    }
+
+    void TryHit()
+    {
+        if (!inHitWindow || hitInThisWindow) return;
+        float mult   = boss.IsPhase2 ? boss.phase2AttackMultiplier : 1f;
+        float damage = boss.attack * mult;
+        if (boss.PerformAttack(damage))
+        {
+            hitInThisWindow = true;
+            Debug.Log($"[Boss] {(useAtk2 ? "Atk2" : "Atk1")} 命中 → 伤害 {damage}");
+        }
+    }
+
+    public override void OnAnimationFinished()
+    {
+        if (animFinished) return;
+        animFinished = true;
+        stateMachine.ChangeState(boss.battleState);
+    }
+}

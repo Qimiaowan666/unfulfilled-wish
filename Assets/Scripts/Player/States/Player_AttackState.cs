@@ -15,6 +15,8 @@ public class Player_AttackState : PlayerBaseState
     {
         if (Time.time > lastAttackTime + player.comboResetTime)
             comboStep = 0;
+        if (comboStep >= player.maxComboStep)
+            comboStep = 0;
 
         hitApplied   = false;
         animFinished = false;
@@ -30,6 +32,14 @@ public class Player_AttackState : PlayerBaseState
         AudioManager.Instance?.PlayAttackWhoosh(comboStep);
     }
 
+    public override void Exit()
+    {
+        base.Exit();
+        comboStep++;
+        if (comboStep >= player.maxComboStep) comboStep = 0;
+        lastAttackTime = Time.time;
+    }
+
     public override void Update()
     {
         base.Update();
@@ -40,7 +50,7 @@ public class Player_AttackState : PlayerBaseState
 
         // Exit when animation event fires or timer expires
         if (animFinished || stateTimer < 0f)
-            ExitAttack();
+            HandleStateExit();
     }
 
     public override void OnHitFrame()
@@ -55,18 +65,15 @@ public class Player_AttackState : PlayerBaseState
         animFinished = true;
     }
 
-    void ExitAttack()
+    void HandleStateExit()
     {
-        lastAttackTime = Time.time;
-
         if (comboQueued)
         {
-            comboStep = (comboStep + 1) % player.maxComboStep;
-            stateMachine.ChangeState(player.attackState); // re-enter same state
+            anim.SetBool(animBoolName, false);
+            player.EnterAttackStateWithDelay();
         }
         else
         {
-            comboStep = 0;
             stateMachine.ChangeState(player.IsGrounded ? (PlayerBaseState)player.idleState : player.fallState);
         }
     }
