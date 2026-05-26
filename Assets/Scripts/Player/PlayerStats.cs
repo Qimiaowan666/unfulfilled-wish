@@ -17,7 +17,8 @@ public class PlayerStats : MonoBehaviour
     [Header("Ghost HP")]
     public float ghostHPBlockRatio = 0.5f;
     public float perfectBlockHealAmount = 20f;
-    public float attackHealAmount = 5f;
+    public float counterHealAmount      = 40f;
+    public float attackHealAmount       = 5f;
 
     [Header("Economy")]
     public int gold = 0;
@@ -72,22 +73,17 @@ public class PlayerStats : MonoBehaviour
         if (CurrentHP <= 0f) Die();
     }
 
-    public void OnPerfectBlock()
+    // 把虚血赎回为 HP（完美格挡 / 识破成功 / 攻击命中等共用）
+    public void RedeemGhostHP(float amount)
     {
-        float amount = Mathf.Min(perfectBlockHealAmount, CurrentGhostHP);
-        CurrentGhostHP -= amount;
-        Heal(amount);
+        float actual = Mathf.Min(amount, CurrentGhostHP);
+        if (actual <= 0f) return;
+        CurrentGhostHP -= actual;
+        Heal(actual);
         NotifyGhostHPChanged();
     }
 
-    public void OnAttackHit()
-    {
-        if (CurrentGhostHP <= 0f) return;
-        float amount = Mathf.Min(attackHealAmount, CurrentGhostHP);
-        CurrentGhostHP -= amount;
-        Heal(amount);
-        NotifyGhostHPChanged();
-    }
+    public void OnAttackHit() => RedeemGhostHP(attackHealAmount);
 
     public void TakeDamage(float damage)
     {

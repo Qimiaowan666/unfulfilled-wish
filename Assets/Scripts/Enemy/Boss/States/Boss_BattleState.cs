@@ -23,14 +23,8 @@ public class Boss_BattleState : BossBaseState
         if (dist <= boss.attackRange && boss.attackCooldownTimer <= 0f)
         {
             var picked = boss.PickAttack();
-            if (picked == MinotaurBoss.AttackId.Rush)
-                stateMachine.ChangeState(boss.rushAttackState);
-            else if (picked == MinotaurBoss.AttackId.Special)
-                stateMachine.ChangeState(boss.specialAttackState);
-            else if (picked == MinotaurBoss.AttackId.Normal)
-                stateMachine.ChangeState(boss.normalAttackState);
-            else
-                stateMachine.ChangeState(boss.waitState);  // 都没选中也站着等
+            if (picked.HasValue) boss.EnterAttack(picked.Value);
+            else stateMachine.ChangeState(boss.waitState);   // 都没选中也站着等
         }
         else if (dist > boss.attackRange)
         {

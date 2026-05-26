@@ -45,4 +45,5 @@ public class PoiseMeter : MonoBehaviour
         CurrentPoise = maxPoise;
         OnPoiseChanged?.Invoke(CurrentPoise, maxPoise);
     }
+
 }

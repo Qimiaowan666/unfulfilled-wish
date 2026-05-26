@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class MinotaurBoss : EnemyBase
@@ -12,9 +11,9 @@ public class MinotaurBoss : EnemyBase
     public Boss_WaitState          waitState           { get; private set; }
     public Boss_NormalAttackState  normalAttackState   { get; private set; }
     public Boss_SpecialAttackState specialAttackState  { get; private set; }
-    public Boss_RushState          rushAttackState     { get; private set; }
     public Boss_EnragedState       enragedState        { get; private set; }
     public Boss_StunnedState       stunnedState        { get; private set; }
+    public Boss_StaggerState       staggerState        { get; private set; }
     public Boss_DeadState          deadState           { get; private set; }
 
     // ── Inspector Config ─────────────────────────────────────────────
@@ -25,17 +24,20 @@ public class MinotaurBoss : EnemyBase
     [Header("Phase 2")]
     public float phase2HPThreshold      = 0.5f;
     public float phase2AttackMultiplier = 1.5f;
-    public float rushAttackCooldown     = 4f;
-    public float rushSpeed              = 12f;
-    public float rushDuration           = 0.3f;
+
+    [Header("Counter Reaction")]
+    public float staggerDuration        = 0.6f;   // 被识破后的停顿时长
 
     [Header("Attack Weights")]
-    public AttackWeight[] attackPool = new AttackWeight[]
+    public Choice[] attackPool = new Choice[]
     {
-        new AttackWeight { id = AttackId.Normal,  weightPhase1 = 6f, weightPhase2 = 4f },
-        new AttackWeight { id = AttackId.Special, weightPhase1 = 4f, weightPhase2 = 3f },
-        new AttackWeight { id = AttackId.Rush,    weightPhase1 = 0f, weightPhase2 = 3f },
+        new Choice { id = AttackId.Atk1,    weight = 6f, weightPhase2 = 3f },
+        new Choice { id = AttackId.Atk2,    weight = 0f, weightPhase2 = 2f },
+        new Choice { id = AttackId.Special, weight = 4f, weightPhase2 = 3f },
     };
+
+    [Header("Attack Hitboxes")]
+    public Hitbox[] hitboxes;
 
     [Header("Special Attack Indicator")]
     public bool           showAttackIndicator    = true;
@@ -52,21 +54,34 @@ public class MinotaurBoss : EnemyBase
     // ── Runtime ──────────────────────────────────────────────────────
     public bool  IsPhase2     { get; private set; }
     public float specialTimer { get; set; }
-    public float rushTimer    { get; set; }
 
     DamageFeedback damageFeedback;
     Coroutine      indicatorRoutine;
 
     public DamageFeedback DamageFeedback => damageFeedback;
 
-    public enum AttackId { Normal, Special, Rush }
+    public enum AttackId { Atk1, Atk2, Special }
+    public enum HitboxKey { Atk1, Atk2, Special }
 
     [System.Serializable]
-    public class AttackWeight
+    public class Choice : AttackWeight
     {
         public AttackId id;
-        public float    weightPhase1;
-        public float    weightPhase2;
+        public float    weightPhase2 = 1f;
+    }
+
+    [System.Serializable]
+    public class Hitbox : AttackHitbox
+    {
+        public HitboxKey key;
+    }
+
+    public override AttackHitbox GetHitbox(string id)
+    {
+        if (hitboxes == null || !System.Enum.TryParse(id, out HitboxKey key)) return null;
+        foreach (var hb in hitboxes)
+            if (hb != null && hb.key == key) return hb;
+        return null;
     }
 
     // ── SetAnimBool（所有 8 个 bool）──────────────────────────────────
@@ -89,7 +104,6 @@ public class MinotaurBoss : EnemyBase
         base.Awake();
         damageFeedback = GetComponent<DamageFeedback>();
         specialTimer = specialAttackCooldown;
-        rushTimer    = rushAttackCooldown;
 
         stateMachine        = new BossStateMachine();
         idleState           = new Boss_IdleState(this, stateMachine);
@@ -98,9 +112,9 @@ public class MinotaurBoss : EnemyBase
         waitState           = new Boss_WaitState(this, stateMachine);
         normalAttackState   = new Boss_NormalAttackState(this, stateMachine);
         specialAttackState  = new Boss_SpecialAttackState(this, stateMachine);
-        rushAttackState     = new Boss_RushState(this, stateMachine);
         enragedState        = new Boss_EnragedState(this, stateMachine);
         stunnedState        = new Boss_StunnedState(this, stateMachine);
+        staggerState        = new Boss_StaggerState(this, stateMachine);
         deadState           = new Boss_DeadState(this, stateMachine);
 
         stateMachine.Initialize(idleState);
@@ -115,7 +129,6 @@ public class MinotaurBoss : EnemyBase
 
         if (attackCooldownTimer > 0f) attackCooldownTimer -= Time.deltaTime;
         if (specialTimer        > 0f) specialTimer        -= Time.deltaTime;
-        if (rushTimer           > 0f) rushTimer           -= Time.deltaTime;
 
         CheckPhase2();
         stateMachine.Update();
@@ -128,6 +141,7 @@ public class MinotaurBoss : EnemyBase
         if (stateMachine.currentState == deadState || stateMachine.currentState == enragedState) return;
 
         IsPhase2 = true;
+        foreach (var c in attackPool) c.weight = c.weightPhase2;   // 整体替换为二阶段权重
         stateMachine.ChangeState(enragedState);
     }
 
@@ -136,7 +150,6 @@ public class MinotaurBoss : EnemyBase
     {
         IsPhase2     = false;
         specialTimer = specialAttackCooldown;
-        rushTimer    = rushAttackCooldown;
         stateMachine.ChangeState(idleState);
     }
 
@@ -144,6 +157,12 @@ public class MinotaurBoss : EnemyBase
     {
         if (CurrentHP <= 0f) return;
         stateMachine.ChangeState(stunnedState);
+    }
+
+    public override void OnCountered()
+    {
+        if (CurrentHP <= 0f) return;
+        stateMachine.ChangeState(staggerState);
     }
 
     // ── Animation Event Entry Points（动画事件直接调这里）─────────────
@@ -154,38 +173,40 @@ public class MinotaurBoss : EnemyBase
     // ── Attack Selection ─────────────────────────────────────────────
     public AttackId? PickAttack()
     {
-        float total = 0f;
-        var available = new List<(AttackWeight opt, float weight)>();
-        foreach (var opt in attackPool)
-        {
-            if (!IsAttackAvailable(opt.id)) continue;
-            float w = IsPhase2 ? opt.weightPhase2 : opt.weightPhase1;
-            if (w <= 0f) continue;
-            available.Add((opt, w));
-            total += w;
-        }
+        var picked = PickAttack(attackPool, opt =>
+            !IsAttackAvailable(opt.id) ? 0f : opt.weight);
 
-        if (total <= 0f) return null;
-
-        float roll = Random.Range(0f, total);
-        float acc  = 0f;
-        foreach (var (opt, w) in available)
-        {
-            acc += w;
-            if (roll <= acc) return opt.id;
-        }
-        return available[available.Count - 1].opt.id;
+        return picked != null ? picked.id : (AttackId?)null;
     }
 
     bool IsAttackAvailable(AttackId id)
     {
         switch (id)
         {
-            case AttackId.Normal:  return true;
+            case AttackId.Atk1:    return true;
+            case AttackId.Atk2:    return true;   // 阶段差异由 weight 控制（phase1 weight=0 即不出）
             case AttackId.Special: return specialTimer <= 0f;
-            case AttackId.Rush:    return IsPhase2 && rushTimer <= 0f;
         }
         return false;
+    }
+
+    // 路由：根据选中的 AttackId 切到对应 state
+    public void EnterAttack(AttackId id)
+    {
+        switch (id)
+        {
+            case AttackId.Atk1:
+                normalAttackState.Configure(useAtk2: false);
+                stateMachine.ChangeState(normalAttackState);
+                break;
+            case AttackId.Atk2:
+                normalAttackState.Configure(useAtk2: true);
+                stateMachine.ChangeState(normalAttackState);
+                break;
+            case AttackId.Special:
+                stateMachine.ChangeState(specialAttackState);
+                break;
+        }
     }
 
     // ── Attack Indicator ─────────────────────────────────────────────
@@ -225,7 +246,11 @@ public class MinotaurBoss : EnemyBase
     // ── Gizmos ───────────────────────────────────────────────────────
     protected override void OnDrawGizmos()
     {
-        base.OnDrawGizmos();
+        base.OnDrawGizmos();   // 父类画 detection / attack range
+
+        // 每个攻击的 hitbox（按 showGizmo flag）
+        if (hitboxes != null)
+            foreach (var hb in hitboxes) DrawHitboxGizmo(hb);
 
         if (showAttackIndicator)
         {

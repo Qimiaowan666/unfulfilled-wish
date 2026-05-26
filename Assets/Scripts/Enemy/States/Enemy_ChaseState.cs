@@ -35,7 +35,8 @@ public class Enemy_ChaseState : EnemyBaseState
         if (dist <= enemy.attackRange && enemy.attackCooldownTimer <= 0f)
         {
             rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
-            stateMachine.ChangeState(enemy.specialCooldownTimer <= 0f
+            var picked = enemy.PickAttack();
+            stateMachine.ChangeState(picked == AoTenguEnemy.AttackId.DashAttack
                 ? (EnemyBaseState)enemy.dashAttackState
                 : enemy.attackState);
             return;

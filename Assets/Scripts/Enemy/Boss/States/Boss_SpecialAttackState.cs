@@ -51,9 +51,13 @@ public class Boss_SpecialAttackState : BossBaseState
     void TryHit()
     {
         if (!inHitWindow || hitInThisWindow) return;
+
+        var hb = boss.GetHitbox(MinotaurBoss.HitboxKey.Special);
+        if (hb == null) return;
+
         float mult   = boss.IsPhase2 ? boss.phase2AttackMultiplier : 1f;
         float damage = boss.attack * 2.5f * mult;
-        if (boss.PerformAttack(damage, isSpecialAttack: true))
+        if (boss.PerformAttack(damage, hb.offset, hb.size, isSpecialAttack: true))
         {
             hitInThisWindow = true;
             Debug.Log($"[Boss] 特殊攻击命中（可识破，无视格挡） → 伤害 {damage}");

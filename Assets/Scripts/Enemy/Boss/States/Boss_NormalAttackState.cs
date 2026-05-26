@@ -10,9 +10,14 @@ public class Boss_NormalAttackState : BossBaseState
 
     public Boss_NormalAttackState(MinotaurBoss b, BossStateMachine sm) : base(b, sm, "isAttacking") {}
 
+    // 由 MinotaurBoss.EnterAttack 调用，指定本次播 atk1 还是 atk2
+    public void Configure(bool useAtk2)
+    {
+        this.useAtk2 = useAtk2;
+    }
+
     public override void Enter()
     {
-        useAtk2 = (Random.value > 0.5f && boss.IsPhase2);
         animBoolName = useAtk2 ? "isAttacking2" : "isAttacking";
 
         base.Enter();
@@ -51,9 +56,13 @@ public class Boss_NormalAttackState : BossBaseState
     void TryHit()
     {
         if (!inHitWindow || hitInThisWindow) return;
+
+        var hb = boss.GetHitbox(useAtk2 ? MinotaurBoss.HitboxKey.Atk2 : MinotaurBoss.HitboxKey.Atk1);
+        if (hb == null) return;
+
         float mult   = boss.IsPhase2 ? boss.phase2AttackMultiplier : 1f;
         float damage = boss.attack * mult;
-        if (boss.PerformAttack(damage))
+        if (boss.PerformAttack(damage, hb.offset, hb.size))
         {
             hitInThisWindow = true;
             Debug.Log($"[Boss] {(useAtk2 ? "Atk2" : "Atk1")} 命中 → 伤害 {damage}");

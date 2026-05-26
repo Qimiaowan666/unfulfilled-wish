@@ -30,8 +30,37 @@ public class EnemyBase : Entity
     public float   attackCooldown        = 1.5f;
     public float   specialAttackCooldown = 5f;
     public float   poiseDamagePerHit     = 15f;
-    public Vector2 attackCheckOffset     = new Vector2(0.5f, 0f);
-    public Vector2 attackHitboxSize      = new Vector2(0.8f, 0.6f);
+
+    [Header("Special Attack Hit Reaction")]
+    public float   specialHitStunDuration = 0.6f;   // 玩家被特殊攻击命中后的硬直时长
+    public float   specialHitKnockback    = 8f;     // 击退强度（普通攻击是 5f）
+
+    [System.Serializable]
+    public class AttackHitbox
+    {
+        public Vector2 offset     = new Vector2(0.5f, 0f);
+        public Vector2 size       = new Vector2(0.8f, 0.6f);
+        public Color   gizmoColor = new Color(1f, 0.3f, 0f, 0.4f);
+        public bool    showGizmo  = true;
+    }
+
+    public virtual AttackHitbox GetHitbox(string id) => null;
+    public AttackHitbox GetHitbox(System.Enum key) => GetHitbox(key.ToString());
+
+    protected void DrawHitboxGizmo(AttackHitbox hb)
+    {
+        if (hb == null || !hb.showGizmo) return;
+        int dir = FacingDir;
+        Vector3 center   = transform.position + new Vector3(hb.offset.x * dir, hb.offset.y, 0f);
+        Vector3 cubeSize = new Vector3(hb.size.x, hb.size.y, 0.1f);
+
+        Gizmos.color = hb.gizmoColor;
+        Gizmos.DrawCube(center, cubeSize);
+
+        var c = hb.gizmoColor;
+        Gizmos.color = new Color(c.r, c.g, c.b, 1f);
+        Gizmos.DrawWireCube(center, cubeSize);
+    }
 
     [Header("Special Attack")]
     public float specialAttackWarningDuration = 0.5f;
@@ -110,14 +139,34 @@ public class EnemyBase : Entity
         ApplyHitToCollider(player.GetComponent<Collider2D>() ?? player.GetComponentInChildren<Collider2D>(), damage, isSpecialAttack);
     }
 
-    public bool PerformAttack(float damage, bool isSpecialAttack = false)
+    public bool PerformAttack(float damage, Vector2 offset, Vector2 size, bool isSpecialAttack = false)
     {
         Vector2 origin = (Vector2)transform.position +
-                         new Vector2(attackCheckOffset.x * FacingDir, attackCheckOffset.y);
-        var hits = Physics2D.OverlapBoxAll(origin, attackHitboxSize, 0f, playerLayer);
+                         new Vector2(offset.x * FacingDir, offset.y);
+        var hits = Physics2D.OverlapBoxAll(origin, size, 0f, playerLayer);
         foreach (var hit in hits)
             ApplyHitToCollider(hit, damage, isSpecialAttack);
         return hits.Length > 0;
+    }
+
+    // ── 通用按权重选招（所有敌人共用）─────────────────────────────────
+    // 基类只含 weight，各敌人继承加自己的 enum id 和扩展字段
+    [System.Serializable]
+    public class AttackWeight
+    {
+        public float weight = 1f;
+    }
+
+    // options：候选攻击列表；getWeight：每个攻击的权重（不可用返回 0）
+    // 返回中签的 option，全部为 0 时返回 null
+    public T PickAttack<T>(T[] options, System.Func<T, float> getWeight) where T : class
+    {
+        if (options == null || options.Length == 0) return null;
+        float[] weights = new float[options.Length];
+        for (int i = 0; i < options.Length; i++)
+            weights[i] = getWeight(options[i]);
+        int idx = WeightedPicker.Pick(weights);
+        return idx >= 0 ? options[idx] : null;
     }
 
     void ApplyHitToCollider(Collider2D hit, float damage, bool isSpecialAttack = false)
@@ -135,9 +184,10 @@ public class EnemyBase : Entity
         {
             // 特殊攻击：识破成功 → 不受伤，给boss poise伤害
             if (isCountering && ctrl.TryCounter(this)) return;
-            // 特殊攻击无视格挡 → 全伤
+            // 特殊攻击无视格挡 → 全伤 + 击退 + 硬直（阻断后续段识破）
             stats.TakeDamage(damage);
-            feedback?.ApplyKnockback(transform.position, 5f);
+            ctrl?.Stun(specialHitStunDuration);                                   // 先切到 stunnedState（Enter 会归零速度）
+            feedback?.ApplyKnockback(transform.position, specialHitKnockback);    // 再设击退速度（KnockbackRoutine 在 stunnedState 之后接管）
             return;
         }
 
@@ -216,6 +266,9 @@ public class EnemyBase : Entity
 
     protected virtual void OnPoiseBroken() { }
 
+    // 被玩家识破时调用（子类重写来打断当前攻击 / 进入硬直）
+    public virtual void OnCountered() { }
+
     IEnumerator DisableAfterDeath()
     {
         yield return new WaitForSeconds(1f);
@@ -281,11 +334,6 @@ public class EnemyBase : Entity
         Gizmos.DrawWireSphere(transform.position, detectionRange);
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, attackRange);
-        Vector2 atkOrigin = (Vector2)transform.position +
-                            new Vector2(attackCheckOffset.x * FacingDir, attackCheckOffset.y);
-        Gizmos.color = new Color(1f, 0f, 1f, 0.4f);
-        Gizmos.DrawCube(atkOrigin, attackHitboxSize);
-        Gizmos.color = Color.magenta;
-        Gizmos.DrawWireCube(atkOrigin, attackHitboxSize);
+        // hitboxes 由具体子类 OnDrawGizmos 调 DrawHitboxGizmo 绘制
     }
 }

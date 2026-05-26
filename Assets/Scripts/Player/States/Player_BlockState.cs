@@ -20,6 +20,8 @@ public class Player_BlockState : PlayerBaseState
         base.Update();
         if (perfectBlockTimer > 0f) perfectBlockTimer -= Time.deltaTime;
 
+        if (CheckGlobalTransitions()) return;   // 按住右键时再按左键 → 切识破
+
         if (IsInputBlocked) return;
 
         if (!input.BlockHeld)
@@ -30,12 +32,14 @@ public class Player_BlockState : PlayerBaseState
     {
         if (InPerfectWindow)
         {
-            player.Stats.OnPerfectBlock();
+            Debug.Log($"[Player] 完美格挡！来袭伤害 {damage}，剩余完美窗口 {perfectBlockTimer:F2}s");
+            player.Stats.RedeemGhostHP(player.Stats.perfectBlockHealAmount);
             AudioManager.Instance?.PlayPerfectBlock();
             CameraShake.Instance?.Shake(0.08f, 0.03f);
         }
         else
         {
+            Debug.Log($"[Player] 普通格挡。来袭伤害 {damage}，已按住 {(player.perfectBlockWindow - perfectBlockTimer):F2}s");
             player.Stats.OnNormalBlock(damage);
             AudioManager.Instance?.PlayBlock();
             CameraShake.Instance?.Shake(0.06f, 0.025f);

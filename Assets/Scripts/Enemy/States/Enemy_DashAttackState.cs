@@ -49,10 +49,19 @@ public class Enemy_DashAttackState : EnemyBaseState
         dashTimer -= Time.deltaTime;
         rb.linearVelocity = new Vector2(dashDir * enemy.dashAttackSpeed, rb.linearVelocity.y);
 
-        if (!hitDealt && enemy.GetHorizontalDistToPlayer() <= enemy.attackRange)
+        if (!hitDealt)
         {
-            hitDealt = true;
-            enemy.HitPlayer(enemy.attack * 2f, enemy.poiseDamagePerHit * 1.5f);
+            var hb = enemy.GetHitbox(AoTenguEnemy.HitboxKey.DashAttack);
+            if (hb != null)
+            {
+                if (enemy.PerformAttack(enemy.attack * 2f, hb.offset, hb.size))
+                    hitDealt = true;
+            }
+            else if (enemy.GetHorizontalDistToPlayer() <= enemy.attackRange)
+            {
+                enemy.HitPlayer(enemy.attack * 2f, enemy.poiseDamagePerHit * 1.5f);
+                hitDealt = true;
+            }
         }
 
         if (dashTimer <= 0f)

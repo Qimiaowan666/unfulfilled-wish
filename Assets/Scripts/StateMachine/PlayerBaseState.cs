@@ -57,11 +57,18 @@ public abstract class PlayerBaseState
             this == player.stunnedState || this == player.counterState)
             return false;
 
-        if (input.CounterPressed && player.counterCooldownTimer <= 0f)
+        if (input.CounterPressed)
         {
-            player.StartCounterCooldown();
-            stateMachine.ChangeState(player.counterState);
-            return true;
+            if (player.counterCooldownTimer > 0f)
+            {
+                Debug.Log($"[Player] 识破冷却中，剩 {player.counterCooldownTimer:F2}s");
+            }
+            else
+            {
+                player.StartCounterCooldown();
+                stateMachine.ChangeState(player.counterState);
+                return true;
+            }
         }
 
         if (input.DashPressed && player.dashCooldownTimer <= 0f)

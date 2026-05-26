@@ -2,6 +2,31 @@ using UnityEngine;
 
 public class AoTenguEnemy : EnemyBase
 {
+    public enum AttackId { Attack, DashAttack }
+    public enum HitboxKey { Attack, DashAttack }
+
+    [System.Serializable]
+    public class Choice : AttackWeight
+    {
+        public AttackId id;
+    }
+
+    [System.Serializable]
+    public class Hitbox : AttackHitbox
+    {
+        public HitboxKey key;
+    }
+
+    [Header("Attack Weights")]
+    public Choice[] attackPool = new Choice[]
+    {
+        new Choice { id = AttackId.Attack,     weight = 3f },
+        new Choice { id = AttackId.DashAttack, weight = 1f },
+    };
+
+    [Header("Attack Hitboxes")]
+    public Hitbox[] hitboxes;
+
     public EnemyStateMachine     stateMachine    { get; private set; }
     public Enemy_IdleState       idleState       { get; private set; }
     public Enemy_MoveState       moveState       { get; private set; }
@@ -56,5 +81,42 @@ public class AoTenguEnemy : EnemyBase
     public void AnimationTrigger() =>
         (stateMachine.currentState as EnemyBaseState)?.AnimationTrigger();
 
-    public void AttackTrigger() => PerformAttack(attack);
+    public void AttackTrigger()
+    {
+        var hb = GetHitbox(HitboxKey.Attack);
+        if (hb != null) PerformAttack(attack, hb.offset, hb.size);
+    }
+
+    // ── 选招（按权重抽签）────────────────────────────────────────────
+    public AttackId? PickAttack()
+    {
+        var picked = PickAttack(attackPool, opt =>
+            !IsAttackAvailable(opt.id) ? 0f : opt.weight);
+        return picked != null ? picked.id : (AttackId?)null;
+    }
+
+    bool IsAttackAvailable(AttackId id)
+    {
+        switch (id)
+        {
+            case AttackId.Attack:     return true;   // 外层已检查 attackCooldownTimer
+            case AttackId.DashAttack: return specialCooldownTimer <= 0f;
+        }
+        return false;
+    }
+
+    public override AttackHitbox GetHitbox(string id)
+    {
+        if (hitboxes == null || !System.Enum.TryParse(id, out HitboxKey key)) return null;
+        foreach (var hb in hitboxes)
+            if (hb != null && hb.key == key) return hb;
+        return null;
+    }
+
+    protected override void OnDrawGizmos()
+    {
+        base.OnDrawGizmos();
+        if (hitboxes == null) return;
+        foreach (var hb in hitboxes) DrawHitboxGizmo(hb);
+    }
 }
