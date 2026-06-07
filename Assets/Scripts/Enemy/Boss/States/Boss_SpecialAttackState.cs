@@ -12,8 +12,10 @@ public class Boss_SpecialAttackState : BossBaseState
     public override void Enter()
     {
         base.Enter();
+        // 强制从 0 帧重播：避免连段中 spatk 复入时 bool 未变化导致 Animator 不重启
+        boss.Anim?.Play("spatk", 0, 0f);
+
         boss.StartAttackCooldown();
-        boss.specialTimer = boss.specialAttackCooldown;
         rb.linearVelocity = Vector2.zero;
         AudioManager.Instance?.PlayBossAttack();
 
@@ -68,6 +70,15 @@ public class Boss_SpecialAttackState : BossBaseState
     {
         if (animFinished) return;
         animFinished = true;
+
+        // 连段未结束 → 直接接下一段（含位移），绕过 BattleState 的距离/冷却检查
+        var next = boss.AdvanceCombo();
+        if (next != null)
+        {
+            boss.ExecuteStep(next);
+            return;
+        }
+
         stateMachine.ChangeState(boss.battleState);
     }
 }

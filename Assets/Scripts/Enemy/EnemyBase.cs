@@ -76,6 +76,7 @@ public class EnemyBase : Entity
 
     // ── Runtime State ────────────────────────────────────────────────
     public float     CurrentHP            { get; protected set; }
+    public bool      Invincible           { get; set; }   // 位移帧（瞬移/跳跃）期间不可被伤
     public Transform player               { get; protected set; }
     public float     attackCooldownTimer  { get; protected set; }
     public float     specialCooldownTimer { get; protected set; }
@@ -176,6 +177,10 @@ public class EnemyBase : Entity
         var stats = hit.GetComponent<PlayerStats>()       ?? hit.GetComponentInParent<PlayerStats>();
         if (stats == null || stats.IsInvulnerable) return;
 
+        // 被命中（无论格挡与否）→ 转身面向攻击来源
+        if (ctrl != null)
+            ctrl.SetFacing(Mathf.Sign(transform.position.x - ctrl.transform.position.x));
+
         bool isBlocking   = ctrl != null && ctrl.IsBlocking;
         bool isCountering = ctrl != null && ctrl.IsCountering;
         var  feedback     = hit.GetComponent<DamageFeedback>() ?? hit.GetComponentInParent<DamageFeedback>();
@@ -221,6 +226,7 @@ public class EnemyBase : Entity
     public virtual void TakeDamage(float damage, float poiseDamage)
     {
         if (CurrentHP <= 0f) return;
+        if (Invincible) return;   // 瞬移/跳劈飞行中免伤
         CurrentHP = Mathf.Max(CurrentHP - damage, 0f);
         Debug.Log($"{gameObject.name} 受到 {damage} 伤害，剩余 HP：{CurrentHP}/{maxHP}");
         OnHPChanged?.Invoke(CurrentHP, maxHP);

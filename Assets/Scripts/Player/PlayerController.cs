@@ -19,12 +19,15 @@ public class PlayerController : Entity
     public Player_CounterState counterState  { get; private set; }
     public Player_ExecuteState executeState  { get; private set; }
     public Player_StunnedState stunnedState  { get; private set; }
+    public Player_DashStrikeState dashStrikeState { get; private set; }
+    public Player_HealState    healState     { get; private set; }
     public Player_DeadState    deadState     { get; private set; }
 
     // ── Player-specific Components ───────────────────────────────────
-    public PlayerStats       Stats       { get; private set; }
-    public PlayerInputBuffer InputBuffer { get; private set; }
-    public PlayerInput       Input       { get; private set; }
+    public PlayerStats         Stats        { get; private set; }
+    public PlayerInputBuffer   InputBuffer  { get; private set; }
+    public PlayerInput         Input        { get; private set; }
+    public Player_SkillManager SkillManager { get; private set; }   // 子节点 "Skills" 上挂
 
     // ── Cooldown Timers ──────────────────────────────────────────────
     public float dashCooldownTimer    { get; private set; }
@@ -50,6 +53,7 @@ public class PlayerController : Entity
     public float[] attackPoiseDamage       = { 8f,   10f,  14f  };
     public Vector2  hitboxOffset = new Vector2(0.6f, 0f);
     public Vector2  hitboxSize   = new Vector2(0.8f, 0.6f);
+    public bool     showAttackHitbox = true;   // ⬛ 显示/隐藏 本体普攻 hitbox Gizmo
     public LayerMask enemyLayer;
 
     [Header("Block")]
@@ -94,7 +98,11 @@ public class PlayerController : Entity
         counterState  = new Player_CounterState(this, stateMachine);
         executeState  = new Player_ExecuteState(this, stateMachine);
         stunnedState  = new Player_StunnedState(this, stateMachine);
+        dashStrikeState = new Player_DashStrikeState(this, stateMachine);
+        healState     = new Player_HealState(this, stateMachine);
         deadState     = new Player_DeadState(this, stateMachine);
+
+        SkillManager = GetComponentInChildren<Player_SkillManager>();   // 可空（还没建 Skills 子节点时）
 
         stateMachine.Initialize(idleState);
         Stats.OnDeath += () => stateMachine.ChangeState(deadState);
@@ -131,6 +139,29 @@ public class PlayerController : Entity
         stateMachine.ChangeState(stunnedState);
     }
 
+    // ── 被挑起：跟随 boss 升空/下落，但不锁状态机 → 空中仍可格挡/识破/翻滚挣脱 ──
+    public bool IsLifted { get; private set; }
+
+    public void BeginLift()
+    {
+        if (IsLifted) return;
+        IsLifted = true;
+        Rb.bodyType       = RigidbodyType2D.Kinematic;   // 关重力，由 boss 控位移
+        Rb.linearVelocity = Vector2.zero;
+    }
+
+    public void SetLiftPosition(Vector2 pos)
+    {
+        if (IsLifted) transform.position = pos;
+    }
+
+    public void EndLift()
+    {
+        if (!IsLifted) return;
+        IsLifted = false;
+        Rb.bodyType = RigidbodyType2D.Dynamic;           // 恢复重力，自然落地
+    }
+
     // ── Called by PlayerAnimationEvents ─────────────────────────────
     public void AnimFinished()      => stateMachine.currentState?.OnAnimationFinished();
     public void AnimHitFrame()      => stateMachine.currentState?.OnHitFrame();
@@ -139,6 +170,7 @@ public class PlayerController : Entity
     protected override void OnDrawGizmos()
     {
         base.OnDrawGizmos();
+        if (!showAttackHitbox) return;
         float dir = FacingRight ? 1f : -1f;
         Vector2 origin = (Vector2)transform.position +
                          new Vector2(hitboxOffset.x * dir, hitboxOffset.y);

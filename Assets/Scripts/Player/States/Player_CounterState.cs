@@ -56,6 +56,7 @@ public class Player_CounterState : PlayerBaseState
 
         Debug.Log("[Player] 识破成功！boss 当前攻击被打断（进入短暂停顿）");
         player.Stats.RedeemGhostHP(player.Stats.counterHealAmount);
+        player.Stats.GainStamina(player.Stats.counterStaminaGain);
         AudioManager.Instance?.PlayCounter();
         enemy.OnCountered();   // 切到 boss 的 staggerState，结束当前攻击 + 短暂停顿
         return true;

@@ -34,6 +34,7 @@ public class Player_BlockState : PlayerBaseState
         {
             Debug.Log($"[Player] 完美格挡！来袭伤害 {damage}，剩余完美窗口 {perfectBlockTimer:F2}s");
             player.Stats.RedeemGhostHP(player.Stats.perfectBlockHealAmount);
+            player.Stats.GainStamina(player.Stats.perfectBlockStaminaGain);
             AudioManager.Instance?.PlayPerfectBlock();
             CameraShake.Instance?.Shake(0.08f, 0.03f);
         }

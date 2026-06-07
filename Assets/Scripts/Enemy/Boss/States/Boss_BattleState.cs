@@ -22,8 +22,8 @@ public class Boss_BattleState : BossBaseState
 
         if (dist <= boss.attackRange && boss.attackCooldownTimer <= 0f)
         {
-            var picked = boss.PickAttack();
-            if (picked.HasValue) boss.EnterAttack(picked.Value);
+            var step = boss.StartNewCombo();
+            if (step != null) boss.ExecuteStep(step);
             else stateMachine.ChangeState(boss.waitState);   // 都没选中也站着等
         }
         else if (dist > boss.attackRange)

@@ -20,11 +20,17 @@ public class PlayerStats : MonoBehaviour
     public float counterHealAmount      = 40f;
     public float attackHealAmount       = 5f;
 
+    [Header("Stamina (技能资源)")]
+    public float maxStamina              = 100f;
+    public float perfectBlockStaminaGain = 20f;
+    public float counterStaminaGain      = 40f;
+
     [Header("Economy")]
     public int gold = 0;
 
     public float CurrentHP { get; private set; }
     public float CurrentGhostHP { get; private set; }
+    public float CurrentStamina { get; private set; }
     public bool IsInvulnerable { get; private set; }
     public bool IsDead => deathTriggered;
     public float EquipmentAttackBonus => equipmentAttackBonus;
@@ -36,6 +42,7 @@ public class PlayerStats : MonoBehaviour
 
     public event Action<float, float> OnHPChanged;
     public event Action<float, float> OnGhostHPChanged;
+    public event Action<float, float> OnStaminaChanged;
     public event Action OnStatsChanged;
     public event Action<float> OnDamaged;
     public event Action OnDeath;
@@ -51,8 +58,34 @@ public class PlayerStats : MonoBehaviour
         RecalculateCombatStats(false);
         CurrentHP = maxHP;
         CurrentGhostHP = 0f;
+        CurrentStamina = 0f;       // 起始 0：必须靠完美格挡 / 识破攒
         deathTriggered = false;
     }
+
+    void Start()
+    {
+        OnStaminaChanged?.Invoke(CurrentStamina, maxStamina);   // 让 UI 同步初始 0%
+    }
+
+    public void GainStamina(float amount)
+    {
+        if (amount <= 0f || deathTriggered) return;
+        float prev = CurrentStamina;
+        CurrentStamina = Mathf.Min(CurrentStamina + amount, maxStamina);
+        if (!Mathf.Approximately(prev, CurrentStamina))
+            OnStaminaChanged?.Invoke(CurrentStamina, maxStamina);
+    }
+
+    public bool SpendStamina(float amount)
+    {
+        if (amount <= 0f) return true;
+        if (CurrentStamina < amount) return false;
+        CurrentStamina -= amount;
+        OnStaminaChanged?.Invoke(CurrentStamina, maxStamina);
+        return true;
+    }
+
+    public bool HasStamina(float amount) => CurrentStamina >= amount;
 
     public void OnNormalBlock(float incomingDamage)
     {

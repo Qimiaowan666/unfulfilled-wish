@@ -10,6 +10,8 @@ public class PlayerInput : MonoBehaviour
     public bool    DashPressed   { get; private set; }
     public bool    CounterPressed { get; private set; }
     public bool    ExecutePressed { get; private set; }
+    public bool    Skill1Pressed  { get; private set; }   // Q：技能槽 1
+    public bool    Skill2Pressed  { get; private set; }   // E：技能槽 2
 
     void Update()
     {
@@ -30,6 +32,8 @@ public class PlayerInput : MonoBehaviour
         DashPressed    = kb != null && (kb.leftShiftKey.wasPressedThisFrame ||
                                         kb.rightShiftKey.wasPressedThisFrame);
         ExecutePressed = kb != null && kb.fKey.wasPressedThisFrame;
+        Skill1Pressed  = kb != null && kb.qKey.wasPressedThisFrame;
+        Skill2Pressed  = kb != null && kb.eKey.wasPressedThisFrame;
 
         bool leftDown  = mouse != null && mouse.leftButton.wasPressedThisFrame;
         bool rightDown = mouse != null && mouse.rightButton.wasPressedThisFrame;

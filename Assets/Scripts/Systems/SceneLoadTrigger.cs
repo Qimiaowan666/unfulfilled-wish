@@ -3,7 +3,7 @@ using UnityEngine.SceneManagement;
 
 public class SceneLoadTrigger : MonoBehaviour
 {
-    public string sceneName = "BossScene";
+    public string sceneName = "ForsakenShrine";
 
     void OnTriggerEnter2D(Collider2D other)
     {

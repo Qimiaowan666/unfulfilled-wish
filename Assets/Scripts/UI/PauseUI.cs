@@ -44,6 +44,17 @@ public class PauseUI : MonoBehaviour
     readonly List<Button> selectableButtons = new List<Button>();
     readonly List<Image> selectionMarks = new List<Image>();
 
+    public static PauseUI Instance { get; private set; }
+
+    void Awake()
+    {
+        // 常驻单例：全局唯一，跨场景不销毁（业界标准的全局 UI 处理）
+        if (Instance != null && Instance != this) { Destroy(gameObject); return; }
+        Instance = this;
+        transform.SetParent(null);
+        DontDestroyOnLoad(gameObject);
+    }
+
     void Start()
     {
         SubscribeGameManager();
@@ -128,6 +139,9 @@ public class PauseUI : MonoBehaviour
             });
     }
 
+    // 这些场景不是 gameplay，禁止暂停（PauseUI 常驻，会跟到这些场景）
+    static readonly string[] NonPausableScenes = { "MainMenu", "Bootstrap" };
+
     bool CanOpenPause()
     {
         if (GameManager.Instance == null) return false;
@@ -136,6 +150,11 @@ public class PauseUI : MonoBehaviour
         if (ShopUI.IsOpen) return false;
         if (CharacterPanelUI.IsOpen) return false;
         if (Time.timeScale <= 0f) return false;
+
+        string active = SceneManager.GetActiveScene().name;
+        foreach (var s in NonPausableScenes)
+            if (active == s) return false;
+
         return true;
     }
 

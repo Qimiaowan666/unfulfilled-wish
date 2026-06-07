@@ -10,6 +10,7 @@ public class Boss_StaggerState : BossBaseState
         base.Enter();
         rb.linearVelocity = Vector2.zero;
         stateTimer = boss.staggerDuration;
+        boss.ResetCombo();    // 识破打断 → 当前连段清零，下次重新挑 pattern
         Debug.Log($"[Boss] 被识破打断，停顿 {boss.staggerDuration}s");
     }
 

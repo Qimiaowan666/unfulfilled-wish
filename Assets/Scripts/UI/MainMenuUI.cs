@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 public class MainMenuUI : MonoBehaviour
 {
-    public string firstGameplayScene = "SampleScene";
+    public string firstGameplayScene = "ForsakenShrine";
     public Button startButton;
     public Button quitButton;
 

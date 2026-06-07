@@ -49,10 +49,10 @@ MonoBehaviour:
   attack3WhooshClip: {fileID: 8300000, guid: 2c3a3e5675d4eb24f98d7b9844ca78e5, type: 3}
   attack3ImpactClip: {fileID: 8300000, guid: 672ccc38cb76ba74da6ece3e2b8bb064, type: 3}
   blockClip: {fileID: 8300000, guid: 508d493044909b64082e397203c0c334, type: 3}
-  perfectBlockClip: {fileID: 8300000, guid: 09f0e9b9bce57ca4c88dd3e57f2e82c9, type: 3}
+  perfectBlockClip: {fileID: 8300000, guid: 9cee7700b2cecce4ab27f72a5fb91425, type: 3}
   perfectBlockTailClip: {fileID: 8300000, guid: 3bd60d1dbd0cd564db0a897be6415608, type: 3}
   counterClip: {fileID: 8300000, guid: 61e6affa280d802408544f8f4e406fe7, type: 3}
-  hitLightClip: {fileID: 8300000, guid: 2f650f5b33f5f6c4f9e1c8ab2866ee40, type: 3}
+  hitLightClip: {fileID: 8300000, guid: 5b4cd0cd6950f5c458d5bb0b2862a614, type: 3}
   hitHeavyClip: {fileID: 8300000, guid: 1689bf1abced31d43990660ca84bf671, type: 3}
   executeDrawClip: {fileID: 8300000, guid: bf7048c604729e64ebf148c465bd8ca9, type: 3}
   executeStrikeClip: {fileID: 8300000, guid: 67a38ba581d671f4aa6777bc5005227c, type: 3}

@@ -108,7 +108,7 @@ public class AudioManager : MonoBehaviour
             return;
         }
 
-        if (sceneName == "BossScene")
+        if (sceneName == "ForsakenShrine")
         {
             PlayBossBGM();
             return;

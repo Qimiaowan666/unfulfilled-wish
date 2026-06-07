@@ -14,6 +14,10 @@ public class PlayerHealthBarUI : MonoBehaviour
     public Image poiseFill;
     public GameObject poiseBarRoot;
 
+    [Header("Stamina")]
+    public Image staminaFill;
+    public TMP_Text staminaText;
+
     [Header("Damage Feedback")]
     public RectTransform shakeTarget;
     public float shakeDuration = 0.2f;
@@ -55,6 +59,7 @@ public class PlayerHealthBarUI : MonoBehaviour
         {
             stats.OnHPChanged -= HandleHPChanged;
             stats.OnGhostHPChanged -= HandleGhostHPChanged;
+            stats.OnStaminaChanged -= HandleStaminaChanged;
             stats.OnDamaged -= HandleDamaged;
         }
         if (poise != null)
@@ -66,12 +71,15 @@ public class PlayerHealthBarUI : MonoBehaviour
         stats = target;
         stats.OnHPChanged += HandleHPChanged;
         stats.OnGhostHPChanged += HandleGhostHPChanged;
+        stats.OnStaminaChanged += HandleStaminaChanged;
         stats.OnDamaged += HandleDamaged;
         Refresh();
+        RefreshStamina();
     }
 
     void HandleHPChanged(float current, float max) => Refresh();
     void HandleGhostHPChanged(float current, float max) => Refresh();
+    void HandleStaminaChanged(float current, float max) => RefreshStamina();
     void HandlePoiseChanged(float current, float max) => RefreshPoise();
 
     void HandleDamaged(float damage)
@@ -130,5 +138,14 @@ public class PlayerHealthBarUI : MonoBehaviour
     {
         if (poise == null || poiseFill == null) return;
         poiseFill.fillAmount = poise.maxPoise > 0f ? Mathf.Clamp01(poise.CurrentPoise / poise.maxPoise) : 0f;
+    }
+
+    void RefreshStamina()
+    {
+        if (stats == null) return;
+        if (staminaFill != null)
+            staminaFill.fillAmount = stats.maxStamina > 0f ? Mathf.Clamp01(stats.CurrentStamina / stats.maxStamina) : 0f;
+        if (staminaText != null)
+            staminaText.text = $"体力 {stats.CurrentStamina:F0}/{stats.maxStamina:F0}";
     }
 }

@@ -53,8 +53,9 @@ public abstract class PlayerBaseState
     protected bool CheckGlobalTransitions()
     {
         if (IsInputBlocked) return false;
-        if (this == player.dashState    || this == player.deadState ||
-            this == player.stunnedState || this == player.counterState)
+        if (this == player.dashState    || this == player.deadState    ||
+            this == player.stunnedState || this == player.counterState ||
+            this == player.healState)   // 治疗施法期间不接收任何全局过渡
             return false;
 
         if (input.CounterPressed)
@@ -76,6 +77,19 @@ public abstract class PlayerBaseState
             player.StartDashCooldown();
             stateMachine.ChangeState(player.dashState);
             return true;
+        }
+
+        // 技能槽 1（Q 键）→ 默认绑突刺斩
+        if (input.Skill1Pressed && player.SkillManager != null)
+        {
+            if (player.SkillManager.TryUseSkill(PlayerSkillType.DashStrike))
+                return true;
+        }
+        // 技能槽 2（E 键）→ 默认绑治疗
+        if (input.Skill2Pressed && player.SkillManager != null)
+        {
+            if (player.SkillManager.TryUseSkill(PlayerSkillType.Heal))
+                return true;
         }
         return false;
     }

@@ -44,6 +44,9 @@ public class Player_AttackState : PlayerBaseState
     {
         base.Update();
 
+        // 识破/冲刺可打断攻击（否则识破的"左+右"会被当成左键排队下一段连招）
+        if (CheckGlobalTransitions()) return;
+
         // Queue next combo on attack press
         if (!IsInputBlocked && input.AttackPressed && comboStep < player.maxComboStep - 1)
             comboQueued = true;
