@@ -5,7 +5,10 @@ public class CheckpointTrigger : MonoBehaviour
 {
     public string checkpointID;
     public string displayName;
-    public string prompt = "F 存档并恢复";
+    public string prompt = "按 F 存档并恢复";
+
+    [Tooltip("复活落点（空子物体，摆在地面安全位置）。留空则用玩家站立位置 + 偏移")]
+    public Transform respawnAnchor;
 
     bool playerInRange;
 
@@ -21,9 +24,10 @@ public class CheckpointTrigger : MonoBehaviour
         if (ShopUI.IsOpen || Time.timeScale <= 0f) return;
 
         var keyboard = Keyboard.current;
-        if (keyboard == null || !keyboard.fKey.wasPressedThisFrame) return;
+        if (keyboard == null || !keyboard.fKey.wasPressedThisFrame) return;   // F 存档（处决已改 R，不再冲突）
 
-        CheckpointManager.Instance?.ActivateCheckpoint(checkpointID, transform.position);
+        Vector3? anchor = respawnAnchor != null ? respawnAnchor.position : (Vector3?)null;
+        CheckpointManager.Instance?.ActivateCheckpoint(checkpointID, anchor);
     }
 
     void OnTriggerEnter2D(Collider2D other)

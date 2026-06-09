@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.SceneManagement;
 using System.Collections.Generic;
 using System;
 
@@ -11,19 +12,11 @@ public class SkillSystem : MonoBehaviour
 
     void Awake()
     {
-        if (Instance != null)
-        {
-            foreach (var skill in learnedSkills)
-            {
-                if (skill != null && !Instance.learnedSkills.Contains(skill))
-                    Instance.learnedSkills.Add(skill);
-            }
-
-            Destroy(gameObject);
-            return;
-        }
-
+        if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
+        transform.SetParent(null);
+        DontDestroyOnLoad(gameObject);
+        SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
     void Start()
@@ -35,6 +28,13 @@ public class SkillSystem : MonoBehaviour
     {
         if (Instance == this)
             Instance = null;
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    // 常驻系统：切场景后玩家重建，重新把被动加成应用到新玩家
+    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        ReapplyPassives();
     }
 
     public static SkillSystem GetOrCreate()

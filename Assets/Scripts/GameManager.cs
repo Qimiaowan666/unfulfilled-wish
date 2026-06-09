@@ -43,6 +43,7 @@ public class GameManager : MonoBehaviour
         IsGameOver = false;
         IsPaused = false;
         Time.timeScale = 1f;
+        SaveSystem.Instance?.RequestFullReload();   // 重生：常驻系统的全局态回到存档状态
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 

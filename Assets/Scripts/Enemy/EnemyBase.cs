@@ -9,6 +9,10 @@ public class EnemyBase : Entity
     public string saveID;
     public bool permanentDeath;
 
+    [Header("Boss")]
+    public bool   isBoss;                // 标记为关卡 boss → 常驻 LevelManager 自动接管 BGM / 胜利检测
+    public string nextSceneOnDefeat;     // 击败后切到的场景（留空 = 不切场景）
+
     [Header("Stats")]
     public float maxHP    = 50f;
     public float attack   = 8f;
@@ -93,6 +97,10 @@ public class EnemyBase : Entity
     public event Action OnDied;
     public event Action OnHit;
 
+    // 是否已经初始化过（Awake 跑过）。预留的 inactive 敌人从未 Awake → false，
+    // 存档刷新时跳过它们，避免被 Respawn 到未记录的 initialPosition(0,0,0) 飞出去。
+    public bool Initialized { get; private set; }
+
     protected PoiseMeter poiseMeter;
     Vector3    initialPosition;
     Quaternion initialRotation;
@@ -107,6 +115,7 @@ public class EnemyBase : Entity
         initialRotation = transform.rotation;
         initialScale    = transform.localScale;
         PatrolOrigin    = transform.position;
+        Initialized     = true;
         CurrentHP       = maxHP;
         poiseMeter      = GetComponent<PoiseMeter>();
         poiseMeter.OnPoiseBroken += OnPoiseBroken;

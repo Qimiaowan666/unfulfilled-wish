@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
@@ -83,11 +84,39 @@ public class SaveSystem : MonoBehaviour
 
     void Awake()
     {
-        if (Instance != null) { Destroy(gameObject); return; }
+        if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
+        transform.SetParent(null);
+        DontDestroyOnLoad(gameObject);
+        SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
-    public void Save(PlayerStats stats, Transform playerTransform, CheckpointManager checkpoints)
+    void OnDestroy()
+    {
+        if (Instance == this)
+        {
+            SceneManager.sceneLoaded -= OnSceneLoaded;
+            Instance = null;
+        }
+    }
+
+    // 读档的统一触发点：每个游戏场景加载后等一帧自动 apply（不再依赖场景里是否挂了 LevelManager）
+    static readonly string[] NoAutoLoadScenes = { "MainMenu", "Bootstrap" };
+    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        foreach (var n in NoAutoLoadScenes)
+            if (scene.name == n) return;
+        StartCoroutine(ApplyAfterFrame());
+    }
+
+    IEnumerator ApplyAfterFrame()
+    {
+        yield return null;   // 等玩家/敌人 Awake 完再 apply，确保 FindAnyObjectByType 能拿到玩家
+        if (HasSave())
+            ApplyOnSceneLoaded();
+    }
+
+    public void Save(PlayerStats stats, Vector3 respawnPosition, CheckpointManager checkpoints)
     {
         var inventory = InventorySystem.Instance;
         var equipment = EquipmentSystem.Instance;
@@ -105,8 +134,8 @@ public class SaveSystem : MonoBehaviour
             currentHP = stats.CurrentHP,
             currentGhostHP = stats.CurrentGhostHP,
             gold = stats.gold,
-            playerX = playerTransform.position.x,
-            playerY = playerTransform.position.y,
+            playerX = respawnPosition.x,
+            playerY = respawnPosition.y,
 
             baseAttack = stats.baseAttack,
             baseDefense = stats.baseDefense,
@@ -139,6 +168,11 @@ public class SaveSystem : MonoBehaviour
         return JsonUtility.FromJson<SaveData>(File.ReadAllText(SavePath));
     }
 
+    // 全局持久态（背包/装备/技能/玩家属性）是否已在本会话载入过。
+    // 常驻系统下，全局态只在「首次进入 / 显式读档 / 重生」时 apply，切场景不再 apply（内存连续）。
+    bool globalStateLoaded;
+
+    // 显式读档 / 重生：apply 全套（全局 + 场景），并标记全局已载入
     public bool LoadAndApply()
     {
         return ApplySave(Load());
@@ -147,14 +181,42 @@ public class SaveSystem : MonoBehaviour
     public bool ApplySave(SaveData data)
     {
         if (data == null) return false;
+        ApplyGlobalState(data);
+        ApplySceneState(data);
+        globalStateLoaded = true;
+        Debug.Log($"Loaded save from {SavePath}");
+        return true;
+    }
+
+    // 每个场景加载时由 LevelManager 调：
+    //   全局态只首次 apply（之后内存连续，不被存档覆盖）；场景态每次都 apply（恢复本场景敌人/门/钥匙）
+    public bool ApplyOnSceneLoaded()
+    {
+        var data = Load();
+        if (data == null) return false;
+
+        if (!globalStateLoaded)
+        {
+            ApplyGlobalState(data);
+            globalStateLoaded = true;
+        }
+        ApplySceneState(data);
+        return true;
+    }
+
+    // 重生 / 显式读档前调用，强制下次重新 apply 全局态（让数据回到存档状态）
+    public void RequestFullReload() => globalStateLoaded = false;
+
+    // 全局持久态：玩家属性、背包、装备、技能、玩家位置/血量
+    void ApplyGlobalState(SaveData data)
+    {
+        if (data == null) return;
 
         var player = FindAnyObjectByType<PlayerController>();
         var stats = player != null ? player.Stats : FindAnyObjectByType<PlayerStats>();
         var inventory = InventorySystem.Instance;
         var equipment = EquipmentSystem.Instance;
         var skills = SkillSystem.Instance;
-        var keyManager = LevelKeyManager.Instance;
-        var checkpoints = CheckpointManager.Instance;
 
         if (stats != null)
         {
@@ -180,6 +242,28 @@ public class SaveSystem : MonoBehaviour
         if (skills != null)
             skills.LoadSkills(ResolveSkills(data.learnedSkillIDs));
 
+        if (player != null)
+        {
+            player.transform.position = new Vector3(data.playerX, data.playerY, player.transform.position.z);
+            if (player.Rb != null)
+                player.Rb.linearVelocity = Vector2.zero;
+            player.stateMachine.ChangeState(player.idleState);
+        }
+
+        if (stats != null)
+            stats.LoadSavedVitals(data.currentHP, data.currentGhostHP, data.gold);
+
+        PlayerInputBuffer.ClearAll();
+    }
+
+    // 场景态：钥匙、敌人、门、商店、检查点（每个场景的对象，每次进场景都恢复）
+    void ApplySceneState(SaveData data)
+    {
+        if (data == null) return;
+
+        var keyManager = LevelKeyManager.Instance;
+        var checkpoints = CheckpointManager.Instance;
+
         if (keyManager != null)
             keyManager.LoadCollectedKeys(data.collectedKeys);
 
@@ -193,21 +277,6 @@ public class SaveSystem : MonoBehaviour
 
         if (checkpoints != null)
             checkpoints.LoadState(data.unlockedCheckpoints, data.lastCheckpointID);
-
-        if (player != null)
-        {
-            player.transform.position = new Vector3(data.playerX, data.playerY, player.transform.position.z);
-            if (player.Rb != null)
-                player.Rb.linearVelocity = Vector2.zero;
-            player.stateMachine.ChangeState(player.idleState);
-        }
-
-        if (stats != null)
-            stats.LoadSavedVitals(data.currentHP, data.currentGhostHP, data.gold);
-
-        PlayerInputBuffer.ClearAll();
-        Debug.Log($"Loaded save from {SavePath}");
-        return true;
     }
 
     public void RefreshRespawnableEnemies()
@@ -215,7 +284,8 @@ public class SaveSystem : MonoBehaviour
         var enemies = FindObjectsByType<EnemyBase>(FindObjectsInactive.Include);
         foreach (var enemy in enemies)
         {
-            if (enemy != null && enemy.RespawnsAtCheckpoint)
+            // 跳过从未初始化的预留 inactive 敌人（它们的 initialPosition 还是 0,0,0，Respawn 会把它们扔到原点飞出去）
+            if (enemy != null && enemy.Initialized && enemy.RespawnsAtCheckpoint)
                 enemy.Respawn();
         }
     }

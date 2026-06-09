@@ -50,11 +50,41 @@ public class CharacterPanelUI : MonoBehaviour
     readonly List<GameObject> hiddenHudRoots = new List<GameObject>();
     readonly List<bool> hiddenHudPreviousStates = new List<bool>();
 
+    public static CharacterPanelUI Instance { get; private set; }
+
     void Awake()
     {
+        // 常驻单例：全局唯一，跨场景不销毁
+        if (Instance != null && Instance != this) { Destroy(gameObject); return; }
+        Instance = this;
+        transform.SetParent(null);
+        DontDestroyOnLoad(gameObject);
+
         isOpen = false;
         IsOpen = false;
         pausedByPanel = false;
+    }
+
+    void EnsureHostCanvas()
+    {
+        var canvas = GetComponent<Canvas>();
+        if (canvas == null)
+        {
+            canvas = gameObject.AddComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        }
+        canvas.overrideSorting = true;
+        canvas.sortingOrder = 900;   // 低于暂停菜单(1000)，高于 HUD
+
+        var scaler = GetComponent<CanvasScaler>();
+        if (scaler == null) scaler = gameObject.AddComponent<CanvasScaler>();
+        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        scaler.referenceResolution = new Vector2(1920f, 1080f);
+        scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
+        scaler.matchWidthOrHeight = 0.5f;
+
+        if (GetComponent<GraphicRaycaster>() == null)
+            gameObject.AddComponent<GraphicRaycaster>();
     }
 
     void Start()
@@ -308,6 +338,7 @@ public class CharacterPanelUI : MonoBehaviour
 
     void EnsureUI()
     {
+        EnsureHostCanvas();   // 常驻后自建 Canvas，确保脱离场景 Canvas 也能显示
         ui = new CharacterPanelUIFactory();
 
         if (panel == null)

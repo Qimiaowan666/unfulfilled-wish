@@ -321,5 +321,6 @@ public class PlayerStats : MonoBehaviour
         deathTriggered = true;
         AudioManager.Instance?.PlayDeath();
         OnDeath?.Invoke();
+        GameManager.Instance?.TriggerGameOver();   // 任何场景死亡都触发 GameOver（不依赖关卡级 LevelManager）
     }
 }

@@ -116,6 +116,7 @@ public class CharacterStatusPageUI : CharacterPanelPage
         sb.AppendLine($"攻击  {stats.attack:F0} = 基础 {baseAttack:F0} + 装备 {equipmentAttack:F0} + 技能 {skillAttack:F0}");
         sb.AppendLine($"防御  {stats.defense:F0} = 基础 {baseDefense:F0} + 装备 {equipmentDefense:F0} + 技能 {skillDefense:F0}");
         sb.AppendLine($"技能加成基于基础值计算：攻击 +{stats.SkillAttackPercent:F0}%，防御 +{stats.SkillDefensePercent:F0}%");
+        sb.AppendLine($"体力  {stats.CurrentStamina:F0} / {stats.maxStamina:F0}（完美格挡 / 识破回复，用于释放战技）");
 
         if (stats.CurrentGhostHP > 0f)
             sb.AppendLine($"虚血  {stats.CurrentGhostHP:F0}");

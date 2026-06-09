@@ -42,6 +42,9 @@ public class Skill_Base : MonoBehaviour
     }
 
     public PlayerSkillType GetSkillType() => skillType;
+    public float GetCooldown()         => cooldown;
+    public float GetStaminaCost()      => staminaCost;
+    public float GetDamageMultiplier() => damageMultiplier;
 
     bool OnCooldown() => Time.time < lastTimeUsed + cooldown;
     protected void SetSkillOnCooldown()

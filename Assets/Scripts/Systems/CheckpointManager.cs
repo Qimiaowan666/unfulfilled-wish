@@ -7,6 +7,7 @@ public class CheckpointManager : MonoBehaviour
     public static CheckpointManager Instance { get; private set; }
 
     public bool restorePlayerOnActivate = true;
+    public Vector2 respawnOffset = new Vector2(1f, 0f);   // 复活点相对存档点的偏移（右偏，避免跟火堆重叠）
 
     public string LastCheckpointID { get; private set; }
     public event Action<string> OnCheckpointActivated;
@@ -19,7 +20,7 @@ public class CheckpointManager : MonoBehaviour
         Instance = this;
     }
 
-    public void ActivateCheckpoint(string id, Vector2 position)
+    public void ActivateCheckpoint(string id, Vector3? respawnAnchor = null)
     {
         if (string.IsNullOrWhiteSpace(id))
             id = "Checkpoint";
@@ -44,8 +45,12 @@ public class CheckpointManager : MonoBehaviour
 
         SaveSystem.Instance?.RefreshRespawnableEnemies();
 
+        // 复活点：优先用存档点摆好的锚点（设计师精确摆位，不卡墙）；没有锚点则用玩家站立位置 + 右偏移
         if (stats != null && player != null)
-            SaveSystem.Instance?.Save(stats, player.transform, this);
+        {
+            Vector3 respawnPos = respawnAnchor ?? (player.transform.position + (Vector3)respawnOffset);
+            SaveSystem.Instance?.Save(stats, respawnPos, this);
+        }
 
         OnCheckpointActivated?.Invoke(id);
         AudioManager.Instance?.PlayCheckpoint();

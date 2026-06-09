@@ -38,6 +38,8 @@ public class MinotaurBoss : EnemyBase
     public float teleportDuration  = 0.35f;   // 瞬移总时长（淡出 + 淡入）
     public float teleportOffset    = 0.8f;    // 现身在玩家身后多远
     public float landingRecovery   = 0.12f;   // 闪身现身后到出招的硬直窗口
+    public LayerMask teleportWallLayer;       // 闪身落点墙体检测层（Inspector 设成 Ground；留空则按名字找 "Ground"）
+    public float teleportClearance = 0.6f;    // 落点距墙安全距离（≈ boss 碰撞半宽）
 
     [Header("Jump Slash (二段跳劈)")]
     public float jumpHeight       = 3f;      // 跳跃顶点高度
@@ -299,18 +301,53 @@ public class MinotaurBoss : EnemyBase
                 int playerFacing = 1;
                 var pc = player.GetComponent<PlayerController>();
                 if (pc != null) playerFacing = pc.FacingDir;
-                return new Vector2(player.position.x - playerFacing * teleportOffset, bossY);
+                return ClampTeleportTarget(new Vector2(player.position.x - playerFacing * teleportOffset, bossY));
             }
             case MovementType.TeleportOtherSide:
             {
                 // 翻到玩家的另一侧（相对 boss 当前所在侧）
                 float side = Mathf.Sign(transform.position.x - player.position.x);
                 if (side == 0f) side = 1f;
-                return new Vector2(player.position.x - side * teleportOffset, bossY);
+                return ClampTeleportTarget(new Vector2(player.position.x - side * teleportOffset, bossY));
             }
             default:
                 return transform.position;
         }
+    }
+
+    // 把闪身落点限制在墙内侧：从玩家位置朝落点探墙，挡住就翻另一侧 / 贴墙前，避免 boss 被传送进墙。
+    // 关键：安全距离用 boss 碰撞体的实际半宽（运行时读取），boss 越大留得越远，半身才不会插进墙。
+    Vector2 ClampTeleportTarget(Vector2 desired)
+    {
+        if (player == null) return desired;
+
+        LayerMask mask = teleportWallLayer.value != 0 ? teleportWallLayer : LayerMask.GetMask("Ground");
+        if (mask.value == 0) return desired;   // 没有可用的墙层 → 不 clamp（安全降级）
+
+        var col = GetComponent<Collider2D>();
+        float halfW = (col != null ? col.bounds.extents.x : 0.5f) + teleportClearance;  // boss 半身宽 + 额外余量
+
+        // 射线在 boss 中心高度水平探（避开脚下地面，只探竖直墙面）
+        Vector2 origin = new Vector2(player.position.x, desired.y);
+        float dx = desired.x - origin.x;
+        float dist = Mathf.Abs(dx);
+        if (dist < 0.01f) return desired;
+        float sign = Mathf.Sign(dx);
+
+        // 探测距离 = 位移距离 + 半身宽：覆盖 boss 朝向那一侧的整个身体宽度
+        float probe = dist + halfW;
+
+        // 目标侧（玩家身后）通畅 → 直接用
+        if (!Physics2D.Raycast(origin, new Vector2(sign, 0f), probe, mask))
+            return desired;
+
+        // 目标侧被墙挡 → 翻到玩家另一侧（若那侧通畅）
+        if (!Physics2D.Raycast(origin, new Vector2(-sign, 0f), probe, mask))
+            return new Vector2(origin.x - sign * teleportOffset, desired.y);
+
+        // 两侧都有墙（窄道）→ 落在目标侧墙前，留出整整一个半身宽，确保不插墙
+        var hit = Physics2D.Raycast(origin, new Vector2(sign, 0f), probe, mask);
+        return new Vector2(hit.point.x - sign * halfW, desired.y);
     }
 
     public void SetInvincible(bool on) => Invincible = on;

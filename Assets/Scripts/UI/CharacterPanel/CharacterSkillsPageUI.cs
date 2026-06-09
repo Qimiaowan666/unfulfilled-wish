@@ -23,22 +23,84 @@ public class CharacterSkillsPageUI : CharacterPanelPage
 
     public override void Refresh()
     {
-        var skills = SkillSystem.GetOrCreate();
         ui.ClearChildren(listContent);
+        if (headerText != null) headerText.text = "技能";
+        int total = 0;
 
-        if (skills == null || skills.learnedSkills.Count == 0)
+        // 战技：Q/E 主动技能（新 SkillSystem，从场景里的 Player_SkillManager 读）
+        var skillManager = Object.FindAnyObjectByType<Player_SkillManager>();
+        if (skillManager != null && skillManager.allSkills != null && skillManager.allSkills.Length > 0)
         {
-            if (headerText != null) headerText.text = "已学技能  0";
-            CreateEmptyMessage("尚未学习技能。");
-            return;
+            CreateSectionHeader("战技");
+            foreach (var s in skillManager.allSkills)
+            {
+                if (s == null) continue;
+                BuildCombatArtCard(s);
+                total++;
+            }
         }
 
-        if (headerText != null) headerText.text = $"已学技能  {skills.learnedSkills.Count}";
-
-        foreach (var skill in skills.learnedSkills)
+        // 已学技能：旧商店技能系统（被动 / 主动）
+        var skills = SkillSystem.GetOrCreate();
+        if (skills != null && skills.learnedSkills.Count > 0)
         {
-            if (skill == null) continue;
-            BuildSkillCard(skill);
+            CreateSectionHeader("已学技能");
+            foreach (var skill in skills.learnedSkills)
+            {
+                if (skill == null) continue;
+                BuildSkillCard(skill);
+                total++;
+            }
+        }
+
+        if (total == 0)
+            CreateEmptyMessage("尚未拥有技能。");
+    }
+
+    void CreateSectionHeader(string title)
+    {
+        var text = ui.CreateText(title + "Header", listContent, title, 17, TextAnchor.MiddleLeft);
+        ui.SetFixedHeight(text.rectTransform, 32f);
+        text.color = ui.MutedTextColor;
+        text.fontStyle = FontStyle.Bold;
+    }
+
+    void BuildCombatArtCard(Skill_Base skill)
+    {
+        var type = skill.GetSkillType();
+        var card = ui.CreatePanel(type + "Card", listContent, ui.PanelAltColor);
+        ui.SetFixedHeight(card.rectTransform, 76f);
+
+        var name = ui.CreateText("Name", card.transform, $"[{SkillKey(type)}] {SkillDisplayName(type)}", 19, TextAnchor.UpperLeft);
+        ui.SetRect(name.rectTransform, new Vector2(0f, 0.5f), new Vector2(1f, 1f), new Vector2(16f, -8f), new Vector2(-12f, -4f));
+
+        var tag = ui.CreateText("Tag", card.transform, "战技", 15, TextAnchor.UpperRight);
+        tag.color = ui.MutedTextColor;
+        ui.SetRect(tag.rectTransform, new Vector2(1f, 0.5f), Vector2.one, new Vector2(-72f, -10f), new Vector2(-12f, -4f));
+
+        var stats = ui.CreateText("Stats", card.transform,
+            $"冷却 {skill.GetCooldown():F1}s   体力 {skill.GetStaminaCost():F0}", 15, TextAnchor.LowerLeft);
+        stats.color = ui.MutedTextColor;
+        ui.SetRect(stats.rectTransform, new Vector2(0f, 0f), new Vector2(1f, 0.5f), new Vector2(16f, 8f), new Vector2(-12f, 2f));
+    }
+
+    static string SkillDisplayName(PlayerSkillType t)
+    {
+        switch (t)
+        {
+            case PlayerSkillType.DashStrike: return "突刺斩";
+            case PlayerSkillType.Heal:       return "治疗";
+            default:                         return t.ToString();
+        }
+    }
+
+    static string SkillKey(PlayerSkillType t)
+    {
+        switch (t)
+        {
+            case PlayerSkillType.DashStrike: return "Q";
+            case PlayerSkillType.Heal:       return "E";
+            default:                         return "?";
         }
     }
 
