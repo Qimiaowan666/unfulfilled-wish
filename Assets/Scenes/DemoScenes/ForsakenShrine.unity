@@ -14130,7 +14130,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a4991b5ea1f79174fb884cd5ec81f974, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerStats
-  maxHP: 1
+  maxHP: 20
   baseAttack: 5
   baseDefense: 5
   attack: 10
@@ -14142,7 +14142,7 @@ MonoBehaviour:
   maxStamina: 100
   perfectBlockStaminaGain: 20
   counterStaminaGain: 40
-  gold: 0
+  gold: 20000
 --- !u!70 &558071670
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -16549,7 +16549,7 @@ Transform:
   m_GameObject: {fileID: 1433499835}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.3977783, y: -3.4600005, z: -10}
+  m_LocalPosition: {x: 1.3966637, y: -3.4600005, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -16938,7 +16938,7 @@ Transform:
   m_GameObject: {fileID: 1845337792}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.3977783, y: -3.4600005, z: -10}
+  m_LocalPosition: {x: 1.3966637, y: -3.4600005, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -17053,7 +17053,7 @@ Transform:
   m_GameObject: {fileID: 1896136802}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 32.38, y: -2.21, z: 0}
+  m_LocalPosition: {x: 52, y: -3.02, z: 0}
   m_LocalScale: {x: 5, y: 5, z: 5}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -17769,9 +17769,25 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6559821617140464840, guid: f91dcfbc5878d4b438dad0a7eed4e811, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: -2326761095400532479, guid: 9e796fd7a0d294846a67cc9e7e114d43, type: 3}
+    - target: {fileID: 6559821617140464840, guid: f91dcfbc5878d4b438dad0a7eed4e811, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6559821617140464840, guid: f91dcfbc5878d4b438dad0a7eed4e811, type: 3}
+      propertyPath: m_WasSpriteAssigned
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6559821617140464840, guid: f91dcfbc5878d4b438dad0a7eed4e811, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 1605693005}
+    - target: {fileID: 7086354276796938236, guid: f91dcfbc5878d4b438dad0a7eed4e811, type: 3}
+      propertyPath: showPreview
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

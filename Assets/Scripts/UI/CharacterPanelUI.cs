@@ -1,476 +1,232 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.Serialization;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using System.Collections.Generic;
+using TMPro;
 
+// 角色面板控制器（挂在 CharacterPanel.prefab 根，常驻单例）。
+// UI 布局全部在 prefab 里画好，这里只管：开关(C) / 切页(1-4) / 订阅系统刷新 / 暂停游戏 / 隐藏 HUD。
+// 各页内容由对应的 CharacterPageView 子类填。
 public class CharacterPanelUI : MonoBehaviour
 {
     public static bool IsOpen { get; private set; }
-
-    enum CharacterTab
-    {
-        Status = 0,
-        Equipment = 1,
-        Inventory = 2,
-        Skills = 3
-    }
-
-    public GameObject panel;
-    public Text titleText;
-    public Text contentText;
-    public Transform equipmentActionParent;
-    public Button statusButton;
-    public Button equipmentButton;
-    public Button inventoryButton;
-    public Button skillsButton;
-
-    [Header("Legacy References")]
-    public Text hpText;
-    public Text attackText;
-    public Text defenseText;
-    public Text goldText;
-    public Image weaponIcon;
-    public Image armorIcon;
-    [FormerlySerializedAs("accessoryIcon")]
-    public Image accessory1Icon;
-    public Image accessory2Icon;
-
-    CharacterPanelUIFactory ui;
-    CharacterPanelPage[] pages;
-    PlayerStats subscribedStats;
-    EquipmentSystem subscribedEquipment;
-    InventorySystem subscribedInventory;
-    SkillSystem subscribedSkills;
-    bool isOpen;
-    bool pausedByPanel;
-    bool hasSubscribed;
-    float previousTimeScale = 1f;
-    CharacterTab currentTab = CharacterTab.Status;
-    readonly List<GameObject> hiddenHudRoots = new List<GameObject>();
-    readonly List<bool> hiddenHudPreviousStates = new List<bool>();
-
     public static CharacterPanelUI Instance { get; private set; }
+
+    [Header("开关用的内容根（Header+Content+Footer 的父；留空=自身）")]
+    public GameObject panelRoot;
+
+    [Header("Header")]
+    public TMP_Text titleText;
+    public TMP_Text goldText;
+    [Tooltip("顺序：状态 / 装备 / 背包 / 技能")]
+    public Button[] tabButtons;
+
+    [Header("四页 View（顺序对应 tab）")]
+    public CharacterPageView[] pages;
+
+    // 非游玩场景：主菜单 / Bootstrap 里不允许开角色面板
+    static readonly string[] NonGameplayScenes = { "MainMenu", "Bootstrap" };
+
+    static readonly string[] TabTitles = { "状态", "装备", "背包", "技能" };
+    static readonly Color TabOn      = new Color(1f, 1f, 1f, 1f);          // 选中：木牌原色(最亮)
+    static readonly Color TabOff     = new Color(0.66f, 0.63f, 0.60f, 1f); // 未选中：略压暗
+    static readonly Color TabTextOn  = new Color(0.15f, 0.10f, 0.05f);     // 选中：深棕黑(醒目)
+    static readonly Color TabTextOff = new Color(0.34f, 0.27f, 0.20f);     // 未选中：棕
+
+    int currentTab;
+    bool isOpen, pausedByPanel, hasSubscribed;
+    float previousTimeScale = 1f;
+    PlayerStats subStats; EquipmentSystem subEquip; InventorySystem subInv; SkillSystem subSkills;
+    readonly List<GameObject> hiddenHud = new List<GameObject>();
+    readonly List<bool> hiddenHudPrev = new List<bool>();
 
     void Awake()
     {
-        // 常驻单例：全局唯一，跨场景不销毁
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
         transform.SetParent(null);
         DontDestroyOnLoad(gameObject);
-
-        isOpen = false;
-        IsOpen = false;
-        pausedByPanel = false;
-    }
-
-    void EnsureHostCanvas()
-    {
-        var canvas = GetComponent<Canvas>();
-        if (canvas == null)
-        {
-            canvas = gameObject.AddComponent<Canvas>();
-            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        }
-        canvas.overrideSorting = true;
-        canvas.sortingOrder = 900;   // 低于暂停菜单(1000)，高于 HUD
-
-        var scaler = GetComponent<CanvasScaler>();
-        if (scaler == null) scaler = gameObject.AddComponent<CanvasScaler>();
-        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(1920f, 1080f);
-        scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
-        scaler.matchWidthOrHeight = 0.5f;
-
-        if (GetComponent<GraphicRaycaster>() == null)
-            gameObject.AddComponent<GraphicRaycaster>();
+        isOpen = false; IsOpen = false; pausedByPanel = false;
     }
 
     void Start()
     {
-        SetOpen(false);
-    }
-
-    void OnEnable()
-    {
-        if (isOpen)
-            Subscribe();
+        BindTabs();
+        if (panelRoot != null) panelRoot.SetActive(false);
     }
 
     void OnDisable()
     {
-        if (pausedByPanel)
-            ResumeGameTime();
-
-        RestoreGameplayHud();
-        if (isOpen)
-        {
-            isOpen = false;
-            IsOpen = false;
-        }
-
+        if (pausedByPanel) ResumeTime();
+        RestoreHud();
+        if (isOpen) { isOpen = false; IsOpen = false; }
         Unsubscribe();
     }
 
     void Update()
     {
-        var keyboard = Keyboard.current;
-        if (keyboard == null) return;
+        var kb = Keyboard.current;
+        if (kb == null) return;
+
+        // 主菜单 / Bootstrap：面板不可用；若从游玩场景残留打开则关掉
+        if (!InGameplayScene())
+        {
+            if (isOpen) SetOpen(false);
+            return;
+        }
 
         if (!isOpen && ShopUI.IsOpen) return;
-
-        if (keyboard.cKey.wasPressedThisFrame)
-            Toggle();
-
+        if (kb.cKey.wasPressedThisFrame) SetOpen(!isOpen);
         if (!isOpen) return;
-        if (keyboard.digit1Key.wasPressedThisFrame) SetTab(CharacterTab.Status);
-        if (keyboard.digit2Key.wasPressedThisFrame) SetTab(CharacterTab.Equipment);
-        if (keyboard.digit3Key.wasPressedThisFrame) SetTab(CharacterTab.Inventory);
-        if (keyboard.digit4Key.wasPressedThisFrame) SetTab(CharacterTab.Skills);
+        if (kb.digit1Key.wasPressedThisFrame) SetTab(0);
+        if (kb.digit2Key.wasPressedThisFrame) SetTab(1);
+        if (kb.digit3Key.wasPressedThisFrame) SetTab(2);
+        if (kb.digit4Key.wasPressedThisFrame) SetTab(3);
     }
 
-    void Toggle()
+    static bool InGameplayScene()
     {
-        SetOpen(!isOpen);
+        string active = SceneManager.GetActiveScene().name;
+        foreach (var s in NonGameplayScenes)
+            if (active == s) return false;
+        return true;
     }
 
     void SetOpen(bool value)
     {
-        if (!value && !isOpen)
-        {
-            IsOpen = false;
-            RestoreGameplayHud();
-            if (panel != null) panel.SetActive(false);
-            return;
-        }
-
         if (value && ShopUI.IsOpen) return;
-
-        if (value)
-        {
-            BuildPages();
-            BindButtons();
-        }
-
-        isOpen = value;
-        IsOpen = value;
+        isOpen = value; IsOpen = value;
         PlayerInputBuffer.ClearAll();
+        if (panelRoot != null) panelRoot.SetActive(isOpen);
 
-        if (panel != null) panel.SetActive(isOpen);
-
-        if (isOpen)
-        {
-            Resubscribe();
-            HideGameplayHud();
-            PauseGameTime();
-            Refresh();
-        }
-        else
-        {
-            HideAllPages();
-            ResumeGameTime();
-            RestoreGameplayHud();
-        }
+        if (isOpen) { Resubscribe(); HideHud(); PauseTime(); Refresh(); }
+        else { HideAllPages(); ResumeTime(); RestoreHud(); }
     }
 
-    void PauseGameTime()
+    void SetTab(int idx)
     {
-        if (pausedByPanel) return;
-
-        previousTimeScale = Time.timeScale;
-        Time.timeScale = 0f;
-        pausedByPanel = true;
-    }
-
-    void ResumeGameTime()
-    {
-        if (!pausedByPanel) return;
-
-        Time.timeScale = GameManager.Instance != null && GameManager.Instance.IsPaused
-            ? 0f
-            : previousTimeScale;
-
-        pausedByPanel = false;
-    }
-
-    void SetTab(CharacterTab tab)
-    {
-        currentTab = tab;
+        int max = pages != null ? pages.Length - 1 : 0;
+        currentTab = Mathf.Clamp(idx, 0, Mathf.Max(0, max));
         Refresh();
     }
 
     void Refresh()
     {
-        if (!isOpen) return;
-        if (pages == null) BuildPages();
-        if (pages == null) return;
+        if (!isOpen || pages == null) return;
 
-        if (titleText != null) titleText.text = GetTabTitle(currentTab);
-        if (contentText != null) contentText.gameObject.SetActive(false);
-        if (equipmentActionParent != null) equipmentActionParent.gameObject.SetActive(false);
+        if (titleText != null && currentTab < TabTitles.Length) titleText.text = TabTitles[currentTab];
+        if (goldText != null) { var s = FindAnyObjectByType<PlayerStats>(); goldText.text = s != null ? $"金币 {s.gold}" : "金币 0"; }
 
         for (int i = 0; i < pages.Length; i++)
         {
             if (pages[i] == null) continue;
-
-            if (i == (int)currentTab)
-                pages[i].Show();
-            else
-                pages[i].Hide();
+            if (i == currentTab) pages[i].Show();
+            else pages[i].Hide();
         }
-
-        RefreshLegacyFields();
-        UpdateButtonStates();
+        UpdateTabVisual();
     }
 
     void HideAllPages()
     {
         if (pages == null) return;
-
-        foreach (var page in pages)
-            page?.Hide();
+        foreach (var p in pages) p?.Hide();
     }
 
-    string GetTabTitle(CharacterTab tab)
+    void UpdateTabVisual()
     {
-        switch (tab)
+        if (tabButtons == null) return;
+        for (int i = 0; i < tabButtons.Length; i++)
         {
-            case CharacterTab.Status: return "状态";
-            case CharacterTab.Equipment: return "装备";
-            case CharacterTab.Inventory: return "背包";
-            case CharacterTab.Skills: return "技能";
-            default: return string.Empty;
+            if (tabButtons[i] == null) continue;
+            bool on = i == currentTab;
+            var img = tabButtons[i].GetComponent<Image>();
+            if (img != null) img.color = on ? TabOn : TabOff;
+            var txt = tabButtons[i].GetComponentInChildren<TMP_Text>();
+            if (txt != null) txt.color = on ? TabTextOn : TabTextOff;
         }
     }
 
-    void RefreshLegacyFields()
+    void BindTabs()
     {
-        SetLegacyObjectActive(hpText, false);
-        SetLegacyObjectActive(attackText, false);
-        SetLegacyObjectActive(defenseText, false);
-        SetLegacyObjectActive(goldText, false);
-        SetLegacyObjectActive(weaponIcon, false);
-        SetLegacyObjectActive(armorIcon, false);
-        SetLegacyObjectActive(accessory1Icon, false);
-        SetLegacyObjectActive(accessory2Icon, false);
+        if (tabButtons == null) return;
+        for (int i = 0; i < tabButtons.Length; i++)
+        {
+            if (tabButtons[i] == null) continue;
+            int idx = i;
+            tabButtons[i].onClick.RemoveAllListeners();
+            tabButtons[i].onClick.AddListener(() => SetTab(idx));
+        }
     }
 
-    void SetLegacyObjectActive(Graphic graphic, bool value)
-    {
-        if (graphic != null)
-            graphic.gameObject.SetActive(value);
-    }
-
-    void UpdateButtonStates()
-    {
-        ui?.SetButtonState(statusButton, currentTab == CharacterTab.Status);
-        ui?.SetButtonState(equipmentButton, currentTab == CharacterTab.Equipment);
-        ui?.SetButtonState(inventoryButton, currentTab == CharacterTab.Inventory);
-        ui?.SetButtonState(skillsButton, currentTab == CharacterTab.Skills);
-    }
-
+    // ── 订阅系统变化 → 刷新 ──────────────────────────────────────────
     void Subscribe()
     {
         if (!isActiveAndEnabled || hasSubscribed) return;
 
-        subscribedStats = FindAnyObjectByType<PlayerStats>();
-        if (subscribedStats != null) subscribedStats.OnStatsChanged += Refresh;
+        subStats = FindAnyObjectByType<PlayerStats>();
+        if (subStats != null) subStats.OnStatsChanged += Refresh;
 
-        subscribedEquipment = EquipmentSystem.Instance != null
-            ? EquipmentSystem.Instance
-            : FindAnyObjectByType<EquipmentSystem>();
-        if (subscribedEquipment != null) subscribedEquipment.OnEquipmentChanged += Refresh;
+        subEquip = EquipmentSystem.Instance != null ? EquipmentSystem.Instance : FindAnyObjectByType<EquipmentSystem>();
+        if (subEquip != null) subEquip.OnEquipmentChanged += Refresh;
 
-        subscribedInventory = InventorySystem.Instance != null
-            ? InventorySystem.Instance
-            : FindAnyObjectByType<InventorySystem>();
-        if (subscribedInventory != null) subscribedInventory.OnInventoryChanged += Refresh;
+        subInv = InventorySystem.Instance != null ? InventorySystem.Instance : FindAnyObjectByType<InventorySystem>();
+        if (subInv != null) subInv.OnInventoryChanged += Refresh;
 
-        subscribedSkills = SkillSystem.Instance != null
-            ? SkillSystem.Instance
-            : FindAnyObjectByType<SkillSystem>();
-        if (subscribedSkills != null) subscribedSkills.OnSkillsChanged += Refresh;
+        subSkills = SkillSystem.Instance != null ? SkillSystem.Instance : FindAnyObjectByType<SkillSystem>();
+        if (subSkills != null) subSkills.OnSkillsChanged += Refresh;
 
         hasSubscribed = true;
     }
 
-    void Resubscribe()
-    {
-        Unsubscribe();
-        Subscribe();
-    }
+    void Resubscribe() { Unsubscribe(); Subscribe(); }
 
     void Unsubscribe()
     {
         if (!hasSubscribed) return;
-
-        if (subscribedStats != null) subscribedStats.OnStatsChanged -= Refresh;
-        subscribedStats = null;
-
-        if (subscribedEquipment != null) subscribedEquipment.OnEquipmentChanged -= Refresh;
-        subscribedEquipment = null;
-
-        if (subscribedInventory != null) subscribedInventory.OnInventoryChanged -= Refresh;
-        subscribedInventory = null;
-
-        if (subscribedSkills != null) subscribedSkills.OnSkillsChanged -= Refresh;
-        subscribedSkills = null;
-
+        if (subStats != null)  subStats.OnStatsChanged   -= Refresh; subStats = null;
+        if (subEquip != null)  subEquip.OnEquipmentChanged -= Refresh; subEquip = null;
+        if (subInv != null)    subInv.OnInventoryChanged  -= Refresh; subInv = null;
+        if (subSkills != null) subSkills.OnSkillsChanged   -= Refresh; subSkills = null;
         hasSubscribed = false;
     }
 
-    void BindButtons()
+    // ── 暂停游戏时间 ────────────────────────────────────────────────
+    void PauseTime()
     {
-        BindTabButton(statusButton, CharacterTab.Status);
-        BindTabButton(equipmentButton, CharacterTab.Equipment);
-        BindTabButton(inventoryButton, CharacterTab.Inventory);
-        BindTabButton(skillsButton, CharacterTab.Skills);
+        if (pausedByPanel) return;
+        previousTimeScale = Time.timeScale;
+        Time.timeScale = 0f;
+        pausedByPanel = true;
     }
 
-    void BindTabButton(Button button, CharacterTab tab)
+    void ResumeTime()
     {
-        if (button == null) return;
-
-        button.onClick.RemoveAllListeners();
-        button.onClick.AddListener(() => SetTab(tab));
+        if (!pausedByPanel) return;
+        Time.timeScale = GameManager.Instance != null && GameManager.Instance.IsPaused ? 0f : previousTimeScale;
+        pausedByPanel = false;
     }
 
-    void EnsureUI()
+    // ── 打开时隐藏战斗 HUD ──────────────────────────────────────────
+    void HideHud()
     {
-        EnsureHostCanvas();   // 常驻后自建 Canvas，确保脱离场景 Canvas 也能显示
-        ui = new CharacterPanelUIFactory();
-
-        if (panel == null)
-            panel = CreatePanel(transform);
-        else
-            ConfigurePanel(panel);
-
-        BuildGeneratedContent(panel.transform);
-    }
-
-    GameObject CreatePanel(Transform parent)
-    {
-        var createdPanel = new GameObject("CharacterPanel", typeof(RectTransform));
-        createdPanel.transform.SetParent(parent, false);
-        ConfigurePanel(createdPanel);
-        return createdPanel;
-    }
-
-    void ConfigurePanel(GameObject targetPanel)
-    {
-        var rect = targetPanel.GetComponent<RectTransform>();
-        if (rect == null) rect = targetPanel.AddComponent<RectTransform>();
-        rect.anchorMin = Vector2.zero;
-        rect.anchorMax = Vector2.one;
-        rect.pivot = new Vector2(0.5f, 0.5f);
-        rect.anchoredPosition = Vector2.zero;
-        rect.offsetMin = Vector2.zero;
-        rect.offsetMax = Vector2.zero;
-
-        var image = targetPanel.GetComponent<Image>();
-        if (image == null) image = targetPanel.AddComponent<Image>();
-        image.color = new Color(0.05f, 0.06f, 0.08f, 0.99f);
-    }
-
-    void HideGameplayHud()
-    {
-        RestoreGameplayHud();
-
-        string[] names =
+        RestoreHud();
+        string[] names = { "HUD_Canvas", "HUD", "CombatHUDCanvas", "ExecutePromptCanvas", "TeleportCanvas", "PlayerHUD_Canvas" };
+        foreach (var n in names)
         {
-            "HUD_Canvas",
-            "HUD",
-            "CombatHUDCanvas",
-            "ExecutePromptCanvas",
-            "TeleportCanvas"
-        };
-
-        foreach (string hudName in names)
-        {
-            GameObject hud = GameObject.Find(hudName);
-            if (hud == null || hud == panel) continue;
-
-            hiddenHudRoots.Add(hud);
-            hiddenHudPreviousStates.Add(hud.activeSelf);
+            var hud = GameObject.Find(n);
+            if (hud == null || hud == gameObject) continue;
+            hiddenHud.Add(hud);
+            hiddenHudPrev.Add(hud.activeSelf);
             hud.SetActive(false);
         }
     }
 
-    void RestoreGameplayHud()
+    void RestoreHud()
     {
-        for (int i = 0; i < hiddenHudRoots.Count; i++)
-        {
-            if (hiddenHudRoots[i] != null)
-                hiddenHudRoots[i].SetActive(hiddenHudPreviousStates[i]);
-        }
-
-        hiddenHudRoots.Clear();
-        hiddenHudPreviousStates.Clear();
-    }
-
-    void BuildGeneratedContent(Transform parent)
-    {
-        var old = parent.Find("GeneratedCharacterMenu");
-        if (old != null)
-            Destroy(old.gameObject);
-
-        var root = ui.CreateUIObject("GeneratedCharacterMenu", parent);
-        ui.SetRect(root.GetComponent<RectTransform>(), Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-
-        titleText = ui.CreateText("Title", root.transform, "人物信息", 34, TextAnchor.MiddleLeft);
-        ui.SetRect(titleText.rectTransform, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(54f, -92f), new Vector2(-54f, -28f));
-
-        var hintText = ui.CreateText("Hint", root.transform, "C 关闭    1 状态    2 装备    3 背包    4 技能", 16, TextAnchor.MiddleLeft);
-        hintText.color = ui.MutedTextColor;
-        ui.SetRect(hintText.rectTransform, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(54f, -126f), new Vector2(-54f, -96f));
-
-        var tabRoot = ui.CreateUIObject("Tabs", root.transform);
-        ui.SetRect(tabRoot.GetComponent<RectTransform>(), new Vector2(0f, 0f), new Vector2(0f, 1f), new Vector2(54f, 56f), new Vector2(254f, -156f));
-        statusButton = CreateTabButton(tabRoot.transform, "状态", 0);
-        equipmentButton = CreateTabButton(tabRoot.transform, "装备", 1);
-        inventoryButton = CreateTabButton(tabRoot.transform, "背包", 2);
-        skillsButton = CreateTabButton(tabRoot.transform, "技能", 3);
-
-        var contentBackground = ui.CreatePanel("ContentBackground", root.transform, ui.PanelColor);
-        ui.SetRect(contentBackground.rectTransform, new Vector2(0f, 0f), Vector2.one, new Vector2(286f, 56f), new Vector2(-54f, -156f));
-
-        contentText = ui.CreateText("Content", contentBackground.transform, string.Empty, 20, TextAnchor.UpperLeft);
-        ui.SetRect(contentText.rectTransform, Vector2.zero, Vector2.one, new Vector2(28f, 24f), new Vector2(-28f, -24f));
-        contentText.gameObject.SetActive(false);
-
-        var equipmentActions = ui.CreateUIObject("EquipmentActions", contentBackground.transform);
-        equipmentActionParent = equipmentActions.transform;
-        ui.SetRect(equipmentActions.GetComponent<RectTransform>(), new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(28f, 24f), new Vector2(-28f, 178f));
-        equipmentActions.SetActive(false);
-
-        pages = new CharacterPanelPage[]
-        {
-            new CharacterStatusPageUI(),
-            new CharacterEquipmentPageUI(),
-            new CharacterInventoryPageUI(),
-            new CharacterSkillsPageUI()
-        };
-
-        foreach (var page in pages)
-            page.Build(contentBackground.transform, ui);
-    }
-
-    void BuildPages()
-    {
-        if (pages != null) return;
-        EnsureUI();
-    }
-
-    Button CreateTabButton(Transform parent, string label, int index)
-    {
-        var button = ui.CreateButton(label + "Button", parent, label, 20);
-        var rect = button.GetComponent<RectTransform>();
-        rect.anchorMin = new Vector2(0f, 1f);
-        rect.anchorMax = new Vector2(1f, 1f);
-        rect.pivot = new Vector2(0.5f, 1f);
-        rect.anchoredPosition = new Vector2(0f, -index * 58f);
-        rect.sizeDelta = new Vector2(0f, 46f);
-        return button;
+        for (int i = 0; i < hiddenHud.Count; i++)
+            if (hiddenHud[i] != null) hiddenHud[i].SetActive(hiddenHudPrev[i]);
+        hiddenHud.Clear();
+        hiddenHudPrev.Clear();
     }
 }

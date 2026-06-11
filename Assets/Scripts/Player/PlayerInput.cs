@@ -13,8 +13,21 @@ public class PlayerInput : MonoBehaviour
     public bool    Skill1Pressed  { get; private set; }   // Q：技能槽 1
     public bool    Skill2Pressed  { get; private set; }   // E：技能槽 2
 
+    // 暂停 / 游戏结束 / 商店 / 角色面板 / 存读档菜单打开时，屏蔽全部玩家输入
+    bool InputBlocked =>
+        (GameManager.Instance != null && (GameManager.Instance.IsPaused || GameManager.Instance.IsGameOver)) ||
+        ShopUI.IsOpen || CharacterPanelUI.IsOpen || PauseMenu.IsOpen || VictoryUI.IsOpen;
+
     void Update()
     {
+        if (InputBlocked)
+        {
+            MoveInput = Vector2.zero;
+            JumpPressed = AttackPressed = BlockHeld = DashPressed =
+                CounterPressed = ExecutePressed = Skill1Pressed = Skill2Pressed = false;
+            return;
+        }
+
         var kb    = Keyboard.current;
         var mouse = Mouse.current;
 

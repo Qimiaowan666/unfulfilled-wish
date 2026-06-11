@@ -51,6 +51,8 @@ public class SaveData
     public int gold;
     public float playerX;
     public float playerY;
+    public float respawnX;   // 火堆复活点（死亡重生落这里）；playerX/Y 是读档落点
+    public float respawnY;
 
     public float baseAttack;
     public float baseDefense;
@@ -77,8 +79,13 @@ public class SaveSystem : MonoBehaviour
 {
     public static SaveSystem Instance { get; private set; }
 
-    const string SaveFileName = "save.json";
-    string SavePath => Path.Combine(Application.persistentDataPath, SaveFileName);
+    public const int AutoSlot = -1;        // 检查点重生用的内部自动档
+    public const int ManualSlotCount = 3;  // 玩家手动存档槽：0 / 1 / 2
+
+    static string SlotPath(int slot) => Path.Combine(Application.persistentDataPath,
+        slot == AutoSlot ? "save_auto.json" : $"save_{slot}.json");
+    static string ThumbPath(int slot) => Path.Combine(Application.persistentDataPath, $"save_{slot}.png");
+    string SavePath => SlotPath(AutoSlot);   // 原有“自动档”读写沿用此路径（检查点存 / 重生读 / 场景加载读）
     readonly HashSet<string> runtimeDefeatedEnemyIDs = new HashSet<string>();
     readonly HashSet<string> runtimeOpenedDoorIDs = new HashSet<string>();
 
@@ -114,9 +121,21 @@ public class SaveSystem : MonoBehaviour
         yield return null;   // 等玩家/敌人 Awake 完再 apply，确保 FindAnyObjectByType 能拿到玩家
         if (HasSave())
             ApplyOnSceneLoaded();
+        nextLoadIsRespawn = false;   // 兜底清标志，避免“没档可读”时残留导致下次读档落点出错
     }
 
     public void Save(PlayerStats stats, Vector3 respawnPosition, CheckpointManager checkpoints)
+    {
+        WriteSlot(AutoSlot, BuildSaveData(stats, respawnPosition, respawnPosition, checkpoints));   // 检查点：落点=复活点=火堆
+    }
+
+    void WriteSlot(int slot, SaveData data)
+    {
+        File.WriteAllText(SlotPath(slot), JsonUtility.ToJson(data, true));
+        Debug.Log($"Saved slot {slot}: {SlotPath(slot)}");
+    }
+
+    SaveData BuildSaveData(PlayerStats stats, Vector3 landPosition, Vector3 respawnPosition, CheckpointManager checkpoints)
     {
         var inventory = InventorySystem.Instance;
         var equipment = EquipmentSystem.Instance;
@@ -125,7 +144,7 @@ public class SaveSystem : MonoBehaviour
 
         float baseMaxHP = stats.maxHP - (equipment != null ? equipment.GetEquippedMaxHPBonus() : 0f);
 
-        var data = new SaveData
+        return new SaveData
         {
             saveVersion = 2,
             sceneName = SceneManager.GetActiveScene().name,
@@ -134,8 +153,10 @@ public class SaveSystem : MonoBehaviour
             currentHP = stats.CurrentHP,
             currentGhostHP = stats.CurrentGhostHP,
             gold = stats.gold,
-            playerX = respawnPosition.x,
-            playerY = respawnPosition.y,
+            playerX = landPosition.x,
+            playerY = landPosition.y,
+            respawnX = respawnPosition.x,
+            respawnY = respawnPosition.y,
 
             baseAttack = stats.baseAttack,
             baseDefense = stats.baseDefense,
@@ -157,9 +178,6 @@ public class SaveSystem : MonoBehaviour
             unlockedCheckpoints = checkpoints != null ? checkpoints.GetUnlockedIDs() : new string[0],
             lastCheckpointID = checkpoints != null ? checkpoints.LastCheckpointID : null
         };
-
-        File.WriteAllText(SavePath, JsonUtility.ToJson(data, true));
-        Debug.Log($"Saved to {SavePath}");
     }
 
     public SaveData Load()
@@ -207,6 +225,10 @@ public class SaveSystem : MonoBehaviour
     // 重生 / 显式读档前调用，强制下次重新 apply 全局态（让数据回到存档状态）
     public void RequestFullReload() => globalStateLoaded = false;
 
+    bool nextLoadIsRespawn;
+    // 死亡重生：下次 apply 落“火堆复活点”而非读档落点
+    public void PrepareRespawn() { nextLoadIsRespawn = true; globalStateLoaded = false; }
+
     // 全局持久态：玩家属性、背包、装备、技能、玩家位置/血量
     void ApplyGlobalState(SaveData data)
     {
@@ -244,11 +266,16 @@ public class SaveSystem : MonoBehaviour
 
         if (player != null)
         {
-            player.transform.position = new Vector3(data.playerX, data.playerY, player.transform.position.z);
+            // 死亡重生 → 火堆复活点(respawnX/Y)；普通读档/进入 → 读档落点(playerX/Y)。旧档无 respawn 坐标时回退 playerX/Y
+            bool useRespawn = nextLoadIsRespawn && (data.respawnX != 0f || data.respawnY != 0f);
+            float px = useRespawn ? data.respawnX : data.playerX;
+            float py = useRespawn ? data.respawnY : data.playerY;
+            player.transform.position = new Vector3(px, py, player.transform.position.z);
             if (player.Rb != null)
                 player.Rb.linearVelocity = Vector2.zero;
             player.stateMachine.ChangeState(player.idleState);
         }
+        nextLoadIsRespawn = false;
 
         if (stats != null)
             stats.LoadSavedVitals(data.currentHP, data.currentGhostHP, data.gold);
@@ -297,6 +324,99 @@ public class SaveSystem : MonoBehaviour
         if (File.Exists(SavePath)) File.Delete(SavePath);
         runtimeDefeatedEnemyIDs.Clear();
         runtimeOpenedDoorIDs.Clear();
+    }
+
+    // ===== 手动多槽存读（ESC 菜单：随时存 / 读，带截图缩略图）=====
+
+    public SaveData Load(int slot)
+    {
+        string p = SlotPath(slot);
+        if (!File.Exists(p)) return null;
+        return JsonUtility.FromJson<SaveData>(File.ReadAllText(p));
+    }
+
+    public bool HasSlot(int slot) => File.Exists(SlotPath(slot));
+    public SaveData GetSlotMeta(int slot) => Load(slot);   // 档不大，直接读整档取 sceneName/savedAtUtc/gold 预览
+
+    public void DeleteSlot(int slot)
+    {
+        if (File.Exists(SlotPath(slot))) File.Delete(SlotPath(slot));
+        if (File.Exists(ThumbPath(slot))) File.Delete(ThumbPath(slot));
+    }
+
+    // 随时手动存档：抓玩家“当前位置”+ 全套状态，写入手动槽，并存缩略图
+    public bool SaveToSlot(int slot)
+    {
+        var player = FindAnyObjectByType<PlayerController>();
+        var stats = player != null ? player.Stats : FindAnyObjectByType<PlayerStats>();
+        if (stats == null) { Debug.LogWarning("SaveToSlot: 找不到 PlayerStats"); return false; }
+        Vector3 landPos = player != null ? player.transform.position : stats.transform.position;
+
+        // 复活点 = 当前自动档记录的火堆点（最后坐的火）；没坐过火则落当前位置
+        Vector3 respawnPos = landPos;
+        var auto = Load(AutoSlot);
+        if (auto != null)
+            respawnPos = (auto.respawnX != 0f || auto.respawnY != 0f)
+                ? new Vector3(auto.respawnX, auto.respawnY, 0f)
+                : new Vector3(auto.playerX, auto.playerY, 0f);
+
+        WriteSlot(slot, BuildSaveData(stats, landPos, respawnPos, CheckpointManager.Instance));
+        WriteThumbnail(slot);
+        return true;
+    }
+
+    // 读取手动槽（同步到 auto 重生点；跨场景则切场景后由 ApplyOnSceneLoaded 恢复）
+    public bool LoadSlot(int slot)
+    {
+        var data = Load(slot);
+        if (data == null) return false;
+        RequestFullReload();
+        WriteSlot(AutoSlot, data);   // 让重生点 = 这次读的档
+        string active = SceneManager.GetActiveScene().name;
+        if (!string.IsNullOrEmpty(data.sceneName) && data.sceneName != active)
+            GameManager.Instance?.LoadScene(data.sceneName);   // 切场景，加载后自动 apply auto 档（含 BGM）
+        else
+        {
+            ApplySave(data);
+            AudioManager.Instance?.RefreshSceneBGM();   // 同场景读档没有 sceneLoaded，主动重播 BGM
+        }
+        return true;
+    }
+
+    // ---- 缩略图（存档时现截一次；存档前由 UI 临时隐藏菜单 overlay，保证画面干净）----
+    void WriteThumbnail(int slot)
+    {
+        var thumb = MakeThumbnail();
+        if (thumb == null) return;
+        try { File.WriteAllBytes(ThumbPath(slot), thumb.EncodeToPNG()); } catch { }
+        Destroy(thumb);
+    }
+
+    Texture2D MakeThumbnail()
+    {
+        var full = ScreenCapture.CaptureScreenshotAsTexture();
+        if (full == null) return null;
+        int tw = 320, th = Mathf.Max(1, Mathf.RoundToInt(320f * full.height / Mathf.Max(1, full.width)));
+        var rt = RenderTexture.GetTemporary(tw, th);
+        Graphics.Blit(full, rt);
+        var prev = RenderTexture.active;
+        RenderTexture.active = rt;
+        var thumb = new Texture2D(tw, th, TextureFormat.RGB24, false);
+        thumb.ReadPixels(new Rect(0, 0, tw, th), 0, 0);
+        thumb.Apply();
+        RenderTexture.active = prev;
+        RenderTexture.ReleaseTemporary(rt);
+        Destroy(full);
+        return thumb;
+    }
+
+    public Texture2D LoadThumbnail(int slot)
+    {
+        string p = ThumbPath(slot);
+        if (!File.Exists(p)) return null;
+        var tex = new Texture2D(2, 2, TextureFormat.RGB24, false);
+        tex.LoadImage(File.ReadAllBytes(p));
+        return tex;
     }
 
     public void MarkEnemyDefeated(string id)

@@ -72,6 +72,10 @@ public class AudioManager : MonoBehaviour
         Instance = this;
         transform.SetParent(null);
         DontDestroyOnLoad(gameObject);
+
+        bgmVolume = PlayerPrefs.GetFloat("set_bgm", bgmVolume);   // 读上次设置的音量
+        sfxVolume = PlayerPrefs.GetFloat("set_sfx", sfxVolume);
+
         source = gameObject.AddComponent<AudioSource>();
         source.playOnAwake = false;
         source.spatialBlend = 0f;
@@ -126,9 +130,13 @@ public class AudioManager : MonoBehaviour
         bgmSource.Play();
     }
 
+    public void RefreshSceneBGM() => PlayDefaultBGMForScene(SceneManager.GetActiveScene().name);
     public void PlayBossBGM() => PlayBGM(bossBGMClip);
     public void PlayFutureBossBGM() => PlayBGM(futureBossBGMClip);
     public void StopBGM()     => bgmSource.Stop();
+
+    public void SetBGMVolume(float v) { bgmVolume = Mathf.Clamp01(v); if (bgmSource != null) bgmSource.volume = bgmVolume; }
+    public void SetSFXVolume(float v) { sfxVolume = Mathf.Clamp01(v); }
 
     public void Play(AudioClip clip)
     {

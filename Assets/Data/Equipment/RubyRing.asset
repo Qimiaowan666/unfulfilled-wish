@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EquipmentData
   saveID: 
   equipmentName: "\u7EA2\u5B9D\u77F3\u6212\u6307"
-  description: "\u9970\u54C1\uFF0C\u653B\u51FB +4\u3002"
+  description: "\u9576\u5D4C\u7EA2\u5B9D\u77F3\u7684\u6212\u6307\uFF0C\u6697\u85CF\u529B\u91CF\u3002"
   icon: {fileID: 21300000, guid: 784602af0e6f8714082f60c362098913, type: 3}
   slot: 2
   price: 160

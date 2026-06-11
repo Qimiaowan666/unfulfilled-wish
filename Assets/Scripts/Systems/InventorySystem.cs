@@ -6,7 +6,7 @@ public class InventorySystem : MonoBehaviour
 {
     public static InventorySystem Instance { get; private set; }
 
-    public int maxSlots = 20;
+    public int maxSlots = 60;   // 20 格/页 × 3 页
     public List<ItemData> items = new List<ItemData>();
 
     public event Action OnInventoryChanged;

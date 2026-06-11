@@ -73,8 +73,10 @@ public class LevelManager : MonoBehaviour
     {
         string next = currentBoss != null ? currentBoss.nextSceneOnDefeat : null;
         if (!string.IsNullOrEmpty(next))
-            GameManager.Instance?.LoadScene(next);
+            GameManager.Instance?.LoadScene(next);              // 有下一关 → 切场景
+        else if (VictoryUI.Instance != null)
+            VictoryUI.Instance.Show();                          // 最终 boss → 通关胜利画面
         else
-            Debug.Log("Boss defeated — no next scene assigned.");
+            Debug.Log("Boss defeated — no next scene & no VictoryUI.");
     }
 }

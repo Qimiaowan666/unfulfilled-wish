@@ -173,8 +173,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 6e7ab5ff83adb9c4b91cd63e9df8bc34, type: 2}
   - {fileID: 11400000, guid: 14f2399a82279d640b82f531a3a94337, type: 2}
   - {fileID: 11400000, guid: f68380beeccb6ca42aefbd29bb7ef0c4, type: 2}
-  - {fileID: 11400000, guid: 9f51e4b884b816c4b830bd9bfe47321a, type: 2}
-  - {fileID: 11400000, guid: 40c967800ab2d924a8794aa08ed35c17, type: 2}
   itemEntries:
   - item: {fileID: 11400000, guid: 0dd68f939e564f64fb7e9de2de3d031d, type: 2}
     quantity: 5
@@ -211,10 +209,6 @@ MonoBehaviour:
   - skill: {fileID: 11400000, guid: 14f2399a82279d640b82f531a3a94337, type: 2}
     quantity: 1
   - skill: {fileID: 11400000, guid: f68380beeccb6ca42aefbd29bb7ef0c4, type: 2}
-    quantity: 1
-  - skill: {fileID: 11400000, guid: 9f51e4b884b816c4b830bd9bfe47321a, type: 2}
-    quantity: 1
-  - skill: {fileID: 11400000, guid: 40c967800ab2d924a8794aa08ed35c17, type: 2}
     quantity: 1
 --- !u!114 &8345193854223710325
 MonoBehaviour:
