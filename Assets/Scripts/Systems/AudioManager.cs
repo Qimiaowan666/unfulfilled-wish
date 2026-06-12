@@ -104,34 +104,32 @@ public class AudioManager : MonoBehaviour
         PlayDefaultBGMForScene(scene.name);
     }
 
-    void PlayDefaultBGMForScene(string sceneName)
+    void PlayDefaultBGMForScene(string sceneName, bool restart = false)
     {
         if (sceneName == "MainMenu")
         {
-            PlayBGM(menuBGMClip != null ? menuBGMClip : bgmClip);
+            PlayBGM(menuBGMClip != null ? menuBGMClip : bgmClip, restart);
             return;
         }
 
-        if (sceneName == "ForsakenShrine")
-        {
-            PlayBossBGM();
-            return;
-        }
-
-        PlayBGM(bgmClip);
+        // ForsakenShrine 进场放区域曲(area1)；boss 曲只在吼叫开打那刻由 BossIntroTrigger.StartCombat 放。
+        PlayBGM(bgmClip, restart);
     }
 
-    public void PlayBGM(AudioClip clip)
+    // restart=true 时即使同一首也从头重播（读档用）；默认 false 保持过场连续，不重启同曲。
+    public void PlayBGM(AudioClip clip, bool restart = false)
     {
         if (clip == null) return;
-        if (bgmSource.clip == clip && bgmSource.isPlaying) return;
+        if (!restart && bgmSource.clip == clip && bgmSource.isPlaying) return;
         bgmSource.clip = clip;
         bgmSource.volume = bgmVolume;
         bgmSource.Play();
     }
 
-    public void RefreshSceneBGM() => PlayDefaultBGMForScene(SceneManager.GetActiveScene().name);
+    // 读档是“重置”时刻 → 强制 BGM 从头放
+    public void RefreshSceneBGM() => PlayDefaultBGMForScene(SceneManager.GetActiveScene().name, restart: true);
     public void PlayBossBGM() => PlayBGM(bossBGMClip);
+    public void PlayAreaBGM() => PlayBGM(bgmClip);   // 普通区域 BGM（boss 击破后恢复用）
     public void PlayFutureBossBGM() => PlayBGM(futureBossBGMClip);
     public void StopBGM()     => bgmSource.Stop();
 

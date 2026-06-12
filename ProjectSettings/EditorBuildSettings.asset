@@ -12,9 +12,6 @@ EditorBuildSettings:
     path: Assets/Scenes/MainMenu.unity
     guid: d34ea65437d0f0d4f996149e2a45c85f
   - enabled: 1
-    path: Assets/Scenes/SampleScene.unity
-    guid: 8c9cfa26abfee488c85f1582747f6a02
-  - enabled: 1
     path: Assets/Scenes/DemoScenes/ForsakenShrine.unity
     guid: f9196df013374b048b8e89f23cf2dcc9
   - enabled: 1

@@ -16,7 +16,8 @@ public class PlayerInput : MonoBehaviour
     // 暂停 / 游戏结束 / 商店 / 角色面板 / 存读档菜单打开时，屏蔽全部玩家输入
     bool InputBlocked =>
         (GameManager.Instance != null && (GameManager.Instance.IsPaused || GameManager.Instance.IsGameOver)) ||
-        ShopUI.IsOpen || CharacterPanelUI.IsOpen || PauseMenu.IsOpen || VictoryUI.IsOpen;
+        ShopUI.IsOpen || CharacterPanelUI.IsOpen || PauseMenu.IsOpen || VictoryUI.IsOpen ||
+        DialogueUI.IsPlaying || BossIntroTrigger.Sequencing || BossFinishUI.IsPlaying;
 
     void Update()
     {

@@ -127,6 +127,11 @@ public class MinotaurBoss : EnemyBase
             Anim.SetBool(name, name == boolName);
     }
 
+    [Header("登场 / 沉睡")]
+    [Tooltip("false = boss 沉睡，不主动进入战斗；由 BossIntroTrigger 在登场对话结束后 Activate() 唤醒")]
+    public bool combatEnabled = true;
+    public void Activate() => combatEnabled = true;
+
     // ── Lifecycle ────────────────────────────────────────────────────
     protected override void Awake()
     {

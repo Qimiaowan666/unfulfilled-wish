@@ -105,6 +105,7 @@ public class EnemyBase : Entity
     Vector3    initialPosition;
     Quaternion initialRotation;
     Vector3    initialScale;
+    bool       initialFacingRight;
     Coroutine  deathRoutine;
 
     // ── Lifecycle ────────────────────────────────────────────────────
@@ -114,6 +115,7 @@ public class EnemyBase : Entity
         initialPosition = transform.position;
         initialRotation = transform.rotation;
         initialScale    = transform.localScale;
+        initialFacingRight = FacingRight;
         PatrolOrigin    = transform.position;
         Initialized     = true;
         CurrentHP       = maxHP;
@@ -316,6 +318,7 @@ public class EnemyBase : Entity
         transform.position   = initialPosition;
         transform.rotation   = initialRotation;
         transform.localScale = initialScale;
+        FacingRight          = initialFacingRight;   // 跟 localScale 一起复位，避免读档后朝向逻辑与视觉脱节、攻击打反方向
         gameObject.SetActive(true);
 
         CurrentHP = hp > 0f ? Mathf.Clamp(hp, 1f, maxHP) : maxHP;

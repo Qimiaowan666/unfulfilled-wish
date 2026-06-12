@@ -13,7 +13,7 @@ public class Boss_IdleState : BossBaseState
     public override void Update()
     {
         base.Update();
-        if (boss.DetectPlayer())
+        if (boss.combatEnabled && boss.DetectPlayer())
             stateMachine.ChangeState(boss.battleState);
     }
 }

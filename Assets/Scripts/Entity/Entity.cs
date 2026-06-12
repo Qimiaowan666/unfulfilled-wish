@@ -5,7 +5,7 @@ public abstract class Entity : MonoBehaviour
     public Rigidbody2D Rb          { get; private set; }
     public Animator    Anim        { get; private set; }
     public bool        IsGrounded  { get; private set; }
-    public bool        FacingRight { get; private set; } = true;
+    public bool        FacingRight { get; protected set; } = true;
     public int         FacingDir   => FacingRight ? 1 : -1;
 
     [Header("Ground Detection")]

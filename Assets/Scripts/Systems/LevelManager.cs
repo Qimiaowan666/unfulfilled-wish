@@ -23,6 +23,7 @@ public class LevelManager : MonoBehaviour
         transform.SetParent(null);
         DontDestroyOnLoad(gameObject);
         SceneManager.sceneLoaded += OnSceneLoaded;
+        SaveSystem.AfterApply += RefreshBoss;   // 同场景原地读档没有 sceneLoaded，靠这个重新接管 boss
     }
 
     void OnDestroy()
@@ -30,6 +31,7 @@ public class LevelManager : MonoBehaviour
         if (Instance == this)
         {
             SceneManager.sceneLoaded -= OnSceneLoaded;
+            SaveSystem.AfterApply -= RefreshBoss;
             Instance = null;
         }
     }
@@ -43,13 +45,20 @@ public class LevelManager : MonoBehaviour
     {
         yield return null;   // 等场景物体 Awake
         yield return null;   // 再等一帧，确保 SaveSystem 已 apply 敌人存档态（已击败的 boss 不会被误判为存活）
+        RefreshBoss();
+    }
 
+    // 重新查找本场景 boss + 重启监测（场景加载后 / 任意读档 apply 后都会调）
+    void RefreshBoss()
+    {
         if (watchRoutine != null) { StopCoroutine(watchRoutine); watchRoutine = null; }
 
         currentBoss = FindSceneBoss();
         if (currentBoss != null)
         {
-            AudioManager.Instance?.PlayBossBGM();
+            // 这里不放 boss BGM：进场/读档时 boss 总是沉睡（BossIntroTrigger 会把它睡回去并重置遭遇），
+            // 区域曲(area1)由 AudioManager 场景默认 + 读档时 RefreshSceneBGM 负责；
+            // boss 曲只在玩家触发遭遇、吼叫开打那一刻由 BossIntroTrigger.StartCombat 放。
             watchRoutine = StartCoroutine(WatchBoss());
         }
     }
@@ -64,19 +73,47 @@ public class LevelManager : MonoBehaviour
 
     IEnumerator WatchBoss()
     {
-        yield return new WaitUntil(() => currentBoss == null || currentBoss.CurrentHP <= 0f);
-        yield return new WaitForSeconds(victoryDelay);
-        OnBossDefeated();
+        var b = currentBoss;
+        yield return new WaitUntil(() => b == null || b.CurrentHP <= 0f);
+        bool active = b != null && b.gameObject.activeInHierarchy;
+        // 只有 boss「战斗中被打死」才触发：对象还在 + HP≤0 + 仍激活(战斗死亡会留着播死亡动画；
+        // 读档把 boss 还原成已击败会 SetActive(false)，借此区分，避免开局/读通关档误触发演出)。
+        if (b != null && b.CurrentHP <= 0f && active && b == currentBoss)
+            OnBossDefeated();
     }
 
     void OnBossDefeated()
     {
         string next = currentBoss != null ? currentBoss.nextSceneOnDefeat : null;
         if (!string.IsNullOrEmpty(next))
-            GameManager.Instance?.LoadScene(next);              // 有下一关 → 切场景
-        else if (VictoryUI.Instance != null)
-            VictoryUI.Instance.Show();                          // 最终 boss → 通关胜利画面
+        {
+            StartCoroutine(DelayedLoad(next));                  // 有下一关 → 等一下切场景
+            return;
+        }
+
+        // 最终 boss → 九日式击破演出 → 出现通关门(玩家走近按 F 才通关)
+        if (BossFinishUI.Instance != null && currentBoss != null)
+            BossFinishUI.Instance.Play(currentBoss, ShowEnding);
         else
-            Debug.Log("Boss defeated — no next scene & no VictoryUI.");
+            StartCoroutine(DelayedEnding());
+    }
+
+    void ShowEnding()
+    {
+        var gate = FindAnyObjectByType<VictoryGate>();
+        if (gate != null) gate.Appear();         // 有通关门 → 出现，等玩家交互
+        else VictoryUI.Instance?.Show();         // 没门兜底 → 直接通关画面
+    }
+
+    IEnumerator DelayedLoad(string next)
+    {
+        yield return new WaitForSeconds(victoryDelay);
+        GameManager.Instance?.LoadScene(next);
+    }
+
+    IEnumerator DelayedEnding()
+    {
+        yield return new WaitForSeconds(victoryDelay);
+        ShowEnding();
     }
 }

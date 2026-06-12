@@ -1,0 +1,975 @@
+fileFormatVersion: 2
+guid: a65d2d1d4b89eee47b85ff5383240e96
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 1843931883792385376
+    second: InkSplatter_0
+  - first:
+      213: 5098076304175862592
+    second: InkSplatter_1
+  - first:
+      213: -2437404371363974296
+    second: InkSplatter_2
+  - first:
+      213: -4459229467737971686
+    second: InkSplatter_3
+  - first:
+      213: 5306776116754325084
+    second: InkSplatter_4
+  - first:
+      213: 2279707418826218821
+    second: InkSplatter_5
+  - first:
+      213: -6268785421173136817
+    second: InkSplatter_6
+  - first:
+      213: 3207384243023097053
+    second: InkSplatter_7
+  - first:
+      213: -8785338966432652463
+    second: InkSplatter_8
+  - first:
+      213: 6457417204526546084
+    second: InkSplatter_9
+  - first:
+      213: -3449328431192926873
+    second: InkSplatter_10
+  - first:
+      213: 5993531312634435236
+    second: InkSplatter_11
+  - first:
+      213: 4046121679227206711
+    second: InkSplatter_12
+  - first:
+      213: 4311636251254115710
+    second: InkSplatter_13
+  - first:
+      213: -9165483339439247940
+    second: InkSplatter_14
+  - first:
+      213: -4879766221162185571
+    second: InkSplatter_15
+  - first:
+      213: -3521517317449433854
+    second: InkSplatter_16
+  - first:
+      213: -5406492084277932070
+    second: InkSplatter_17
+  - first:
+      213: -2543960459888194364
+    second: InkSplatter_18
+  - first:
+      213: 5009230585449481855
+    second: InkSplatter_19
+  - first:
+      213: -2684894040140122848
+    second: InkSplatter_20
+  - first:
+      213: 1114247541798146802
+    second: InkSplatter_21
+  - first:
+      213: -8221099078410113948
+    second: InkSplatter_22
+  - first:
+      213: -1126337252948216921
+    second: InkSplatter_23
+  - first:
+      213: -2047873678932108820
+    second: InkSplatter_24
+  - first:
+      213: 6078020943219080334
+    second: InkSplatter_25
+  - first:
+      213: -1501496113963622330
+    second: InkSplatter_26
+  - first:
+      213: -2826797033991575196
+    second: InkSplatter_27
+  - first:
+      213: 2254578863662924964
+    second: InkSplatter_28
+  - first:
+      213: 6931790855792358346
+    second: InkSplatter_29
+  - first:
+      213: 2984652035568077972
+    second: InkSplatter_30
+  - first:
+      213: -3582539019334465080
+    second: InkSplatter_31
+  - first:
+      213: -6862011380407342225
+    second: InkSplatter_32
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 1
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: InkSplatter_0
+      rect:
+        serializedVersion: 2
+        x: 163
+        y: 465
+        width: 13
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 065467b5746f69910800000000000000
+      internalID: 1843931883792385376
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: InkSplatter_1
+      rect:
+        serializedVersion: 2
+        x: 325
+        y: 475
+        width: 15
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0431d3c436100c640800000000000000
+      internalID: 5098076304175862592
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: InkSplatter_2
+      rect:
+        serializedVersion: 2
+        x: 244
+        y: 447
+        width: 24
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 863bdde53a99c2ed0800000000000000
+      internalID: -2437404371363974296
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: InkSplatter_3
+      rect:
+        serializedVersion: 2
+        x: 271
+        y: 462
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a142683dc62ad12c0800000000000000
+      internalID: -4459229467737971686
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: InkSplatter_4
+      rect:
+        serializedVersion: 2
+        x: 288
+        y: 432
+        width: 14
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c5e1badf2c475a940800000000000000
+      internalID: 5306776116754325084
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: InkSplatter_5
+      rect:
+        serializedVersion: 2
+        x: 289
+        y: 451
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 54d95faa1d523af10800000000000000
+      internalID: 2279707418826218821
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: InkSplatter_6
+      rect:
+        serializedVersion: 2
+        x: 345
+        y: 430
+        width: 27
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f42e3d57fdcc009a0800000000000000
+      internalID: -6268785421173136817
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: InkSplatter_7
+      rect:
+        serializedVersion: 2
+        x: 68
+        y: 93
+        width: 349
+        height: 340
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ddca39fb9fae28c20800000000000000
+      internalID: 3207384243023097053
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: InkSplatter_8
+      rect:
+        serializedVersion: 2
+        x: 407
+        y: 385
+        width: 17
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 153626ab1c4341680800000000000000
+      internalID: -8785338966432652463
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: InkSplatter_9
+      rect:
+        serializedVersion: 2
+        x: 41
+        y: 331
+        width: 20
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4acfc421cba5d9950800000000000000
+      internalID: 6457417204526546084
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: InkSplatter_10
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 287
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 765171131168120d0800000000000000
+      internalID: -3449328431192926873
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: InkSplatter_11
+      rect:
+        serializedVersion: 2
+        x: 62
+        y: 276
+        width: 13
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4a691c749fc4d2350800000000000000
+      internalID: 5993531312634435236
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: InkSplatter_12
+      rect:
+        serializedVersion: 2
+        x: 54
+        y: 270
+        width: 10
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 73c3850ea36b62830800000000000000
+      internalID: 4046121679227206711
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: InkSplatter_13
+      rect:
+        serializedVersion: 2
+        x: 414
+        y: 263
+        width: 18
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e7dc2b4935206db30800000000000000
+      internalID: 4311636251254115710
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: InkSplatter_14
+      rect:
+        serializedVersion: 2
+        x: 484
+        y: 260
+        width: 22
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cbd66fda679adc080800000000000000
+      internalID: -9165483339439247940
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: InkSplatter_15
+      rect:
+        serializedVersion: 2
+        x: 38
+        y: 262
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d9c7da8d976974cb0800000000000000
+      internalID: -4879766221162185571
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: InkSplatter_16
+      rect:
+        serializedVersion: 2
+        x: 44
+        y: 258
+        width: 11
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 20d3a0758ae012fc0800000000000000
+      internalID: -3521517317449433854
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: InkSplatter_17
+      rect:
+        serializedVersion: 2
+        x: 466
+        y: 250
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: adf07ab181848f4b0800000000000000
+      internalID: -5406492084277932070
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: InkSplatter_18
+      rect:
+        serializedVersion: 2
+        x: 27
+        y: 199
+        width: 21
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4cc89b1b07902bcd0800000000000000
+      internalID: -2543960459888194364
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: InkSplatter_19
+      rect:
+        serializedVersion: 2
+        x: 417
+        y: 202
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f760dbb6dac548540800000000000000
+      internalID: 5009230585449481855
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: InkSplatter_20
+      rect:
+        serializedVersion: 2
+        x: 416
+        y: 167
+        width: 19
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 02572ed78175dbad0800000000000000
+      internalID: -2684894040140122848
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: InkSplatter_21
+      rect:
+        serializedVersion: 2
+        x: 404
+        y: 116
+        width: 17
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2f21bb85c3a967f00800000000000000
+      internalID: 1114247541798146802
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: InkSplatter_22
+      rect:
+        serializedVersion: 2
+        x: 132
+        y: 80
+        width: 10
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 46ce21802f9c8ed80800000000000000
+      internalID: -8221099078410113948
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: InkSplatter_23
+      rect:
+        serializedVersion: 2
+        x: 192
+        y: 87
+        width: 11
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7a37bbc6c327e50f0800000000000000
+      internalID: -1126337252948216921
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: InkSplatter_24
+      rect:
+        serializedVersion: 2
+        x: 207
+        y: 89
+        width: 13
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ce911663dbd7493e0800000000000000
+      internalID: -2047873678932108820
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: InkSplatter_25
+      rect:
+        serializedVersion: 2
+        x: 266
+        y: 73
+        width: 23
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e8c35f958d7795450800000000000000
+      internalID: 6078020943219080334
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: InkSplatter_26
+      rect:
+        serializedVersion: 2
+        x: 341
+        y: 81
+        width: 13
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 640a1975d3d992be0800000000000000
+      internalID: -1501496113963622330
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: InkSplatter_27
+      rect:
+        serializedVersion: 2
+        x: 196
+        y: 74
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 469edc8131335c8d0800000000000000
+      internalID: -2826797033991575196
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: InkSplatter_28
+      rect:
+        serializedVersion: 2
+        x: 206
+        y: 77
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4a48bbef78fd94f10800000000000000
+      internalID: 2254578863662924964
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: InkSplatter_29
+      rect:
+        serializedVersion: 2
+        x: 318
+        y: 74
+        width: 14
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ac3fdc0ae0ba23060800000000000000
+      internalID: 6931790855792358346
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: InkSplatter_30
+      rect:
+        serializedVersion: 2
+        x: 132
+        y: 53
+        width: 21
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 49c8e26863d9b6920800000000000000
+      internalID: 2984652035568077972
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: InkSplatter_31
+      rect:
+        serializedVersion: 2
+        x: 182
+        y: 40
+        width: 12
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8c9c7963eb3484ec0800000000000000
+      internalID: -3582539019334465080
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: InkSplatter_32
+      rect:
+        serializedVersion: 2
+        x: 376
+        y: 40
+        width: 11
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f6be12a810d35c0a0800000000000000
+      internalID: -6862011380407342225
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      InkSplatter_0: 1843931883792385376
+      InkSplatter_1: 5098076304175862592
+      InkSplatter_10: -3449328431192926873
+      InkSplatter_11: 5993531312634435236
+      InkSplatter_12: 4046121679227206711
+      InkSplatter_13: 4311636251254115710
+      InkSplatter_14: -9165483339439247940
+      InkSplatter_15: -4879766221162185571
+      InkSplatter_16: -3521517317449433854
+      InkSplatter_17: -5406492084277932070
+      InkSplatter_18: -2543960459888194364
+      InkSplatter_19: 5009230585449481855
+      InkSplatter_2: -2437404371363974296
+      InkSplatter_20: -2684894040140122848
+      InkSplatter_21: 1114247541798146802
+      InkSplatter_22: -8221099078410113948
+      InkSplatter_23: -1126337252948216921
+      InkSplatter_24: -2047873678932108820
+      InkSplatter_25: 6078020943219080334
+      InkSplatter_26: -1501496113963622330
+      InkSplatter_27: -2826797033991575196
+      InkSplatter_28: 2254578863662924964
+      InkSplatter_29: 6931790855792358346
+      InkSplatter_3: -4459229467737971686
+      InkSplatter_30: 2984652035568077972
+      InkSplatter_31: -3582539019334465080
+      InkSplatter_32: -6862011380407342225
+      InkSplatter_4: 5306776116754325084
+      InkSplatter_5: 2279707418826218821
+      InkSplatter_6: -6268785421173136817
+      InkSplatter_7: 3207384243023097053
+      InkSplatter_8: -8785338966432652463
+      InkSplatter_9: 6457417204526546084
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

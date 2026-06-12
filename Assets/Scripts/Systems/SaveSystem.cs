@@ -190,6 +190,10 @@ public class SaveSystem : MonoBehaviour
     // 常驻系统下，全局态只在「首次进入 / 显式读档 / 重生」时 apply，切场景不再 apply（内存连续）。
     bool globalStateLoaded;
 
+    // 每次「场景态 apply 完成」后触发（读档 / 重生 / 进场景都会走到）。
+    // 例如 BossIntroTrigger 订阅它，在读档后把存活的 boss 重新置为沉睡，让登场剧情可再次触发。
+    public static event System.Action AfterApply;
+
     // 显式读档 / 重生：apply 全套（全局 + 场景），并标记全局已载入
     public bool LoadAndApply()
     {
@@ -304,6 +308,8 @@ public class SaveSystem : MonoBehaviour
 
         if (checkpoints != null)
             checkpoints.LoadState(data.unlockedCheckpoints, data.lastCheckpointID);
+
+        AfterApply?.Invoke();
     }
 
     public void RefreshRespawnableEnemies()
@@ -377,8 +383,8 @@ public class SaveSystem : MonoBehaviour
             GameManager.Instance?.LoadScene(data.sceneName);   // 切场景，加载后自动 apply auto 档（含 BGM）
         else
         {
-            ApplySave(data);
-            AudioManager.Instance?.RefreshSceneBGM();   // 同场景读档没有 sceneLoaded，主动重播 BGM
+            AudioManager.Instance?.RefreshSceneBGM();   // 先回到场景默认曲(区域曲)——同场景读档没有 sceneLoaded
+            ApplySave(data);                            // 再 apply → AfterApply → LevelManager 视战斗状态切 boss 曲（最终定）
         }
         return true;
     }

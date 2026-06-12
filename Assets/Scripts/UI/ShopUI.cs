@@ -1,30 +1,45 @@
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
-// 商店界面：常驻单例（跟 PauseUI 同类全局 UI），程序化构建。
-// 由 ShopNPCTrigger 调 Open(shop) 打开。shopSlotPrefab 用现成的 ShopSlot.prefab（Bootstrap Inspector 拖入）。
+// 商店界面（View 版）：布局在 Assets/Prefabs/UI/ShopUI.prefab 里摆好（木框风），常驻 Bootstrap。
+// 这个脚本只引用节点 + 跑逻辑；由 ShopNPCTrigger 调 ShopUI.Instance.Open(shop) 打开。
 public class ShopUI : MonoBehaviour
 {
     public static bool IsOpen { get; private set; }
     public static ShopUI Instance { get; private set; }
 
-    [Tooltip("商品行 prefab（拖 Assets/Prefabs/ShopSlot.prefab）")]
-    public GameObject shopSlotPrefab;
+    [Header("根 / 标题")]
+    public GameObject panelRoot;     // overlay 开关根
+    public TMP_Text titleText;
+    public TMP_Text goldText;
 
-    static readonly Color OverlayColor = new Color(0.03f, 0.02f, 0.02f, 0.72f);
-    static readonly Color PanelColor   = new Color(0.12f, 0.10f, 0.09f, 0.98f);
+    [Header("列表")]
+    public Transform listContent;    // ScrollRect 的 Content（VerticalLayoutGroup）
+    public ShopRowView rowTemplate;  // 模板行（默认隐藏，运行时克隆）
 
-    GameObject overlay;
-    GameObject panel;
-    Transform  itemListParent;
-    Text       goldText;
-    Font       uiFont;
-    bool       uiBuilt;
+    [Header("按钮")]
+    public Button exitButton;
+
+    [Header("详情确认弹窗")]
+    public GameObject detailPopup;     // 弹窗根（默认隐藏）
+    public Image      detailIcon;
+    public TMP_Text   detailName;
+    public TMP_Text   detailDesc;
+    public TMP_Text   detailPrice;
+    public Button     buyButton;       // 确认购买
+    public TMP_Text   buyButtonLabel;
+    public Button     cancelButton;    // 取消
+    public TMP_Text   hintText;        // 失败提示（默认隐藏）
+
+    static readonly Color GoldColor = new Color(0.86f, 0.66f, 0.27f, 1f);
+    static readonly Color PoorColor = new Color(0.70f, 0.32f, 0.28f, 1f);
 
     ShopSystem  shop;
     PlayerStats stats;
     bool  pausedByShop;
     float previousTimeScale = 1f;
+    System.Action reselect;   // 重新展示当前选中项（购买后刷新金币/可购性）
 
     void Awake()
     {
@@ -36,14 +51,33 @@ public class ShopUI : MonoBehaviour
         pausedByShop = false;
     }
 
+    void Start()
+    {
+        if (exitButton != null)
+        {
+            exitButton.onClick.RemoveAllListeners();
+            exitButton.onClick.AddListener(Close);
+        }
+        if (cancelButton != null)
+        {
+            cancelButton.onClick.RemoveAllListeners();
+            cancelButton.onClick.AddListener(ClearDetail);
+        }
+        if (rowTemplate != null) rowTemplate.gameObject.SetActive(false);
+        if (detailPopup != null) detailPopup.SetActive(true);   // 详情面板常驻显示
+        ClearDetail();
+        if (panelRoot != null) panelRoot.SetActive(false);
+    }
+
     public void Open(ShopSystem shopSystem)
     {
-        EnsureUI();
         shop  = shopSystem;
         stats = FindAnyObjectByType<PlayerStats>();
         IsOpen = true;
         PlayerInputBuffer.ClearAll();
-        if (overlay != null) overlay.SetActive(true);
+        if (panelRoot != null) panelRoot.SetActive(true);
+        if (detailPopup != null) detailPopup.SetActive(true);
+        ClearDetail();
         PauseGameTime();
         Refresh();
     }
@@ -52,7 +86,7 @@ public class ShopUI : MonoBehaviour
     {
         PlayerInputBuffer.ClearAll();
         IsOpen = false;
-        if (overlay != null) overlay.SetActive(false);
+        if (panelRoot != null) panelRoot.SetActive(false);
         ResumeGameTime();
     }
 
@@ -63,126 +97,101 @@ public class ShopUI : MonoBehaviour
 
     void Refresh()
     {
-        if (shop == null || itemListParent == null || shopSlotPrefab == null) return;
+        if (shop == null || listContent == null || rowTemplate == null) return;
 
-        foreach (Transform child in itemListParent) Destroy(child.gameObject);
-        if (goldText != null && stats != null) goldText.text = $"金币：{stats.gold}";
+        // 清掉旧行（保留模板）
+        foreach (Transform child in listContent)
+            if (child != rowTemplate.transform) Destroy(child.gameObject);
+
+        if (goldText != null) goldText.text = stats != null ? $"金币 {stats.gold}" : "金币 0";
 
         foreach (var entry in shop.AvailableItems)
-            AddSlot(entry.item.itemName, shop.FormatPrice(entry.item.price, entry.quantity), () => shop.BuyItem(entry, stats));
-
+        {
+            var e = entry;
+            AddRow(e.item.itemName, e.item.description, e.item.price, e.quantity, e.item.icon, () => shop.BuyItem(e, stats));
+        }
         foreach (var entry in shop.AvailableEquipment)
-            AddSlot(entry.equipment.equipmentName, shop.FormatPrice(entry.equipment.price, entry.quantity), () => shop.BuyEquipment(entry, stats));
-
+        {
+            var e = entry;
+            AddRow(e.equipment.equipmentName, e.equipment.description, e.equipment.price, e.quantity, e.equipment.icon, () => shop.BuyEquipment(e, stats));
+        }
         foreach (var entry in shop.AvailableSkills)
-            AddSlot(entry.skill.skillName, shop.FormatPrice(entry.skill.price, entry.quantity), () => shop.BuySkill(entry, stats));
+        {
+            var e = entry;
+            AddRow(e.skill.skillName, e.skill.description, e.skill.price, e.quantity, e.skill.icon, () => shop.BuySkill(e, stats));
+        }
     }
 
-    void AddSlot(string label, string priceTextValue, System.Func<bool> buyAction, bool interactable = true)
+    // 点一行 → 不直接买，弹出详情确认框
+    void AddRow(string label, string desc, int price, int quantity, Sprite icon, System.Func<bool> buyAction)
     {
-        var slot = Instantiate(shopSlotPrefab, itemListParent);
-        Text nameText = null;
-        Text priceText = null;
-        foreach (var text in slot.GetComponentsInChildren<Text>())
+        var row = Instantiate(rowTemplate, listContent);
+        row.gameObject.SetActive(true);
+        bool canAfford = stats != null && stats.gold >= price;
+        row.Setup(label, shop.FormatPrice(price, quantity), icon, canAfford,
+            () => ShowDetail(label, desc, price, quantity, icon, buyAction));
+    }
+
+    // 选中一行 → 把详情填进常驻的右侧面板（不再开关弹窗）
+    void ShowDetail(string label, string desc, int price, int quantity, Sprite icon, System.Func<bool> buyAction)
+    {
+        AudioManager.Instance?.PlayUIClick();
+        reselect = () => ShowDetail(label, desc, price, quantity, icon, buyAction);
+
+        bool canAfford = stats != null && stats.gold >= price;
+        if (detailIcon != null) { detailIcon.sprite = icon; detailIcon.enabled = icon != null; }
+        if (detailName != null) detailName.text = label;
+        if (detailDesc != null) detailDesc.text = string.IsNullOrEmpty(desc) ? "（无描述）" : desc;
+        if (detailPrice != null)
         {
-            if (text.name == "ItemName") nameText = text;
-            else if (text.name == "PriceText") priceText = text;
+            detailPrice.text  = shop.FormatPrice(price, quantity);
+            detailPrice.color = canAfford ? GoldColor : PoorColor;
         }
+        if (hintText != null) hintText.gameObject.SetActive(false);
+        if (buyButtonLabel != null) buyButtonLabel.text = "购买";
 
-        if (nameText != null) nameText.text = label;
-        if (priceText != null) priceText.text = priceTextValue;
-
-        var btn = slot.GetComponent<Button>();
-        if (btn != null)
+        if (buyButton != null)
         {
-            btn.interactable = interactable;
-            btn.onClick.AddListener(() =>
+            buyButton.interactable = true;
+            buyButton.onClick.RemoveAllListeners();
+            buyButton.onClick.AddListener(() =>
             {
                 AudioManager.Instance?.PlayUIClick();
                 bool bought = buyAction();
-                if (bought) AudioManager.Instance?.PlayShopBuy();
-                else { AudioManager.Instance?.PlayShopFail(); Debug.LogWarning($"购买失败：{label}"); }
-                Refresh();
+                if (bought)
+                {
+                    AudioManager.Instance?.PlayShopBuy();
+                    Refresh();           // 刷新列表 + 金币
+                    reselect?.Invoke();  // 重填详情，更新金币/价格颜色，可连续购买
+                }
+                else
+                {
+                    AudioManager.Instance?.PlayShopFail();
+                    if (hintText != null)
+                    {
+                        hintText.text = (stats != null && stats.gold < price) ? "金币不足" : "无法购买";
+                        hintText.gameObject.SetActive(true);
+                    }
+                }
             });
         }
     }
 
-    // ── 程序化构建 UI ──────────────────────────────────────────────
-    void EnsureUI()
+    // 未选中 / 取消 / 刚打开：详情面板显示占位，购买键禁用
+    void ClearDetail()
     {
-        if (uiBuilt) return;
-        uiBuilt = true;
-
-        EnsureHostCanvas();
-        uiFont = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf")
-              ?? Resources.GetBuiltinResource<Font>("Arial.ttf");
-
-        overlay = CreateUIObject("ShopOverlay", transform);
-        Stretch(overlay.GetComponent<RectTransform>());
-        var bg = overlay.AddComponent<Image>();
-        bg.color = OverlayColor;
-        bg.raycastTarget = true;
-
-        // 面板
-        panel = CreateUIObject("ShopPanel", overlay.transform);
-        SetRect(panel.GetComponent<RectTransform>(), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(640f, 720f));
-        panel.AddComponent<Image>().color = PanelColor;
-
-        var title = CreateText("Title", panel.transform, "商 店", 34, TextAnchor.UpperCenter);
-        SetRect(title.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -16f), new Vector2(560f, 50f));
-        title.fontStyle = FontStyle.Bold;
-
-        goldText = CreateText("Gold", panel.transform, "金币：0", 22, TextAnchor.UpperRight);
-        SetRect(goldText.rectTransform, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-24f, -72f), new Vector2(260f, 36f));
-        goldText.color = new Color(1f, 0.86f, 0.4f, 1f);
-
-        // 商品列表容器（竖排）
-        var listGo = CreateUIObject("ItemList", panel.transform);
-        SetRect(listGo.GetComponent<RectTransform>(), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -120f), new Vector2(580f, 540f));
-        var layout = listGo.AddComponent<VerticalLayoutGroup>();
-        layout.spacing = 8f;
-        layout.childForceExpandHeight = false;
-        layout.childControlHeight = false;
-        layout.childAlignment = TextAnchor.UpperCenter;
-        itemListParent = listGo.transform;
-
-        // 退出按钮
-        BuildExitButton(panel.transform);
-
-        overlay.SetActive(false);
-    }
-
-    void EnsureHostCanvas()
-    {
-        var canvas = GetComponent<Canvas>();
-        if (canvas == null) canvas = gameObject.AddComponent<Canvas>();
-        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        canvas.overrideSorting = true;
-        canvas.sortingOrder = 950;   // 低于暂停(1000)/死亡(1100)，高于 HUD/角色面板(900)
-
-        var scaler = GetComponent<CanvasScaler>();
-        if (scaler == null) scaler = gameObject.AddComponent<CanvasScaler>();
-        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(1920f, 1080f);
-        scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
-        scaler.matchWidthOrHeight = 0.5f;
-
-        if (GetComponent<GraphicRaycaster>() == null)
-            gameObject.AddComponent<GraphicRaycaster>();
-    }
-
-    void BuildExitButton(Transform parent)
-    {
-        var go = CreateUIObject("ShopExitButton", parent);
-        SetRect(go.GetComponent<RectTransform>(), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 30f), new Vector2(180f, 50f));
-        go.AddComponent<Image>().color = new Color(0.30f, 0.20f, 0.18f, 0.95f);
-
-        var btn = go.AddComponent<Button>();
-        btn.onClick.AddListener(Close);
-
-        var text = CreateText("Text", go.transform, "退 出", 22, TextAnchor.MiddleCenter);
-        Stretch(text.rectTransform);
-        text.raycastTarget = false;
+        reselect = null;
+        if (detailIcon != null) { detailIcon.sprite = null; detailIcon.enabled = false; }
+        if (detailName != null) detailName.text = "选择商品查看详情";
+        if (detailDesc != null) detailDesc.text = "";
+        if (detailPrice != null) detailPrice.text = "";
+        if (hintText != null) hintText.gameObject.SetActive(false);
+        if (buyButtonLabel != null) buyButtonLabel.text = "购买";
+        if (buyButton != null)
+        {
+            buyButton.onClick.RemoveAllListeners();
+            buyButton.interactable = false;
+        }
     }
 
     void PauseGameTime()
@@ -198,45 +207,5 @@ public class ShopUI : MonoBehaviour
         if (!pausedByShop) return;
         Time.timeScale = GameManager.Instance != null && GameManager.Instance.IsPaused ? 0f : previousTimeScale;
         pausedByShop = false;
-    }
-
-    // ── UI 小工具 ──────────────────────────────────────────────────
-    GameObject CreateUIObject(string name, Transform parent)
-    {
-        var go = new GameObject(name, typeof(RectTransform));
-        go.transform.SetParent(parent, false);
-        return go;
-    }
-
-    Text CreateText(string name, Transform parent, string value, int size, TextAnchor anchor)
-    {
-        var go = CreateUIObject(name, parent);
-        var text = go.AddComponent<Text>();
-        text.text = value;
-        text.font = uiFont;
-        text.fontSize = size;
-        text.alignment = anchor;
-        text.color = Color.white;
-        text.horizontalOverflow = HorizontalWrapMode.Overflow;
-        text.verticalOverflow = VerticalWrapMode.Overflow;
-        return text;
-    }
-
-    void SetRect(RectTransform rect, Vector2 anchorMin, Vector2 anchorMax, Vector2 pos, Vector2 size)
-    {
-        rect.anchorMin = anchorMin;
-        rect.anchorMax = anchorMax;
-        rect.pivot = new Vector2(0.5f, 0.5f);
-        rect.anchoredPosition = pos;
-        rect.sizeDelta = size;
-    }
-
-    void Stretch(RectTransform rect)
-    {
-        rect.anchorMin = Vector2.zero;
-        rect.anchorMax = Vector2.one;
-        rect.pivot = new Vector2(0.5f, 0.5f);
-        rect.offsetMin = Vector2.zero;
-        rect.offsetMax = Vector2.zero;
     }
 }

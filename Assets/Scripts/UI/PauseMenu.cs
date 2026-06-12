@@ -171,7 +171,7 @@ public class PauseMenu : MonoBehaviour
     bool CanOpenPause()
     {
         if (GameManager.Instance == null || GameManager.Instance.IsGameOver || GameManager.Instance.IsPaused) return false;
-        if (ShopUI.IsOpen || CharacterPanelUI.IsOpen || VictoryUI.IsOpen) return false;
+        if (ShopUI.IsOpen || CharacterPanelUI.IsOpen || VictoryUI.IsOpen || DialogueUI.IsPlaying || BossIntroTrigger.Sequencing || BossFinishUI.IsPlaying) return false;
 
         string active = SceneManager.GetActiveScene().name;
         foreach (var s in NonPausableScenes)
