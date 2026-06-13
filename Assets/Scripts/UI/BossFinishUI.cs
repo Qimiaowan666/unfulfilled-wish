@@ -24,6 +24,10 @@ public class BossFinishUI : MonoBehaviour
     public Color  darkColor       = new Color(0.02f, 0.02f, 0.05f, 1f);
     [Tooltip("水墨泼溅大小（越小越像伤口、越大越像爆炸）")]
     public float  splatterScale   = 1.2f;
+    [Tooltip("泼溅/碎屑相对 boss 中心向下偏移（按 boss 半高比例，0=正中，0.3≈往下三成）")]
+    public float  vfxDropFrac     = 0.28f;
+    [Tooltip("演出期间 boss 死亡动画的播放速度（1=原速，越小越慢镜）")]
+    public float  deathAnimSpeed  = 0.4f;
 
     [Header("击破名牌")]
     public GameObject  defeatBanner;   // 名牌根（金框 + 烘焙文字 DefeatTextImg，默认隐藏）
@@ -31,6 +35,8 @@ public class BossFinishUI : MonoBehaviour
 
     struct SRState { public SpriteRenderer sr; public Material mat; public Color color; public int layer; public int order; }
     readonly List<SRState> swapped = new List<SRState>();
+    struct AnimMode { public Animator a; public AnimatorUpdateMode mode; public float speed; }
+    readonly List<AnimMode> animModes = new List<AnimMode>();
     Sprite squareSprite;
     GameObject hudHidden;
 
@@ -80,6 +86,18 @@ public class BossFinishUI : MonoBehaviour
 
         Vector3 bossPos = boss != null ? BossCenter(boss) : Vector3.zero;
 
+        // 让 boss 死亡动画在演出慢放(timeScale≈0)里也按真实时间播完，
+        // 否则 Animator 跟着冻住，剪影会定格在接近站立的早期帧。
+        animModes.Clear();
+        if (boss != null)
+            foreach (var a in boss.GetComponentsInChildren<Animator>())
+                if (a != null)
+                {
+                    animModes.Add(new AnimMode { a = a, mode = a.updateMode, speed = a.speed });
+                    a.updateMode = AnimatorUpdateMode.UnscaledTime;   // 不被慢放冻住
+                    a.speed = deathAnimSpeed;                         // 但放慢，保留慢镜感
+                }
+
         // 1) 顿帧 + 白闪 + BGM 戛然而止（更有节奏）
         AudioManager.Instance?.StopBGM();
         Time.timeScale = 0.0001f;
@@ -100,8 +118,11 @@ public class BossFinishUI : MonoBehaviour
 
         // 4) 黑幕合上后：boss 剪影 + 水墨泼溅 + 碎屑 —— 同一刻一起出现
         var bossSRs = boss != null ? SwapToSilhouette(boss.gameObject, Color.white, topLayer, 30010) : new List<SpriteRenderer>();
-        var splatSR = SpawnSplatter(bossPos, topLayer, 30005);   // 泼溅排在剪影之下；alpha 不自淡，交给下面共享 fade
-        SpawnShards(bossPos, topLayer, 30025, 16);
+        // VFX 生成点：boss 中心往下偏一点（按半高比例）
+        var bsr = boss != null ? boss.GetComponentInChildren<SpriteRenderer>() : null;
+        Vector3 vfxPos = bossPos + Vector3.down * (bsr != null ? bsr.bounds.extents.y * vfxDropFrac : 0f);
+        var splatSR = SpawnSplatter(vfxPos, topLayer, 30005);   // 泼溅排在剪影之下；alpha 不自淡，交给下面共享 fade
+        SpawnShards(vfxPos, topLayer, 30025, 16);
         StartCoroutine(ShowDefeatBannerDelayed(1.2f));   // 名牌晚一拍再浮现
         // 只显示 boss 剪影；主角不染白(被压暗块盖住，不出现在画面)
 
@@ -116,13 +137,19 @@ public class BossFinishUI : MonoBehaviour
             if (splatSR != null) { var c = splatSR.color; c.a = a; splatSR.color = c; }
         });
 
-        // 7) 停一拍
-        yield return new WaitForSecondsRealtime(1.4f);
+        // 7) 停一拍（全黑 + 名牌定格）
+        yield return new WaitForSecondsRealtime(1.0f);
 
-        // 8) 收尾 → 交给 VictoryUI
+        // 8) 收尾：黑幕(+名牌) 逐渐消失、露出场景 → 还原 → 交给 VictoryUI
         Time.timeScale = 1f;
         RestoreSwapped();
         if (splatSR != null) Destroy(splatSR.gameObject);
+        if (boss != null) boss.gameObject.SetActive(false);   // 死 boss 收掉，渐隐时不重现（DisableAfterDeath 多半已收，这里兜底）
+        yield return Fade(1.5f, t =>
+        {
+            if (darkSR != null) { var c = darkColor; c.a = 1f - t; darkSR.color = c; }   // 黑幕渐隐
+            if (defeatGroup != null) defeatGroup.alpha = 1f - t;                          // 名牌一起淡出
+        });
         if (dark != null) Destroy(dark);
         if (panelRoot != null) panelRoot.SetActive(false);
         IsPlaying = false;
@@ -199,6 +226,13 @@ public class BossFinishUI : MonoBehaviour
         foreach (var s in swapped)
             if (s.sr != null) { s.sr.sharedMaterial = s.mat; s.sr.color = s.color; s.sr.sortingLayerID = s.layer; s.sr.sortingOrder = s.order; }
         swapped.Clear();
+        RestoreAnimUpdate();
+    }
+
+    void RestoreAnimUpdate()
+    {
+        foreach (var m in animModes) if (m.a != null) { m.a.updateMode = m.mode; m.a.speed = m.speed; }
+        animModes.Clear();
     }
 
     // 击破演出期间藏玩家 HUD（血条/体力等所在的 Canvas），演出结束再开

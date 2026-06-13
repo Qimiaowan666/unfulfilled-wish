@@ -23,15 +23,7 @@ public static class CameraSetup
         if (mainCam.GetComponent<CinemachineBrain>() == null)
             Undo.AddComponent<CinemachineBrain>(mainCam.gameObject);
 
-        // 2. 移除旧的简易 CameraFollow（如果有）
-        var oldFollow = mainCam.GetComponent<CameraFollow>();
-        if (oldFollow != null)
-        {
-            Undo.DestroyObjectImmediate(oldFollow);
-            Debug.Log("[CameraSetup] 移除 Main Camera 上旧的 CameraFollow 组件。");
-        }
-
-        // 3. 检查是否已有 CinemachineCamera 物体
+        // 2. 检查是否已有 CinemachineCamera 物体
         var existing = GameObject.Find("CinemachineCamera");
         if (existing != null)
         {
