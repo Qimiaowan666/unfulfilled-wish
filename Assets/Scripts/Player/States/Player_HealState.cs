@@ -30,22 +30,13 @@ public class Player_HealState : PlayerBaseState
         if (!string.IsNullOrEmpty(skill.AnimStateName) && anim != null)
             anim.Play(skill.AnimStateName, 0, 0f);
 
-        SpawnVfx();
+        if (skill.VfxEnabled)
+            activeVfx = VfxManager.PlayLoop("Vfx/HealAura", player.transform, (Vector3)skill.VfxLocalOffset, 1f,
+                                            skill.VfxTint, player.GetComponentInChildren<SpriteRenderer>());
+        AudioManager.Instance?.PlayHeal();
 
         player.Stats.OnDamaged += OnDamagedDuringCast;
         Debug.Log($"[Heal] 开始施法 {skill.CastDuration}s");
-    }
-
-    void SpawnVfx()
-    {
-        if (!skill.VfxEnabled || skill.VfxFrames == null || skill.VfxFrames.Length == 0) return;
-        activeVfx = new GameObject("Vfx_HealAura");
-        activeVfx.transform.SetParent(player.transform, false);   // 跟随玩家
-        activeVfx.transform.localPosition = (Vector3)skill.VfxLocalOffset;
-        activeVfx.transform.localScale    = new Vector3(skill.VfxLocalScale.x, skill.VfxLocalScale.y, 1f);
-        activeVfx.AddComponent<Vfx_SpriteAnim>()
-                 .Init(skill.VfxFrames, skill.VfxFps, skill.VfxTint,
-                       skill.VfxSortingLayer, skill.VfxSortingOrder);
     }
 
     void OnDamagedDuringCast(float dmg)
@@ -82,6 +73,6 @@ public class Player_HealState : PlayerBaseState
     {
         base.Exit();   // 设 isHealing = false → rest state 此时退出回 idle
         player.Stats.OnDamaged -= OnDamagedDuringCast;
-        if (activeVfx != null) Object.Destroy(activeVfx);
+        if (activeVfx != null) { VfxManager.StopLoop(activeVfx); activeVfx = null; }
     }
 }

@@ -21,6 +21,8 @@ public class CharacterPanelUI : MonoBehaviour
     public TMP_Text goldText;
     [Tooltip("顺序：状态 / 装备 / 背包 / 技能")]
     public Button[] tabButtons;
+    [Tooltip("右上角关闭按钮(X)")]
+    public Button closeButton;
 
     [Header("四页 View（顺序对应 tab）")]
     public CharacterPageView[] pages;
@@ -96,6 +98,7 @@ public class CharacterPanelUI : MonoBehaviour
     void SetOpen(bool value)
     {
         if (value && ShopUI.IsOpen) return;
+        if (value) AudioManager.Instance?.PlayUIOpen(); else AudioManager.Instance?.PlayUIClick();   // 开=开启声 / 关=点击声
         isOpen = value; IsOpen = value;
         PlayerInputBuffer.ClearAll();
         if (panelRoot != null) panelRoot.SetActive(isOpen);
@@ -106,6 +109,7 @@ public class CharacterPanelUI : MonoBehaviour
 
     void SetTab(int idx)
     {
+        AudioManager.Instance?.PlayUIClick();   // 切页
         int max = pages != null ? pages.Length - 1 : 0;
         currentTab = Mathf.Clamp(idx, 0, Mathf.Max(0, max));
         Refresh();
@@ -149,6 +153,11 @@ public class CharacterPanelUI : MonoBehaviour
 
     void BindTabs()
     {
+        if (closeButton != null)
+        {
+            closeButton.onClick.RemoveAllListeners();
+            closeButton.onClick.AddListener(() => SetOpen(false));   // 右上角 X 关闭面板
+        }
         if (tabButtons == null) return;
         for (int i = 0; i < tabButtons.Length; i++)
         {

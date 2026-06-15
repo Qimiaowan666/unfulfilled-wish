@@ -169,6 +169,25 @@ public class EquipmentSystem : MonoBehaviour
         OnEquipmentChanged?.Invoke();
     }
 
+    // 把饰品装到指定槽(1 或 2)，替换该槽原有；用于面板上点某个饰品槽精确换装（不再总是覆盖槽1）
+    public void EquipAccessoryToSlot(EquipmentData equipment, int slotIndex)
+    {
+        if (equipment == null || equipment.slot != EquipmentSlot.Accessory) return;
+        if (slotIndex != 1 && slotIndex != 2) return;
+        if (!ownedEquipment.Contains(equipment)) ownedEquipment.Add(equipment);
+
+        // 同一件已在另一槽 → 先从那槽卸下，避免两个槽放同一件
+        if (slotIndex == 1 && accessory2 == equipment) { ApplyBonus(accessory2, -1f); accessory2 = null; }
+        if (slotIndex == 2 && accessory1 == equipment) { ApplyBonus(accessory1, -1f); accessory1 = null; }
+
+        EquipmentData old = slotIndex == 1 ? accessory1 : accessory2;
+        if (old == equipment) return;                  // 已在目标槽，无操作
+        if (old != null) ApplyBonus(old, -1f);         // 卸下目标槽原有
+        if (slotIndex == 1) accessory1 = equipment; else accessory2 = equipment;
+        ApplyBonus(equipment, 1f);
+        OnEquipmentChanged?.Invoke();
+    }
+
     public void Unequip(EquipmentSlot slot)
     {
         switch (slot)

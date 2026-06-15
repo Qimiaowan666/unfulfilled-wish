@@ -332,6 +332,18 @@ public class SaveSystem : MonoBehaviour
         runtimeOpenedDoorIDs.Clear();
     }
 
+    // 新游戏：清自动档 + 清空常驻单例（装备/背包/技能）。
+    // 这些是 DontDestroyOnLoad 单例，光删档不会清它们；不清的话上一局的装备/物品/技能会残留到新档。
+    public void ResetForNewGame()
+    {
+        DeleteSave();
+        globalStateLoaded = false;
+        nextLoadIsRespawn = false;
+        EquipmentSystem.Instance?.LoadEquipment(null, null, null, null, null);
+        InventorySystem.Instance?.LoadItems(null);
+        SkillSystem.Instance?.LoadSkills(null);
+    }
+
     // ===== 手动多槽存读（ESC 菜单：随时存 / 读，带截图缩略图）=====
 
     public SaveData Load(int slot)

@@ -28,6 +28,16 @@ public class DamageFeedback : MonoBehaviour
         flashRoutine = StartCoroutine(FlashRoutine());
     }
 
+    // 设置「基色」：受击闪白后恢复到的颜色 + 立即应用。用于持久染色（如 boss 二阶段怒气红）。
+    public void SetBaseColor(Color color)
+    {
+        for (int i = 0; i < renderers.Length; i++)
+        {
+            if (i < originalColors.Length) originalColors[i] = color;
+            if (renderers[i] != null) renderers[i].color = color;
+        }
+    }
+
     public void FlashWarning(float duration = 0.4f)
     {
         if (renderers.Length == 0) return;

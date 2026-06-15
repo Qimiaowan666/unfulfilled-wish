@@ -15,7 +15,7 @@ MonoBehaviour:
   saveID: 
   skillName: "\u72C2\u6218\u6012\u706B"
   description: "\u88AB\u52A8\uFF1A\u63D0\u9AD8\u653B\u51FB\u3002"
-  icon: {fileID: 21300000, guid: cca4f90948e03434f8c482719b9eb718, type: 3}
+  icon: {fileID: 21300000, guid: 876c0fe9addc0b6438bea014a26ebb79, type: 3}
   type: 1
   price: 160
   cooldown: 0

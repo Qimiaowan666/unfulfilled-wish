@@ -7,7 +7,7 @@ public abstract class CharacterPageView : MonoBehaviour
     public abstract void Refresh();
 
     public void Show() { gameObject.SetActive(true); Refresh(); }
-    public void Hide() { gameObject.SetActive(false); }
+    public virtual void Hide() { gameObject.SetActive(false); }
 
     protected static void ClearChildren(Transform t)
     {

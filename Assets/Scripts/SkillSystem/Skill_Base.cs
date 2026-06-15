@@ -8,6 +8,7 @@ public class Skill_Base : MonoBehaviour
 
     [Header("General details")]
     [SerializeField] protected PlayerSkillType skillType;
+    [SerializeField] protected Sprite          icon;                    // 技能图标（UI 显示）
     [SerializeField] protected float           cooldown         = 1f;
     [SerializeField] protected float           damageMultiplier = 1f;
     [SerializeField] protected float           staminaCost      = 0f;   // 0 = 不消耗
@@ -42,6 +43,7 @@ public class Skill_Base : MonoBehaviour
     }
 
     public PlayerSkillType GetSkillType() => skillType;
+    public Sprite GetIcon()            => icon;
     public float GetCooldown()         => cooldown;
     public float GetStaminaCost()      => staminaCost;
     public float GetDamageMultiplier() => damageMultiplier;

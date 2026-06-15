@@ -140,7 +140,7 @@ public class PlayerStats : MonoBehaviour
 
         var feedback = GetComponent<DamageFeedback>();
         if (feedback != null) feedback.Flash();
-        CameraShake.Instance?.Shake();
+        CameraShake.Shake(0.1f, 0.06f);
 
         if (CurrentHP <= 0f) Die();
     }

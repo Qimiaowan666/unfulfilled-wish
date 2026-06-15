@@ -104,16 +104,11 @@ public class ShopSystem : MonoBehaviour
         var equipmentSystem = EquipmentSystem.Instance;
         if (equipmentSystem == null) return false;
 
-        if (equipmentSystem.HasEquipment(entry.equipment))
-        {
-            equipmentSystem.EquipOwned(entry.equipment);
-            Consume(entry);
-            return true;
-        }
+        if (equipmentSystem.HasEquipment(entry.equipment)) return false;   // 已拥有，不重复购买
 
         if (stats.gold < entry.equipment.price) return false;
         stats.AddGold(-entry.equipment.price);
-        equipmentSystem.AddEquipment(entry.equipment, true);
+        equipmentSystem.AddEquipment(entry.equipment, false);   // 只入库，不自动装备（去商店买完自己到面板装）
         Consume(entry);
         return true;
     }

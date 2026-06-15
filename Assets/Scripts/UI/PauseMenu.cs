@@ -102,6 +102,7 @@ public class PauseMenu : MonoBehaviour
 
         if (IsOpen)
         {
+            AudioManager.Instance?.PlayUIClick();   // ESC 返回/关闭
             if (confirmPanel != null && confirmPanel.activeSelf) HideConfirm();
             else if (standalone) CloseStandalone();
             else if (page != Page.Main) ShowMain();
@@ -145,7 +146,7 @@ public class PauseMenu : MonoBehaviour
     {
         if (button == null) return;
         button.onClick.RemoveAllListeners();
-        button.onClick.AddListener(() => { PlayerInputBuffer.ClearAll(); action?.Invoke(); });
+        button.onClick.AddListener(() => { AudioManager.Instance?.PlayUIClick(); PlayerInputBuffer.ClearAll(); action?.Invoke(); });
     }
 
     // ─────────────────────────────────────────────────────
@@ -171,7 +172,7 @@ public class PauseMenu : MonoBehaviour
     bool CanOpenPause()
     {
         if (GameManager.Instance == null || GameManager.Instance.IsGameOver || GameManager.Instance.IsPaused) return false;
-        if (ShopUI.IsOpen || CharacterPanelUI.IsOpen || VictoryUI.IsOpen || DialogueUI.IsPlaying || BossIntroTrigger.Sequencing || BossFinishUI.IsPlaying) return false;
+        if (ShopUI.IsOpen || CharacterPanelUI.IsOpen || VictoryUI.IsOpen || DialogueUI.IsPlaying || BossIntroTrigger.Sequencing || BossFinishUI.IsPlaying || MinotaurBoss.PhaseTransition) return false;
 
         string active = SceneManager.GetActiveScene().name;
         foreach (var s in NonPausableScenes)
@@ -189,6 +190,7 @@ public class PauseMenu : MonoBehaviour
 
     void Open()
     {
+        AudioManager.Instance?.PlayUIOpen();   // 暂停菜单弹出
         if (panelRoot != null) panelRoot.SetActive(true);
         ShowMain();
         IsOpen = true;

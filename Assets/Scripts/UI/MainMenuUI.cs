@@ -39,8 +39,7 @@ public class MainMenuUI : MonoBehaviour
 
     public void NewGame()
     {
-        SaveSystem.Instance?.DeleteSave();          // 清自动档，从头开始
-        SaveSystem.Instance?.RequestFullReload();
+        SaveSystem.Instance?.ResetForNewGame();     // 清档 + 清空常驻装备/背包/技能，真正从头开始
         LoadScene(firstGameplayScene);
     }
 

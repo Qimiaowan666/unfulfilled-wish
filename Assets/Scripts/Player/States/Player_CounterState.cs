@@ -15,6 +15,7 @@ public class Player_CounterState : PlayerBaseState
         animFinished      = false;
         stateTimer        = player.counterWindow * 3f; // total fallback duration
         rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
+        AudioManager.Instance?.PlayCounterWhiff();   // 识破挥击声（挥空也有反馈；命中再叠 PlayCounter）
         Debug.Log("[Player] 进入识破状态，窗口由动画事件 AnimationCounterWindowClosed 关闭");
     }
 
@@ -58,6 +59,11 @@ public class Player_CounterState : PlayerBaseState
         player.Stats.RedeemGhostHP(player.Stats.counterHealAmount);
         player.Stats.GainStamina(player.Stats.counterStaminaGain);
         AudioManager.Instance?.PlayCounter();
+        CameraShake.Shake(0.12f, 0.08f);   // 识破成功：一记爽脆震屏
+        // 识破成功：暖金火花（更大更亮，系统粒子预制，走 VfxManager 池）
+        Vector3 sp = player.transform.position + new Vector3((player.FacingRight ? 1f : -1f) * 0.7f, 0.95f, 0f);
+        VfxManager.Play("Vfx/GuardSpark", sp, Quaternion.identity, 1.2f,
+                        new Color(1f, 0.8f, 0.45f), player.GetComponentInChildren<SpriteRenderer>());
         enemy.OnCountered();   // 切到 boss 的 staggerState，结束当前攻击 + 短暂停顿
         return true;
     }

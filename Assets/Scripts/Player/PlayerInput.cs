@@ -17,7 +17,8 @@ public class PlayerInput : MonoBehaviour
     bool InputBlocked =>
         (GameManager.Instance != null && (GameManager.Instance.IsPaused || GameManager.Instance.IsGameOver)) ||
         ShopUI.IsOpen || CharacterPanelUI.IsOpen || PauseMenu.IsOpen || VictoryUI.IsOpen ||
-        DialogueUI.IsPlaying || BossIntroTrigger.Sequencing || BossFinishUI.IsPlaying;
+        DialogueUI.IsPlaying || BossIntroTrigger.Sequencing || BossFinishUI.IsPlaying ||
+        MinotaurBoss.PhaseTransition;
 
     void Update()
     {

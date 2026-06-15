@@ -216,7 +216,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6308646177846846426}
   - component: {fileID: 2936234144180337457}
-  - component: {fileID: 288796834411843929}
+  - component: {fileID: 8042808622095717071}
   m_Layer: 0
   m_Name: CampfireVisual
   m_TagString: Untagged
@@ -298,23 +298,25 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
---- !u!114 &288796834411843929
-MonoBehaviour:
+--- !u!95 &8042808622095717071
+Animator:
+  serializedVersion: 7
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8290813904424710315}
   m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f40c0dd8ca6a3f144b9aafc01bf68f3e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::LoopedSpriteAnimation
-  frames:
-  - {fileID: 6911056676163173146, guid: 5a66301d689350e4eb9079f9bdbd71cf, type: 3}
-  - {fileID: 3638588854622080461, guid: 5a66301d689350e4eb9079f9bdbd71cf, type: 3}
-  - {fileID: 4258691910607252123, guid: 5a66301d689350e4eb9079f9bdbd71cf, type: 3}
-  - {fileID: -167408823652372025, guid: 5a66301d689350e4eb9079f9bdbd71cf, type: 3}
-  - {fileID: -6563699389893897227, guid: 5a66301d689350e4eb9079f9bdbd71cf, type: 3}
-  - {fileID: -2002984010778373910, guid: 5a66301d689350e4eb9079f9bdbd71cf, type: 3}
-  fps: 8
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 8cee3a47e9be62b43b8b6b07a578e51f, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0

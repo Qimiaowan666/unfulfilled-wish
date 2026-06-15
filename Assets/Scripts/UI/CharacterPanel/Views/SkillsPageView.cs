@@ -31,7 +31,7 @@ public class SkillsPageView : CharacterPageView
                     var captured = s; var t = s.GetSkillType();
                     AddItem(listContainer, $"[{SkillKey(t)}] {SkillDisplayName(t)}",
                         $"主动 · CD {s.GetCooldown():F1}s · 体力 {s.GetStaminaCost():F0}",
-                        null, ReferenceEquals(selected, s), () => { selected = captured; Refresh(); });
+                        s.GetIcon(), ReferenceEquals(selected, s), () => { AudioManager.Instance?.PlayUIClick(); selected = captured; Refresh(); });
                     total++;
                 }
             if (skills != null && skills.learnedSkills != null)
@@ -40,7 +40,7 @@ public class SkillsPageView : CharacterPageView
                     if (sk == null || sk.type != SkillType.Active) continue;
                     var captured = sk;
                     AddItem(listContainer, sk.skillName, SkillSub(sk), sk.icon, ReferenceEquals(selected, sk),
-                        () => { selected = captured; Refresh(); });
+                        () => { AudioManager.Instance?.PlayUIClick(); selected = captured; Refresh(); });
                     total++;
                 }
         }
@@ -54,7 +54,7 @@ public class SkillsPageView : CharacterPageView
                 if (sk == null || sk.type != SkillType.Passive) continue;
                 var captured = sk;
                 AddItem(listContainer, sk.skillName, SkillSub(sk), sk.icon, ReferenceEquals(selected, sk),
-                    () => { selected = captured; Refresh(); });
+                    () => { AudioManager.Instance?.PlayUIClick(); selected = captured; Refresh(); });
                 total++;
             }
         }
@@ -106,7 +106,7 @@ public class SkillsPageView : CharacterPageView
         if (selected is Skill_Base sb)
         {
             var t = sb.GetSkillType();
-            detail.SetHeader($"[{SkillKey(t)}] {SkillDisplayName(t)}", ActiveDesc(t), null);
+            detail.SetHeader($"[{SkillKey(t)}] {SkillDisplayName(t)}", ActiveDesc(t), sb.GetIcon());
             detail.ClearStats();
             detail.AddStat("冷却", $"{sb.GetCooldown():F1}s");
             detail.AddStat("体力消耗", $"{sb.GetStaminaCost():F0}");

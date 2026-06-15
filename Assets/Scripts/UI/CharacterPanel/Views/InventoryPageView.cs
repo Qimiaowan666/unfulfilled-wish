@@ -56,7 +56,7 @@ public class InventoryPageView : CharacterPageView
             {
                 var captured = stacks[idx].item;
                 slot.Setup(stacks[idx].item.icon, stacks[idx].count, stacks[idx].item == selected,
-                           () => { selected = captured; Refresh(); });
+                           () => { AudioManager.Instance?.PlayUIClick(); selected = captured; Refresh(); });
             }
             else
             {
@@ -70,8 +70,8 @@ public class InventoryPageView : CharacterPageView
 
     void WirePager()
     {
-        if (prevButton != null) { prevButton.onClick.RemoveAllListeners(); prevButton.onClick.AddListener(PrevPage); }
-        if (nextButton != null) { nextButton.onClick.RemoveAllListeners(); nextButton.onClick.AddListener(NextPage); }
+        if (prevButton != null) { prevButton.onClick.RemoveAllListeners(); prevButton.onClick.AddListener(() => { AudioManager.Instance?.PlayUIClick(); PrevPage(); }); }
+        if (nextButton != null) { nextButton.onClick.RemoveAllListeners(); nextButton.onClick.AddListener(() => { AudioManager.Instance?.PlayUIClick(); NextPage(); }); }
     }
 
     void UpdatePager(int page, int total)
@@ -121,6 +121,7 @@ public class InventoryPageView : CharacterPageView
         var target = item;
         detail.SetAction("使用", canUse, () =>
         {
+            AudioManager.Instance?.PlayUIUse();
             var stats = Object.FindAnyObjectByType<PlayerStats>();
             InventorySystem.Instance?.UseItem(target, stats);
             selected = null;

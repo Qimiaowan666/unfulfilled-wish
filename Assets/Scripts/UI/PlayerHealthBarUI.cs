@@ -1,14 +1,15 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using TMPro;
 
+// 玩家 HUD（血/虚血/体力/韧性）。常驻 Bootstrap：每次 sceneLoaded 重新 Find 当前场景玩家并重新绑定，
+// 没有玩家的场景（主菜单/Bootstrap）则隐藏可视部分。
 public class PlayerHealthBarUI : MonoBehaviour
 {
     [Header("HP")]
     public Image hpFill;
     public Image ghostFill;
-    public TMP_Text hpText;
 
     [Header("Poise")]
     public Image poiseFill;
@@ -16,7 +17,6 @@ public class PlayerHealthBarUI : MonoBehaviour
 
     [Header("Stamina")]
     public Image staminaFill;
-    public TMP_Text staminaText;
 
     [Header("Damage Feedback")]
     public RectTransform shakeTarget;
@@ -29,13 +29,44 @@ public class PlayerHealthBarUI : MonoBehaviour
     PoiseMeter poise;
     Vector2 shakeOrigin;
     Color hpOriginalColor;
+    bool cached;
+    LiquidBar hpLiquid, ghostLiquid, staminaLiquid;   // 液体条驱动（暗黑4式波浪），无则回退 fillAmount
+    bool firstFill = true;             // 首次填充瞬间到位，之后才晃
+    bool firstStamina = true;
     Coroutine shakeRoutine;
     Coroutine flashRoutine;
 
-    void Start()
+    void Awake() { SceneManager.sceneLoaded += OnSceneLoaded; }
+
+    void OnDestroy()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+        Unbind();
+    }
+
+    void Start() { CacheSelf(); Acquire(); }
+    void OnSceneLoaded(Scene s, LoadSceneMode m) { CacheSelf(); Acquire(); }
+
+    // 缓存自身（HUD 位置 / hp 原色）一次即可，与玩家无关
+    void CacheSelf()
+    {
+        if (cached) return;
+        if (shakeTarget == null) shakeTarget = transform as RectTransform;
+        if (shakeTarget != null) shakeOrigin = shakeTarget.anchoredPosition;
+        if (hpFill != null) hpOriginalColor = hpFill.color;
+        if (hpFill != null) hpLiquid = hpFill.GetComponent<LiquidBar>();
+        if (ghostFill != null) ghostLiquid = ghostFill.GetComponent<LiquidBar>();
+        if (staminaFill != null) staminaLiquid = staminaFill.GetComponent<LiquidBar>();
+        cached = true;
+    }
+
+    // 重新获取当前场景玩家并绑定；无玩家则隐藏
+    void Acquire()
     {
         var player = FindAnyObjectByType<PlayerStats>();
-        if (player == null) return;
+        if (player == stats) { SetVisible(stats != null); return; }   // 没变化
+        Unbind();
+        if (player == null) { SetVisible(false); return; }
         Bind(player);
         poise = player.GetComponent<PoiseMeter>();
         if (poise != null)
@@ -47,13 +78,10 @@ public class PlayerHealthBarUI : MonoBehaviour
         {
             poiseBarRoot.SetActive(false);
         }
-
-        if (shakeTarget == null) shakeTarget = transform as RectTransform;
-        if (shakeTarget != null) shakeOrigin = shakeTarget.anchoredPosition;
-        if (hpFill != null) hpOriginalColor = hpFill.color;
+        SetVisible(true);
     }
 
-    void OnDestroy()
+    void Unbind()
     {
         if (stats != null)
         {
@@ -62,9 +90,21 @@ public class PlayerHealthBarUI : MonoBehaviour
             stats.OnStaminaChanged -= HandleStaminaChanged;
             stats.OnDamaged -= HandleDamaged;
         }
-        if (poise != null)
-            poise.OnPoiseChanged -= HandlePoiseChanged;
+        if (poise != null) { poise.OnPoiseChanged -= HandlePoiseChanged; poise = null; }
+        stats = null;
+        firstFill = true;   // 下次绑定时初始填充瞬间到位，不晃
+        firstStamina = true;
     }
+
+    // 隐藏/显示可视部分（保留组件存活以继续监听 sceneLoaded）
+    void SetVisible(bool v)
+    {
+        for (int i = 0; i < transform.childCount; i++)
+            transform.GetChild(i).gameObject.SetActive(v);
+    }
+
+    // 外部临时隐藏（如 boss 二阶段过渡演出）；结束再 false 恢复
+    public void SetHudHidden(bool hidden) => SetVisible(!hidden);
 
     void Bind(PlayerStats target)
     {
@@ -129,9 +169,12 @@ public class PlayerHealthBarUI : MonoBehaviour
     {
         if (stats == null) return;
         float maxHP = Mathf.Max(stats.maxHP, 1f);
-        if (ghostFill != null) ghostFill.fillAmount = Mathf.Clamp01((stats.CurrentHP + stats.CurrentGhostHP) / maxHP);
-        if (hpFill != null)    hpFill.fillAmount    = Mathf.Clamp01(stats.CurrentHP / maxHP);
-        if (hpText != null)    hpText.text          = $"HP {stats.CurrentHP:F0}/{stats.maxHP:F0}";
+        float ghostF = Mathf.Clamp01((stats.CurrentHP + stats.CurrentGhostHP) / maxHP);
+        float hpF    = Mathf.Clamp01(stats.CurrentHP / maxHP);
+        bool inst = firstFill; firstFill = false;
+        // 有 LiquidBar 走液体波浪，否则回退原 fillAmount
+        if (ghostLiquid != null) ghostLiquid.SetFill(ghostF, inst); else if (ghostFill != null) ghostFill.fillAmount = ghostF;
+        if (hpLiquid != null)    hpLiquid.SetFill(hpF, inst);       else if (hpFill != null)    hpFill.fillAmount    = hpF;
     }
 
     void RefreshPoise()
@@ -143,9 +186,9 @@ public class PlayerHealthBarUI : MonoBehaviour
     void RefreshStamina()
     {
         if (stats == null) return;
-        if (staminaFill != null)
-            staminaFill.fillAmount = stats.maxStamina > 0f ? Mathf.Clamp01(stats.CurrentStamina / stats.maxStamina) : 0f;
-        if (staminaText != null)
-            staminaText.text = $"体力 {stats.CurrentStamina:F0}/{stats.maxStamina:F0}";
+        float f = stats.maxStamina > 0f ? Mathf.Clamp01(stats.CurrentStamina / stats.maxStamina) : 0f;
+        if (staminaLiquid != null) staminaLiquid.SetFill(f, firstStamina);
+        else if (staminaFill != null) staminaFill.fillAmount = f;
+        firstStamina = false;
     }
 }

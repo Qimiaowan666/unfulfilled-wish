@@ -10,8 +10,12 @@ public class EnemyBase : Entity
     public bool permanentDeath;
 
     [Header("Boss")]
-    public bool   isBoss;                // 标记为关卡 boss → 常驻 LevelManager 自动接管 BGM / 胜利检测
+    public bool   isBoss;                // 标记为关卡 boss → 常驻 LevelManager 自动接管 BGM / 胜利检测；血条/名牌按此识别
     public string nextSceneOnDefeat;     // 击败后切到的场景（留空 = 不切场景）
+    public BossProfile profile;          // 名牌/血条展示数据（名字、罗马名、单字图、配色）
+    [Tooltip("false = boss 沉睡，不主动进战；由 BossIntroTrigger 登场后 Activate() 唤醒。普通敌人保持 true")]
+    public bool   combatEnabled = true;
+    public virtual void Activate() => combatEnabled = true;
 
     [Header("Stats")]
     public float maxHP    = 50f;
@@ -247,7 +251,6 @@ public class EnemyBase : Entity
 
         var feedback = GetComponent<DamageFeedback>();
         if (feedback != null) feedback.Flash();
-        CameraShake.Instance?.Shake(0.06f, 0.04f);
 
         if (CurrentHP <= 0f) Die();
     }

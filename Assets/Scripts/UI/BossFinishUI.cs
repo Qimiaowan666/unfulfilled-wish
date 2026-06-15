@@ -31,7 +31,8 @@ public class BossFinishUI : MonoBehaviour
 
     [Header("击破名牌")]
     public GameObject  defeatBanner;   // 名牌根（金框 + 烘焙文字 DefeatTextImg，默认隐藏）
-    public CanvasGroup defeatGroup;    // 淡入用（“xx 被打败了。”已烘焙进 DefeatText.png）
+    public CanvasGroup defeatGroup;    // 淡入用（“xx 被打败了。”已烘焙进 PNG）
+    public Image       defeatTextImg;  // 烘焙文字图：从 boss.profile.defeatBanner 取（per-boss）
 
     struct SRState { public SpriteRenderer sr; public Material mat; public Color color; public int layer; public int order; }
     readonly List<SRState> swapped = new List<SRState>();
@@ -82,6 +83,7 @@ public class BossFinishUI : MonoBehaviour
         HidePlayerHud();
         if (panelRoot != null) panelRoot.SetActive(true);
         if (defeatBanner != null) defeatBanner.SetActive(false);
+        ApplyDefeatBanner(boss);   // 按 boss profile 切换击破名牌文字图
         if (whiteFlash != null) whiteFlash.color = new Color(1f, 1f, 1f, 0f);
 
         Vector3 bossPos = boss != null ? BossCenter(boss) : Vector3.zero;
@@ -98,8 +100,9 @@ public class BossFinishUI : MonoBehaviour
                     a.speed = deathAnimSpeed;                         // 但放慢，保留慢镜感
                 }
 
-        // 1) 顿帧 + 白闪 + BGM 戛然而止（更有节奏）
+        // 1) 顿帧 + 白闪 + BGM 戛然而止（更有节奏）+ 击破重音
         AudioManager.Instance?.StopBGM();
+        AudioManager.Instance?.PlayBossDefeat();
         Time.timeScale = 0.0001f;
         if (whiteFlash != null) StartCoroutine(FlashOnce(0.18f, 0.9f));
         yield return new WaitForSecondsRealtime(hitstopRealtime);
@@ -247,6 +250,14 @@ public class BossFinishUI : MonoBehaviour
     {
         if (hudHidden != null) hudHidden.SetActive(true);
         hudHidden = null;
+    }
+
+    // 击破名牌文字图按 boss profile 切换（per-boss）；profile / 图为空则保持预制体里的默认。
+    void ApplyDefeatBanner(EnemyBase boss)
+    {
+        var p = boss != null ? boss.profile : null;
+        if (p != null && p.defeatBanner != null && defeatTextImg != null)
+            defeatTextImg.sprite = p.defeatBanner;
     }
 
     // 名牌晚一拍再出（剪影/泼溅炸开后约 delay 秒），轻微淡入。

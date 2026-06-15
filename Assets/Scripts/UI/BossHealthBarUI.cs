@@ -1,12 +1,17 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
+// Boss 血条（通用，不绑定具体 boss 类型）。场景级：Start 时 Find 当前场景标记了 isBoss 的敌人并绑定，
+// 读档 apply 时(SaveSystem.AfterApply)重新绑定/收起；名字/配色读 boss.profile(BossProfile)。
+// 登场模式下开局先藏，吼叫 Reveal 缓缓露出充满。
 public class BossHealthBarUI : MonoBehaviour
 {
     public EnemyBase boss;
     public Image hpFill;
     public Image poiseFill;
+    public TMP_Text nameText;   // boss 名（从 profile.displayName 取）
     public GameObject root;
 
     [Tooltip("登场演出：开局先隐藏，等 boss 吼叫时再 Reveal 缓缓露出并充满")]
@@ -16,39 +21,82 @@ public class BossHealthBarUI : MonoBehaviour
     Coroutine revealRoutine;
     bool revealed;
 
+    void Awake()
+    {
+        if (root == null) root = gameObject;
+        SaveSystem.AfterApply += OnSaveApplied;
+    }
+
+    void OnDestroy()
+    {
+        SaveSystem.AfterApply -= OnSaveApplied;
+        Unbind();
+    }
+
+    void Start() { Acquire(); }
+    void OnSaveApplied() { Acquire(); }
+
     // 自愈：登场模式下，只要 boss 进入战斗(combatEnabled) 就保证血条露出，
     // 不依赖别人显式调 Reveal（读档/各种时序下都不会"没血条"）。
     void Update()
     {
         if (!startHidden || revealed || boss == null) return;
-        var mb = boss as MinotaurBoss;
         // 只在 boss「活着 + 在场 + 进入战斗」时自愈露出；死了就别再拉回来（击破时血条要消失）
-        if (mb != null && mb.combatEnabled && mb.CurrentHP > 0f && mb.gameObject.activeInHierarchy)
+        if (boss.combatEnabled && boss.CurrentHP > 0f && boss.gameObject.activeInHierarchy)
             Reveal(0.6f);
     }
 
-    void Start()
+    // 找当前场景里标记了 isBoss 的活动敌人
+    static EnemyBase FindActiveBoss()
+    {
+        foreach (var e in FindObjectsByType<EnemyBase>(FindObjectsSortMode.None))
+            if (e != null && e.isBoss && e.gameObject.activeInHierarchy) return e;
+        return null;
+    }
+
+    // 重新获取当前场景 boss 并绑定；无 boss 则隐藏
+    void Acquire()
     {
         if (root == null) root = gameObject;
-        if (boss == null)
-            boss = FindAnyObjectByType<MinotaurBoss>();
-
-        if (boss == null)
-        {
-            root.SetActive(false);
-            return;
-        }
+        var found = FindActiveBoss();
+        if (found == boss && boss != null) return;   // 没变化
+        Unbind();
+        boss = found;
+        if (boss == null) { root.SetActive(false); return; }
 
         poise = boss.GetComponent<PoiseMeter>();
         boss.OnHPChanged += HandleHPChanged;
         boss.OnDied += Hide;
         if (poise != null) poise.OnPoiseChanged += HandlePoiseChanged;
 
+        ApplyProfile();   // 名字 + 可选配色
+
         root.SetActive(true);
         RefreshHP();
         RefreshPoise();
 
         if (startHidden) HideForIntro();   // 登场前先藏（用 alpha=0，保持 GameObject 激活，协程可用）
+    }
+
+    void ApplyProfile()
+    {
+        var p = boss != null ? boss.profile : null;
+        if (p == null) return;
+        if (nameText != null) nameText.text = p.displayName;
+        if (p.overrideBarColor && hpFill != null) hpFill.color = p.barColor;
+    }
+
+    void Unbind()
+    {
+        if (revealRoutine != null) { StopCoroutine(revealRoutine); revealRoutine = null; }
+        if (boss != null)
+        {
+            boss.OnHPChanged -= HandleHPChanged;
+            boss.OnDied -= Hide;
+        }
+        if (poise != null) { poise.OnPoiseChanged -= HandlePoiseChanged; poise = null; }
+        boss = null;
+        revealed = false;
     }
 
     CanvasGroup EnsureCanvasGroup()
@@ -66,6 +114,9 @@ public class BossHealthBarUI : MonoBehaviour
         EnsureCanvasGroup().alpha = 0f;
         if (hpFill != null) hpFill.fillAmount = 0f;
     }
+
+    // 外部临时隐藏/恢复（如 boss 二阶段过渡演出）；只动 alpha，不重置血量/露出状态
+    public void SetHidden(bool hidden) => EnsureCanvasGroup().alpha = hidden ? 0f : 1f;
 
     // boss 吼叫时调用：血条淡入 + 血量从 0 缓缓充满
     public void Reveal(float duration)
@@ -96,18 +147,6 @@ public class BossHealthBarUI : MonoBehaviour
         cg.alpha = 1f;
         if (hpFill != null) hpFill.fillAmount = target;
         revealRoutine = null;
-    }
-
-    void OnDestroy()
-    {
-        if (boss != null)
-        {
-            boss.OnHPChanged -= HandleHPChanged;
-            boss.OnDied -= Hide;
-        }
-
-        if (poise != null)
-            poise.OnPoiseChanged -= HandlePoiseChanged;
     }
 
     void HandleHPChanged(float current, float max) => RefreshHP();

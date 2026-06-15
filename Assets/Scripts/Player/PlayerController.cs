@@ -19,6 +19,7 @@ public class PlayerController : Entity
     public Player_CounterState counterState  { get; private set; }
     public Player_ExecuteState executeState  { get; private set; }
     public Player_StunnedState stunnedState  { get; private set; }
+    public Player_KnockedState knockedState  { get; private set; }
     public Player_DashStrikeState dashStrikeState { get; private set; }
     public Player_HealState    healState     { get; private set; }
     public Player_DeadState    deadState     { get; private set; }
@@ -98,6 +99,7 @@ public class PlayerController : Entity
         counterState  = new Player_CounterState(this, stateMachine);
         executeState  = new Player_ExecuteState(this, stateMachine);
         stunnedState  = new Player_StunnedState(this, stateMachine);
+        knockedState  = new Player_KnockedState(this, stateMachine);
         dashStrikeState = new Player_DashStrikeState(this, stateMachine);
         healState     = new Player_HealState(this, stateMachine);
         deadState     = new Player_DeadState(this, stateMachine);

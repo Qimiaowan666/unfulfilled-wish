@@ -18,6 +18,8 @@ public class CheckpointManager : MonoBehaviour
     {
         if (Instance != null) { Destroy(gameObject); return; }
         Instance = this;
+        transform.SetParent(null);
+        DontDestroyOnLoad(gameObject);   // Bootstrap 常驻，跨场景唯一存活
     }
 
     public void ActivateCheckpoint(string id, Vector3? respawnAnchor = null)

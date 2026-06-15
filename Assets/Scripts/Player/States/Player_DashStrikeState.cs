@@ -9,6 +9,10 @@ public class Player_DashStrikeState : PlayerBaseState
     Skill_DashStrike skill;
     SpriteRenderer cachedPlayerSr;
     int afterimagesSpawned;
+    GameObject dashVfx;   // 能量收拢 VFX 句柄（每帧驱动位置随冲刺前进，Exit 回收）
+
+    // 能量 VFX 的目标位置：玩家前方一点、与月牙同高
+    Vector3 DashVfxPos() => player.transform.position + new Vector3(player.FacingDir * 1.8f, 0.3f, 0f);
 
     public Player_DashStrikeState(PlayerController player, PlayerStateMachine sm)
         : base(player, sm, "isAttacking") { }   // 让 isAttacking=true 维持 animator 在挥剑 state
@@ -45,7 +49,10 @@ public class Player_DashStrikeState : PlayerBaseState
         rb.linearVelocity = Vector2.zero;
         player.Stats.SetInvulnerable(true);
 
-        AudioManager.Instance?.PlayDash();
+        AudioManager.Instance?.PlayDashStrike();
+        // 突进能量 VFX：向心收拢光线 + 中心闪光，跟在玩家前方随冲刺前进（Update 每帧驱动位置）
+        dashVfx = VfxManager.PlayLoop("Vfx/DashStrike", null, DashVfxPos(), 1f,
+                                      new Color(0.7f, 0.9f, 1f), player.GetComponentInChildren<SpriteRenderer>());
 
         // 强制播挥剑动画 + 调倍速
         if (!string.IsNullOrEmpty(skill.AnimStateName) && anim != null)
@@ -93,6 +100,7 @@ public class Player_DashStrikeState : PlayerBaseState
 
         float t = skill.Duration > 0f ? 1f - Mathf.Clamp01(stateTimer / skill.Duration) : 1f;
         player.transform.position = Vector2.Lerp(startPos, endPos, t);
+        if (dashVfx != null) dashVfx.transform.position = DashVfxPos();   // 能量收拢点跟着冲刺前进
 
         // 沿移动逐个生成残影（按 t 进度均匀触发）
         TrySpawnAfterimages(Mathf.FloorToInt(t * skill.AfterimageCount));
@@ -126,5 +134,6 @@ public class Player_DashStrikeState : PlayerBaseState
         rb.linearVelocity = Vector2.zero;
         player.Stats.SetInvulnerable(false);
         if (anim != null) anim.speed = 1f;
+        if (dashVfx != null) { VfxManager.StopLoop(dashVfx); dashVfx = null; }   // 回收能量 VFX
     }
 }

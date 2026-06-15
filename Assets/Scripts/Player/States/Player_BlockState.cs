@@ -36,14 +36,18 @@ public class Player_BlockState : PlayerBaseState
             player.Stats.RedeemGhostHP(player.Stats.perfectBlockHealAmount);
             player.Stats.GainStamina(player.Stats.perfectBlockStaminaGain);
             AudioManager.Instance?.PlayPerfectBlock();
-            CameraShake.Instance?.Shake(0.08f, 0.03f);
+            CameraShake.Shake(0.08f, 0.05f);
+            // 精准格挡：冷白蓝火花（系统粒子预制，走 VfxManager 池）
+            Vector3 bp = player.transform.position + new Vector3((player.FacingRight ? 1f : -1f) * 0.7f, 0.95f, 0f);
+            VfxManager.Play("Vfx/GuardSpark", bp, Quaternion.identity, 0.95f,
+                            new Color(0.8f, 0.95f, 1f), player.GetComponentInChildren<SpriteRenderer>());
         }
         else
         {
             Debug.Log($"[Player] 普通格挡。来袭伤害 {damage}，已按住 {(player.perfectBlockWindow - perfectBlockTimer):F2}s");
             player.Stats.OnNormalBlock(damage);
             AudioManager.Instance?.PlayBlock();
-            CameraShake.Instance?.Shake(0.06f, 0.025f);
+            CameraShake.Shake(0.06f, 0.03f);
         }
     }
 }

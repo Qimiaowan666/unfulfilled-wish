@@ -56,12 +56,12 @@ public class ShopUI : MonoBehaviour
         if (exitButton != null)
         {
             exitButton.onClick.RemoveAllListeners();
-            exitButton.onClick.AddListener(Close);
+            exitButton.onClick.AddListener(() => { AudioManager.Instance?.PlayUIClick(); Close(); });
         }
         if (cancelButton != null)
         {
             cancelButton.onClick.RemoveAllListeners();
-            cancelButton.onClick.AddListener(ClearDetail);
+            cancelButton.onClick.AddListener(() => { AudioManager.Instance?.PlayUIClick(); ClearDetail(); });
         }
         if (rowTemplate != null) rowTemplate.gameObject.SetActive(false);
         if (detailPopup != null) detailPopup.SetActive(true);   // 详情面板常驻显示
@@ -74,6 +74,7 @@ public class ShopUI : MonoBehaviour
         shop  = shopSystem;
         stats = FindAnyObjectByType<PlayerStats>();
         IsOpen = true;
+        AudioManager.Instance?.PlayUIOpen();   // 开商店
         PlayerInputBuffer.ClearAll();
         if (panelRoot != null) panelRoot.SetActive(true);
         if (detailPopup != null) detailPopup.SetActive(true);

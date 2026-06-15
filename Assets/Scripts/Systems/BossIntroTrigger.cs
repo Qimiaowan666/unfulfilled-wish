@@ -1,14 +1,19 @@
 using System.Collections;
 using UnityEngine;
+using Unity.Cinemachine;
 
 // boss 房入口触发区：玩家首次进入 → boss 沉睡 → 登场对话 → 推镜对准 boss + 吼叫(震屏/zoom punch/血条充满) → 正式开打。
-// 演出期间直接接管主相机（关掉 Cinemachine / RoomCamera），结束后再交还。
+// 演出期间用临时高优先级 vcam 推镜，靠 Cinemachine 平滑 blend 进/出，结束后混合回玩家 vcam。
 [RequireComponent(typeof(Collider2D))]
 public class BossIntroTrigger : MonoBehaviour
 {
     [Header("剧情 / boss")]
     public DialogueSequence sequence;
-    public MinotaurBoss boss;
+    public EnemyBase boss;   // 任意 boss（通用，不绑定具体类型）
+    [Tooltip("场景里预摆的登场过场相机(默认低优先级，框 boss)。可在编辑器里调它的取景/大小")]
+    public CinemachineCamera bossIntroVcam;
+    [Tooltip("九日式登场揭幕名牌(黑条+罗马名+大红中文名)，吼叫时扫入")]
+    public BossNameCard nameCard;
 
     [Header("登场演出")]
     [Tooltip("吼叫 + 血条充满阶段时长")]
@@ -19,8 +24,6 @@ public class BossIntroTrigger : MonoBehaviour
     public float roarShakeMagnitude = 0.22f;
     [Tooltip("推镜 / 拉回时长")]
     public float camMoveDuration = 0.5f;
-    [Tooltip("boss 占视野高度的比例，越大越贴满（0.8≈占大半屏）")]
-    public float framePadding = 0.8f;
 
     // 登场演出（对话 + 吼叫）期间为 true → 屏蔽玩家输入、禁止暂停
     public static bool Sequencing { get; private set; }
@@ -81,28 +84,44 @@ public class BossIntroTrigger : MonoBehaviour
         AudioManager.Instance?.StopBGM();   // 遭遇触发 → 立刻静音；对话/吼叫在安静中进行，开打才起 boss 曲
         FaceBossAtPlayer();
 
+        // 进剧情即冻住玩家：清速度 + 取消当前动作(回 idle) + 停物理，整段演出原地不动。StartCombat 再解冻。
+        var playerGo = GameObject.FindGameObjectWithTag("Player");
+        var pc  = playerGo != null ? playerGo.GetComponent<PlayerController>() : null;
+        var prb = playerGo != null ? playerGo.GetComponent<Rigidbody2D>() : null;
+        if (prb != null) prb.linearVelocity = Vector2.zero;
+        if (pc  != null) pc.stateMachine.ChangeState(pc.idleState);
+        if (prb != null) prb.simulated = false;
+
         var cam = Camera.main;
-        // 直接接管相机：关掉 Cinemachine brain 与 RoomCamera（用字符串取组件，避免硬依赖具体相机插件类型）
-        var brain   = cam != null ? cam.GetComponent("CinemachineBrain") as Behaviour : null;
-        var roomCam = cam != null ? cam.GetComponent("RoomCamera") as Behaviour : null;
-        bool brainWas = brain != null && brain.enabled;
-        bool roomWas  = roomCam != null && roomCam.enabled;
-        if (brain != null)   brain.enabled = false;
-        if (roomCam != null) roomCam.enabled = false;
+        // 不再手动接管/关 Brain —— 改用临时高优先级 vcam，让 Cinemachine 平滑 blend 进/出，
+        // 交还时由 Cinemachine 混合回玩家 vcam（不存在“冷启动硬切”的突跳）。
 
-        Vector3 camStart  = cam != null ? cam.transform.position : Vector3.zero;
-        float   sizeStart = cam != null && cam.orthographic ? cam.orthographicSize : 8f;
+        // 把 Brain 默认混合时长临时设成 camMoveDuration（场景默认是 2s，太慢）
+        var brain = cam != null ? cam.GetComponent<CinemachineBrain>() : null;
+        CinemachineBlendDefinition prevBlend = default;
+        if (brain != null)
+        {
+            prevBlend = brain.DefaultBlend;
+            var b = brain.DefaultBlend;
+            b.Style = CinemachineBlendDefinition.Styles.EaseInOut;
+            b.Time  = camMoveDuration;
+            brain.DefaultBlend = b;
+        }
 
-        // 用 boss 实际渲染包围盒自适应取景，保证整只 boss 入画
-        var sr = boss.GetComponentInChildren<SpriteRenderer>();
-        Bounds bnd = sr != null ? sr.bounds : new Bounds(boss.transform.position, Vector3.one * 8f);
-        Vector3 focus = new Vector3(bnd.center.x, bnd.center.y, camStart.z);
-        float fitSize = Mathf.Clamp(bnd.extents.y / Mathf.Max(0.3f, framePadding), 6f, 16f);
+        // 抬高场景里预摆的过场 vcam 的优先级 → Cinemachine 平滑 blend 推进到 boss。
+        // 取景(位置/大小)和抖动基准都在那台 vcam 上、可在编辑器里直接调。
+        Vector3 vcamHome = bossIntroVcam != null ? bossIntroVcam.transform.position : Vector3.zero;
+        float   baseSize = bossIntroVcam != null ? bossIntroVcam.Lens.OrthographicSize : 8f;
+        int     prevPrio = 0;
+        if (bossIntroVcam != null)
+        {
+            var p = bossIntroVcam.Priority; prevPrio = p.Value; p.Value = 100; bossIntroVcam.Priority = p;
+        }
 
-        // 1) 刚进事件 → 立刻把镜头推到 boss（timeScale 仍为 1）
-        yield return CamMove(cam, camStart, focus, sizeStart, fitSize, camMoveDuration);
+        // 1) 等推进 blend 完成（timeScale 仍为 1）
+        yield return new WaitForSecondsRealtime(camMoveDuration);
 
-        // 2) 对话（镜头停在 boss 上不动；DialogueUI 内部会把 timeScale 置 0）
+        // 2) 对话（镜头停在 boss 上；DialogueUI 内部会把 timeScale 置 0）
         bool dialogueDone = false;
         if (DialogueUI.Instance != null && sequence != null)
             DialogueUI.Instance.Play(sequence, () => dialogueDone = true);
@@ -110,8 +129,9 @@ public class BossIntroTrigger : MonoBehaviour
             dialogueDone = true;
         while (!dialogueDone) yield return null;
 
-        // 3) 吼叫：音效 + 血条充满 + boss 弹一下 + 强震 + 轻 zoom 抖
+        // 3) 吼叫：音效 + 揭幕名牌扫入 + 血条充满 + boss 弹一下 + 强震 + 轻 zoom 抖（抖 introVcam，不直接动相机）
         AudioManager.Instance?.PlayBossPhaseChange();
+        if (nameCard != null) nameCard.Play(boss != null ? boss.profile : null, roarDuration);
         Bar()?.Reveal(barRevealDuration);
         StartCoroutine(BossScalePunch());
 
@@ -120,39 +140,30 @@ public class BossIntroTrigger : MonoBehaviour
         {
             t += Time.deltaTime;
             float decay = 1f - Mathf.Clamp01(t / roarDuration);
-            if (cam != null)
+            if (bossIntroVcam != null)
             {
                 Vector2 sh = Random.insideUnitCircle * (roarShakeMagnitude * decay);
+                bossIntroVcam.transform.position = vcamHome + new Vector3(sh.x, sh.y, 0f);
                 float zp = Mathf.Sin(t * 16f) * 0.18f * decay;
-                cam.transform.position = focus + new Vector3(sh.x, sh.y, 0f);
-                if (cam.orthographic) cam.orthographicSize = fitSize - zp;
+                var lr = bossIntroVcam.Lens; lr.OrthographicSize = baseSize - zp; bossIntroVcam.Lens = lr;
             }
             yield return null;
         }
-
-        // 4) 拉回到进场前的相机位置 + 交还 Cinemachine（此时 boss 仍沉睡、玩家仍被锁）
-        if (cam != null) yield return CamMove(cam, cam.transform.position, camStart, cam.orthographicSize, sizeStart, camMoveDuration);
-        if (brain != null)   brain.enabled = brainWas;
-        if (roomCam != null) roomCam.enabled = roomWas;
-
-        // 5) 相机完全复原后，双方才开始行动
-        StartCombat();   // boss.Activate() + BGM + 解锁玩家
-    }
-
-    IEnumerator CamMove(Camera cam, Vector3 fromP, Vector3 toP, float fromS, float toS, float dur)
-    {
-        if (cam == null) yield break;
-        float t = 0f;
-        while (t < dur)
+        if (bossIntroVcam != null)
         {
-            t += Time.deltaTime;
-            float k = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(t / dur));
-            cam.transform.position = Vector3.Lerp(fromP, toP, k);
-            if (cam.orthographic) cam.orthographicSize = Mathf.Lerp(fromS, toS, k);
-            yield return null;
+            bossIntroVcam.transform.position = vcamHome;
+            var lf = bossIntroVcam.Lens; lf.OrthographicSize = baseSize; bossIntroVcam.Lens = lf;
         }
-        cam.transform.position = toP;
-        if (cam.orthographic) cam.orthographicSize = toS;
+
+        // 4) 降回过场 vcam 优先级 → Cinemachine 平滑 blend 回玩家 vcam（正确取景、无冷切突跳）
+        if (bossIntroVcam != null) { var p = bossIntroVcam.Priority; p.Value = prevPrio; bossIntroVcam.Priority = p; }
+        yield return new WaitForSecondsRealtime(camMoveDuration);
+
+        // 5) 还原 Brain 混合设置
+        if (brain != null) brain.DefaultBlend = prevBlend;
+
+        // 6) 双方开始行动
+        StartCombat();   // boss.Activate() + BGM + 解锁玩家
     }
 
     // boss 吼叫弹一下（轻微 squash 模拟发力），保留朝向用的 localScale 符号
@@ -181,6 +192,10 @@ public class BossIntroTrigger : MonoBehaviour
     void StartCombat()
     {
         Sequencing = false;
+        // 解冻玩家（登场演出里冻住了它）+ 清残速，从静止开打
+        var pgo = GameObject.FindGameObjectWithTag("Player");
+        var prb = pgo != null ? pgo.GetComponent<Rigidbody2D>() : null;
+        if (prb != null) { prb.simulated = true; prb.linearVelocity = Vector2.zero; }
         if (boss != null) boss.Activate();
         AudioManager.Instance?.PlayBossBGM();
     }

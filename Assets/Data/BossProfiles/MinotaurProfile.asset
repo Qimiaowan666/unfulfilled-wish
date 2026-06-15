@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fc84735a1c35d9459c80c5c9839faf1, type: 3}
+  m_Name: MinotaurProfile
+  m_EditorClassIdentifier: Assembly-CSharp::BossProfile
+  displayName: MINOTAUR
+  overrideBarColor: 0
+  barColor: {r: 0.85, g: 0.15, b: 0.2, a: 1}
+  romanSprite: {fileID: 21300000, guid: 386c33fa5e5245245819f335c7d9406d, type: 3}
+  nameChars:
+  - {fileID: 21300000, guid: e4791d5ac74cf9348bb985b8c5b8a66d, type: 3}
+  - {fileID: 21300000, guid: 350c5d34ae5679d41bf2021943cf483a, type: 3}
+  - {fileID: 21300000, guid: 4eb8306be0a79ff47892e98da7e231a8, type: 3}
+  - {fileID: 21300000, guid: e91a3a179d1fcb44d8608962bcf7de27, type: 3}
+  - {fileID: 21300000, guid: 3ae1d339d4944b54e9eb2126ed65dde8, type: 3}
+  nameColor: {r: 0.8392157, g: 0.14901961, b: 0.19607843, a: 1}
+  defeatBanner: {fileID: 21300000, guid: 603f18a64dcee6a40ba1a427dcaa577c, type: 3}
