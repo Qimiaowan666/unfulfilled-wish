@@ -17,27 +17,25 @@ public class EnemyBase : Entity
     public bool   combatEnabled = true;
     public virtual void Activate() => combatEnabled = true;
 
+    // boss 战进行中：任意 boss 已被唤醒(combatEnabled)且存活 → 此期间禁止存档(火堆/暂停菜单)
+    public static bool AnyBossInCombat()
+    {
+        foreach (var e in FindObjectsByType<EnemyBase>(FindObjectsSortMode.None))
+            if (e.isBoss && e.combatEnabled && e.CurrentHP > 0f) return true;
+        return false;
+    }
+
     [Header("Stats")]
     public float maxHP    = 50f;
     public float attack   = 8f;
     public int   goldDrop = 10;
 
     [Header("Detection")]
-    public float     detectionRange = 6f;
-    public float     attackRange    = 1.2f;
+    public float     attackRange = 1.2f;   // 出手距离(boss 用；GroundEnemy 也用作攻击范围 gizmo)
     public LayerMask playerLayer;
-
-    [Header("Movement")]
-    public float patrolMoveSpeed         = 2f;
-    public float battleMoveSpeed         = 3.5f;
-    public float patrolDistance          = 3f;
-    public float preferredCombatDistance = 1.05f;
-    public float retreatDistance         = 0.75f;
 
     [Header("Attack")]
     public float   attackCooldown        = 1.5f;
-    public float   specialAttackCooldown = 5f;
-    public float   poiseDamagePerHit     = 15f;
 
     [Header("Special Attack Hit Reaction")]
     public float   specialHitStunDuration = 0.6f;   // 玩家被特殊攻击命中后的硬直时长
@@ -72,23 +70,12 @@ public class EnemyBase : Entity
 
     [Header("Special Attack")]
     public float specialAttackWarningDuration = 0.5f;
-    public float dashAttackSpeed             = 8f;
-    public float dashAttackDuration          = 0.35f;
-
-    [Header("Idle / Battle")]
-    public float idleTime          = 1.5f;
-    public float battleTimeDuration = 5f;
-
-    [Header("Stun")]
-    public float stunDuration = 3f;
 
     // ── Runtime State ────────────────────────────────────────────────
     public float     CurrentHP            { get; protected set; }
     public bool      Invincible           { get; set; }   // 位移帧（瞬移/跳跃）期间不可被伤
     public Transform player               { get; protected set; }
     public float     attackCooldownTimer  { get; protected set; }
-    public float     specialCooldownTimer { get; protected set; }
-    public Vector2   PatrolOrigin         { get; private set; }
 
     public bool IsDefeated          => CurrentHP <= 0f;
     public bool SavesPermanentDeath => permanentDeath || GetComponent<MinotaurBoss>() != null;
@@ -120,7 +107,6 @@ public class EnemyBase : Entity
         initialRotation = transform.rotation;
         initialScale    = transform.localScale;
         initialFacingRight = FacingRight;
-        PatrolOrigin    = transform.position;
         Initialized     = true;
         CurrentHP       = maxHP;
         poiseMeter      = GetComponent<PoiseMeter>();
@@ -129,30 +115,31 @@ public class EnemyBase : Entity
         int playerLayerIndex = LayerMask.NameToLayer("Player");
         if (playerLayerIndex >= 0 && (playerLayer.value & (1 << playerLayerIndex)) == 0)
             playerLayer = 1 << playerLayerIndex;
-
-        specialCooldownTimer = specialAttackCooldown;
     }
 
     // ── AI Utilities (used by enemy states) ──────────────────────────
-    public bool DetectPlayer()
-    {
-        Collider2D hit = Physics2D.OverlapCircle(transform.position, detectionRange, playerLayer);
-        if (hit != null) player = hit.transform;
-        return hit != null;
-    }
+    // 感知玩家由 GroundEnemy.DetectPlayer 实现(横向矩形)；boss 不感知，靠 tag 锁定。
 
     public void LoseTarget() => player = null;
+
+    // 一旦开战(combatEnabled)就锁定玩家、永不脱战；玩家真不在场(死亡/不在)才返回 false
+    public bool EnsurePlayer()
+    {
+        if (player == null)
+        {
+            var p = GameObject.FindGameObjectWithTag("Player");
+            if (p != null) player = p.transform;
+        }
+        return player != null;
+    }
+
+    // 是否继续交战(boss 用)：靠 tag 锁定玩家，开战后永不脱战
+    public bool KeepEngaged() => EnsurePlayer();
 
     public float GetHorizontalDistToPlayer()
     {
         if (player == null) return Mathf.Infinity;
         return Mathf.Abs(player.position.x - transform.position.x);
-    }
-
-    public void HitPlayer(float damage, float poiseDamage, bool isSpecialAttack = false)
-    {
-        if (player == null) return;
-        ApplyHitToCollider(player.GetComponent<Collider2D>() ?? player.GetComponentInChildren<Collider2D>(), damage, isSpecialAttack);
     }
 
     public bool PerformAttack(float damage, Vector2 offset, Vector2 size, bool isSpecialAttack = false)
@@ -185,7 +172,8 @@ public class EnemyBase : Entity
         return idx >= 0 ? options[idx] : null;
     }
 
-    void ApplyHitToCollider(Collider2D hit, float damage, bool isSpecialAttack = false)
+    // public：近战 PerformAttack 与远程 Arrow 共用同一套命中处理(格挡/识破/击退)
+    public void ApplyHitToCollider(Collider2D hit, float damage, bool isSpecialAttack = false)
     {
         if (hit == null) return;
         var ctrl  = hit.GetComponent<PlayerController>()  ?? hit.GetComponentInParent<PlayerController>();
@@ -220,20 +208,20 @@ public class EnemyBase : Entity
         }
 
         if (feedback != null && !isBlocking) feedback.ApplyKnockback(transform.position, 5f);
-        if (isBlocking) ctrl.ReceiveBlockHit(damage);
+        if (isBlocking) ctrl.ReceiveBlockHit(damage, this);
         else            stats.TakeDamage(damage);
     }
 
-    public bool TryTriggerCounter()
-    {
-        if (player == null) return false;
-        var ctrl = player.GetComponent<PlayerController>();
-        return ctrl != null && ctrl.TryCounter(this);
-    }
-
-    public void StartAttackCooldown()  => attackCooldownTimer  = attackCooldown;
-    public void StartSpecialCooldown() => specialCooldownTimer = specialAttackCooldown;
+    public void StartAttackCooldown()           => attackCooldownTimer = attackCooldown;
+    public void StartAttackCooldown(float secs) => attackCooldownTimer = secs;   // 指定时长(per-招冷却用)
     public void ResetPoise()           => poiseMeter?.ResetPoise();
+
+    // 只削韧性、不掉血（完美格挡反震用）：累计破韧 → OnPoiseBroken → 硬直
+    public void ApplyPoiseDamage(float poise)
+    {
+        if (CurrentHP <= 0f || Invincible || poise <= 0f) return;
+        poiseMeter?.TakePoiseDamage(poise);
+    }
 
     // ── Damage / Death ───────────────────────────────────────────────
     public virtual void TakeDamage(float damage) => TakeDamage(damage, 0f);
@@ -289,9 +277,12 @@ public class EnemyBase : Entity
     // 被玩家识破时调用（子类重写来打断当前攻击 / 进入硬直）
     public virtual void OnCountered() { }
 
+    // 死亡后多久消失(子类按死亡动画时长覆盖，避免动画没播完就消失)
+    protected virtual float DeathDisableDelay => 1f;
+
     IEnumerator DisableAfterDeath()
     {
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(DeathDisableDelay);
         gameObject.SetActive(false);
         deathRoutine = null;
     }
@@ -330,7 +321,6 @@ public class EnemyBase : Entity
 
         Rb.linearVelocity    = Vector2.zero;
         attackCooldownTimer  = 0f;
-        specialCooldownTimer = specialAttackCooldown;
         player               = null;
 
         OnHPChanged?.Invoke(CurrentHP, maxHP);
@@ -351,10 +341,14 @@ public class EnemyBase : Entity
     protected override void OnDrawGizmos()
     {
         base.OnDrawGizmos();
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, detectionRange);
+        DrawDetectionGizmo();
+        // hitboxes 由具体子类 OnDrawGizmos 调 DrawHitboxGizmo 绘制
+    }
+
+    // boss 不用感知(开战后靠 tag 锁定玩家、永不脱战)，只画攻击距离；GroundEnemy 覆盖为横向探测框
+    protected virtual void DrawDetectionGizmo()
+    {
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, attackRange);
-        // hitboxes 由具体子类 OnDrawGizmos 调 DrawHitboxGizmo 绘制
     }
 }

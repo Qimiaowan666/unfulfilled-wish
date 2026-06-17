@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.Serialization;
 
 public class AudioManager : MonoBehaviour
 {
@@ -52,26 +53,34 @@ public class AudioManager : MonoBehaviour
     public AudioClip uiUseClip;     // 使用道具
 
     [Header("Enemy SFX")]
-    public AudioClip enemyAttackClip;
+    public AudioClip enemyAttackClip;    // 挥剑第一段
+    public AudioClip enemyAttack2Clip;   // 挥剑第二段
     public AudioClip enemyHitClip;
     public AudioClip enemyDeathClip;
+    public AudioClip bowShotClip;        // 弓箭手放弦(轻箭)
+    public AudioClip bowHeavyClip;       // 蓄力重箭放弦
+    public AudioClip arrowImpactClip;    // 箭命中
 
     [Header("Boss SFX")]
     public AudioClip bossAttackClip;
-    public AudioClip bossRushClip;
+    public AudioClip bossSlamClip;      // 跳劈/挑飞 落地砸击
+    public AudioClip bossTeleportClip;  // 闪身瞬移
     public AudioClip bossPhaseChangeClip;
     public AudioClip bossRoarClip;     // 转阶段吼叫（空则用 phaseChange 兜底）
     public AudioClip bossChargeClip;   // 转阶段蓄力充能
     public AudioClip bossExplodeClip;  // 转阶段爆开
     public AudioClip bossRageRoarClip; // 爆开后强化登场的更响亮吼叫
     public AudioClip bossDefeatClip;   // 击破 boss 重音/sting
+    public AudioClip bossDeathClip;    // boss 死亡吼/惨叫
+    public AudioClip bossLandClip;     // boss 死亡倒地砸地(死亡动画事件触发)
     public AudioClip bossNameStampClip; // 登场名牌逐字砸出的重音
 
     [Header("BGM")]
     public AudioClip menuBGMClip;
     public AudioClip bgmClip;
-    public AudioClip bossBGMClip;
-    public AudioClip futureBossBGMClip;
+    public AudioClip bossBGMClip;           // boss 一阶段 BGM
+    [FormerlySerializedAs("futureBossBGMClip")]
+    public AudioClip bossPhase2BGMClip;     // boss 二阶段 BGM（爆开强化后切入）
     [Range(0f,1f)] public float bgmVolume = 0.5f;
 
     [Range(0f,1f)] public float sfxVolume = 0.8f;
@@ -144,7 +153,7 @@ public class AudioManager : MonoBehaviour
     public void RefreshSceneBGM() => PlayDefaultBGMForScene(SceneManager.GetActiveScene().name, restart: true);
     public void PlayBossBGM() => PlayBGM(bossBGMClip);
     public void PlayAreaBGM() => PlayBGM(bgmClip);   // 普通区域 BGM（boss 击破后恢复用）
-    public void PlayFutureBossBGM() => PlayBGM(futureBossBGMClip);
+    public void PlayBossPhase2BGM() => PlayBGM(bossPhase2BGMClip);
     public void StopBGM()     => bgmSource.Stop();
 
     public void SetBGMVolume(float v) { bgmVolume = Mathf.Clamp01(v); if (bgmSource != null) bgmSource.volume = bgmVolume; }
@@ -212,10 +221,15 @@ public class AudioManager : MonoBehaviour
     public void PlayUIEquip()        => Play(uiEquipClip != null ? uiEquipClip : uiClickClip);
     public void PlayUIUse()          => Play(uiUseClip  != null ? uiUseClip  : uiClickClip);
     public void PlayEnemyAttack()    => Play(enemyAttackClip);
+    // 按攻击段播挥剑声：第 0 段第一声，其余用第二声(没配则回退第一声)
+    public void PlayEnemySwing(int index) => Play(index <= 0 ? enemyAttackClip : (enemyAttack2Clip != null ? enemyAttack2Clip : enemyAttackClip));
     public void PlayEnemyHit()       => Play(enemyHitClip);
     public void PlayEnemyDeath()     => Play(enemyDeathClip);
+    public void PlayBow(bool heavy)  => Play(heavy && bowHeavyClip != null ? bowHeavyClip : bowShotClip, heavy ? 1f : 0.7f);   // 重箭满音量更突出，轻箭(连发)略小
+    public void PlayArrowImpact()    => Play(arrowImpactClip);
     public void PlayBossAttack()     => Play(bossAttackClip);
-    public void PlayBossRush()       => Play(bossRushClip);
+    public void PlayBossSlam()       => Play(bossSlamClip);
+    public void PlayBossTeleport()   => Play(bossTeleportClip);
     public void PlayBossPhaseChange()=> Play(bossPhaseChangeClip);
     public void PlayBossRoar()       => Play(bossRoarClip != null ? bossRoarClip : bossPhaseChangeClip);
     public void PlayBossCharge()     => Play(bossChargeClip);
@@ -223,6 +237,8 @@ public class AudioManager : MonoBehaviour
     public float PlayBossExplode()   { var c = bossExplodeClip  != null ? bossExplodeClip  : bossPhaseChangeClip; Play(c); return c != null ? c.length : 0f; }
     public float PlayBossRageRoar()  { var c = bossRageRoarClip != null ? bossRageRoarClip : bossRoarClip;        Play(c); return c != null ? c.length : 0f; }
     public void PlayBossDefeat()     => Play(bossDefeatClip);
+    public void PlayBossDeath()      => Play(bossDeathClip);
+    public void PlayBossLand()       => Play(bossLandClip);
     public void PlayBossNameStamp()  => Play(bossNameStampClip, 0.5f);   // 砸字音轻一点
     public void PlayHeal()           => Play(healClip);
     public void PlayVictory()        => Play(victoryClip);

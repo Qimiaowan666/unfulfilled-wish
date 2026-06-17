@@ -120,7 +120,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 5
   m_MaskInteraction: 0
   m_Sprite: {fileID: -2326761095400532479, guid: 9e796fd7a0d294846a67cc9e7e114d43, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -231,7 +231,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerStats
   maxHP: 20
-  baseAttack: 5
+  baseAttack: 20
   baseDefense: 5
   attack: 10
   defense: 5
@@ -242,6 +242,8 @@ MonoBehaviour:
   maxStamina: 100
   perfectBlockStaminaGain: 20
   counterStaminaGain: 40
+  perfectBlockPoiseDamage: 5
+  counterPoiseDamage: 15
   gold: 20000
 --- !u!114 &9161862221462641032
 MonoBehaviour:
@@ -267,8 +269,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 94ddfe759727def4eb2ce16caeecb468, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DamageFeedback
-  flashColor: {r: 1, g: 0, b: 0, a: 1}
+  flashColor: {r: 1, g: 1, b: 1, a: 1}
   flashDuration: 0.08
+  flashMaterial: {fileID: 2100000, guid: 6e20bf32e09be244d89d5ec3700faba1, type: 2}
 --- !u!114 &1183578778618374012
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -302,9 +305,9 @@ MonoBehaviour:
   - 1
   - 1.2
   attackPoiseDamage:
-  - 8
-  - 10
-  - 14
+  - 3
+  - 3
+  - 4
   hitboxOffset: {x: 0.9, y: 0.2}
   hitboxSize: {x: 1.8, y: 2}
   showAttackHitbox: 0

@@ -14,6 +14,8 @@ public class BossIntroTrigger : MonoBehaviour
     public CinemachineCamera bossIntroVcam;
     [Tooltip("九日式登场揭幕名牌(黑条+罗马名+大红中文名)，吼叫时扫入")]
     public BossNameCard nameCard;
+    [Tooltip("雾门：开战时关上挡住出口，boss 死亡/读档重置时自动开")]
+    public BossFogGate fogGate;
 
     [Header("登场演出")]
     [Tooltip("吼叫 + 血条充满阶段时长")]
@@ -33,6 +35,7 @@ public class BossIntroTrigger : MonoBehaviour
     void Start()
     {
         if (boss != null) boss.combatEnabled = false;   // 进场前先沉睡
+        if (fogGate != null && fogGate.boss == null) fogGate.boss = boss;   // 让雾门看守同一个 boss
     }
 
     void OnEnable()  { SaveSystem.AfterApply += OnSaveApplied; }
@@ -129,11 +132,12 @@ public class BossIntroTrigger : MonoBehaviour
             dialogueDone = true;
         while (!dialogueDone) yield return null;
 
-        // 3) 吼叫：音效 + 揭幕名牌扫入 + 血条充满 + boss 弹一下 + 强震 + 轻 zoom 抖（抖 introVcam，不直接动相机）
+        // 3) 吼叫：音效 + 揭幕名牌扫入 + 血条充满 + boss 弹一下 + 强震 + 轻 zoom 抖（抖 introVcam，不直接动相机）+ 全屏放射状吼叫爆发
         AudioManager.Instance?.PlayBossPhaseChange();
         if (nameCard != null) nameCard.Play(boss != null ? boss.profile : null, roarDuration);
         Bar()?.Reveal(barRevealDuration);
         StartCoroutine(BossScalePunch());
+        ScreenRoarFx.Burst(BossSpriteCenter(), 0.85f, 0.88f, Color.black);   // 连放 4 波集中线（黑色）
 
         float t = 0f;
         while (t < roarDuration)
@@ -197,7 +201,16 @@ public class BossIntroTrigger : MonoBehaviour
         var prb = pgo != null ? pgo.GetComponent<Rigidbody2D>() : null;
         if (prb != null) { prb.simulated = true; prb.linearVelocity = Vector2.zero; }
         if (boss != null) boss.Activate();
+        if (fogGate != null) fogGate.Close();   // 关上雾门，封住出口
         AudioManager.Instance?.PlayBossBGM();
+    }
+
+    // boss 精灵中心（放射吼叫的发出点）
+    Vector3 BossSpriteCenter()
+    {
+        if (boss == null) return Vector3.zero;
+        var sr = boss.GetComponentInChildren<SpriteRenderer>();
+        return sr != null ? sr.bounds.center : boss.transform.position;
     }
 
     void FaceBossAtPlayer()

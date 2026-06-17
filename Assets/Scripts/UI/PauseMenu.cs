@@ -244,6 +244,7 @@ public class PauseMenu : MonoBehaviour
         SetActive(mainGroup, true);
         SetActive(slotsGroup, false);
         SetActive(settingsGroup, false);
+        if (saveButton != null) saveButton.interactable = !EnemyBase.AnyBossInCombat();   // boss 战期间禁止存档
         HideConfirm();
     }
 
@@ -330,6 +331,7 @@ public class PauseMenu : MonoBehaviour
 
         if (page == Page.Save)
         {
+            if (EnemyBase.AnyBossInCombat()) return;   // boss 战期间禁止存档（兜底）
             if (save.HasSlot(slot))
                 ShowConfirm($"覆盖存档槽 {slot + 1}？", () => StartCoroutine(SaveRoutine(slot)));
             else

@@ -14,7 +14,7 @@ public class Boss_WaitState : BossBaseState
     {
         base.Update();
 
-        if (!boss.DetectPlayer())
+        if (!boss.KeepEngaged())   // 开战后永不脱战
         {
             stateMachine.ChangeState(boss.idleState);
             return;

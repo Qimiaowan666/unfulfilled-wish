@@ -148,9 +148,9 @@ public class BossFinishUI : MonoBehaviour
         RestoreSwapped();
         if (splatSR != null) Destroy(splatSR.gameObject);
         if (boss != null) boss.gameObject.SetActive(false);   // 死 boss 收掉，渐隐时不重现（DisableAfterDeath 多半已收，这里兜底）
-        yield return Fade(1.5f, t =>
+        yield return Fade(2.5f, t =>
         {
-            if (darkSR != null) { var c = darkColor; c.a = 1f - t; darkSR.color = c; }   // 黑幕渐隐
+            if (darkSR != null) { var c = darkColor; c.a = 1f - t; darkSR.color = c; }   // 黑幕渐隐（收尾露出场景，放慢更缓）
             if (defeatGroup != null) defeatGroup.alpha = 1f - t;                          // 名牌一起淡出
         });
         if (dark != null) Destroy(dark);

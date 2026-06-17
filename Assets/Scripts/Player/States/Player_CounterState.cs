@@ -65,6 +65,7 @@ public class Player_CounterState : PlayerBaseState
         VfxManager.Play("Vfx/GuardSpark", sp, Quaternion.identity, 1.2f,
                         new Color(1f, 0.8f, 0.45f), player.GetComponentInChildren<SpriteRenderer>());
         enemy.OnCountered();   // 切到 boss 的 staggerState，结束当前攻击 + 短暂停顿
+        enemy.ApplyPoiseDamage(player.Stats.counterPoiseDamage);   // 识破再削一截韧性（凑满 → 升级成破韧大硬直）
         return true;
     }
 }

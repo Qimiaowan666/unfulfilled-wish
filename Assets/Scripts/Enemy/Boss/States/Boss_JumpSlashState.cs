@@ -26,7 +26,11 @@ public class Boss_JumpSlashState : BossBaseState
 
         startPos = boss.transform.position;
         float groundY = startPos.y;
-        float targetX = boss.player != null ? boss.player.position.x : startPos.x;
+        // 落点比玩家靠后一个身位（朝 boss 来向退 standoff），避免砸在玩家正中心、精灵重叠
+        float pX = boss.player != null ? boss.player.position.x : startPos.x;
+        float approachDir = Mathf.Sign(pX - startPos.x);
+        if (approachDir == 0f) approachDir = boss.FacingDir;
+        float targetX = pX - approachDir * boss.jumpSlashStandoff;
         groundTarget = new Vector2(targetX, groundY);
         apex         = new Vector2(targetX, groundY + boss.jumpHeight);
 
@@ -83,6 +87,7 @@ public class Boss_JumpSlashState : BossBaseState
     {
         inHitWindow     = true;
         hitInThisWindow = false;
+        AudioManager.Instance?.PlayBossSlam();   // 砸地重音
         if (boss.Invincible) EndAirborne();   // 兜底：确保砸地时已落地、可被惩罚
         TryHit();
     }

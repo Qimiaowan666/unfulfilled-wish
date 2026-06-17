@@ -26,6 +26,7 @@ public class Boss_RepositionState : BossBaseState
         elapsed = 0f;
         landed  = false;
 
+        AudioManager.Instance?.PlayBossTeleport();   // 闪身瞬移音
         boss.SetInvincible(true);
         originalBodyType  = rb.bodyType;
         rb.bodyType       = RigidbodyType2D.Kinematic;

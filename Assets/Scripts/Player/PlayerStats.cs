@@ -25,6 +25,10 @@ public class PlayerStats : MonoBehaviour
     public float perfectBlockStaminaGain = 20f;
     public float counterStaminaGain      = 40f;
 
+    [Header("Poise (对敌韧性伤害)")]
+    public float perfectBlockPoiseDamage = 5f;    // 完美格挡削减敌人/boss 韧性
+    public float counterPoiseDamage      = 15f;   // 识破削韧（识破另有即时硬直，这里再叠韧性进度）
+
     [Header("Economy")]
     public int gold = 0;
 
@@ -137,6 +141,7 @@ public class PlayerStats : MonoBehaviour
         CurrentHP = Mathf.Max(CurrentHP - damage, 0f);
         OnHPChanged?.Invoke(CurrentHP, maxHP);
         OnDamaged?.Invoke(damage);
+        Debug.Log($"[{System.DateTime.Now:HH:mm:ss.fff}] [受伤] 主角 -{damage:0.#}  HP {CurrentHP:0}/{maxHP:0}");
 
         var feedback = GetComponent<DamageFeedback>();
         if (feedback != null) feedback.Flash();

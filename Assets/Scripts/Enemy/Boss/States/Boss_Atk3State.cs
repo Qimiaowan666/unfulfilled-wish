@@ -21,7 +21,7 @@ public class Boss_Atk3State : BossBaseState
     PlayerController target;
     RigidbodyType2D originalBodyType;
 
-    public Boss_Atk3State(MinotaurBoss b, BossStateMachine sm) : base(b, sm, "isAttacking") {}
+    public Boss_Atk3State(MinotaurBoss b, BossStateMachine sm) : base(b, sm, "isAttacking3") {}
 
     public override void Enter()
     {
@@ -55,7 +55,7 @@ public class Boss_Atk3State : BossBaseState
         hitInThisWindow = false;
 
         if (windowCount == 1 && hitElapsed < 0f) hitElapsed = elapsed;   // 横劈连接（玩家飞，boss 延迟后飞）
-        if (windowCount >= 2 && slamElapsed < 0f) slamElapsed = elapsed; // 下劈 → 一起砸下
+        if (windowCount >= 2 && slamElapsed < 0f) { slamElapsed = elapsed; AudioManager.Instance?.PlayBossSlam(); }   // 下劈砸地 → 重音
 
         TryHit();
     }

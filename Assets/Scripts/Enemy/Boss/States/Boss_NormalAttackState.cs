@@ -46,6 +46,7 @@ public class Boss_NormalAttackState : BossBaseState
     {
         inHitWindow     = true;
         hitInThisWindow = false;
+        if (useAtk2) AudioManager.Instance?.PlayBossSlam();   // 二段是砸地 → 接触帧重音（一段是横扫，不播）
         TryHit();              // Open 帧立即检测一次
     }
 

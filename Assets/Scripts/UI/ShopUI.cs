@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -109,40 +110,87 @@ public class ShopUI : MonoBehaviour
         foreach (var entry in shop.AvailableItems)
         {
             var e = entry;
-            AddRow(e.item.itemName, e.item.description, e.item.price, e.quantity, e.item.icon, () => shop.BuyItem(e, stats));
+            AddRow(e.item.itemName, ItemStats(e.item), e.item.price, e.quantity, e.item.icon, () => shop.BuyItem(e, stats));
         }
         foreach (var entry in shop.AvailableEquipment)
         {
             var e = entry;
-            AddRow(e.equipment.equipmentName, e.equipment.description, e.equipment.price, e.quantity, e.equipment.icon, () => shop.BuyEquipment(e, stats));
+            AddRow(e.equipment.equipmentName, EquipStats(e.equipment), e.equipment.price, e.quantity, e.equipment.icon, () => shop.BuyEquipment(e, stats));
         }
         foreach (var entry in shop.AvailableSkills)
         {
             var e = entry;
-            AddRow(e.skill.skillName, e.skill.description, e.skill.price, e.quantity, e.skill.icon, () => shop.BuySkill(e, stats));
+            AddRow(e.skill.skillName, SkillStats(e.skill), e.skill.price, e.quantity, e.skill.icon, () => shop.BuySkill(e, stats));
         }
     }
 
+    // 详情面板改为展示数值（不再显示文字描述）。各类商品按其属性字段逐行列出，无加成则给占位。
+    static string Bonus(float v) => (v >= 0 ? "+" : "") + v.ToString("F0");
+
+    static string EquipStats(EquipmentData e)
+    {
+        var lines = new List<string>();
+        if (!Mathf.Approximately(e.attackBonus, 0f))  lines.Add($"攻击 {Bonus(e.attackBonus)}");
+        if (!Mathf.Approximately(e.defenseBonus, 0f)) lines.Add($"防御 {Bonus(e.defenseBonus)}");
+        if (!Mathf.Approximately(e.maxHPBonus, 0f))   lines.Add($"生命 {Bonus(e.maxHPBonus)}");
+        return lines.Count > 0 ? string.Join("\n", lines) : "无属性加成";
+    }
+
+    static string ItemStats(ItemData it)
+    {
+        var lines = new List<string>();
+        if (it.type == ItemType.Consumable)
+        {
+            if (!Mathf.Approximately(it.healAmount, 0f)) lines.Add($"回复生命 {Bonus(it.healAmount)}");
+        }
+        else
+        {
+            if (!Mathf.Approximately(it.attackBonus, 0f))  lines.Add($"攻击 {Bonus(it.attackBonus)}");
+            if (!Mathf.Approximately(it.defenseBonus, 0f)) lines.Add($"防御 {Bonus(it.defenseBonus)}");
+            if (!Mathf.Approximately(it.maxHPBonus, 0f))   lines.Add($"生命 {Bonus(it.maxHPBonus)}");
+        }
+        return lines.Count > 0 ? string.Join("\n", lines) : "无属性加成";
+    }
+
+    static string SkillStats(SkillData sk)
+    {
+        var lines = new List<string>();
+        if (sk.type == SkillType.Active)
+        {
+            if (!Mathf.Approximately(sk.damage, 0f))      lines.Add($"伤害 {sk.damage:F0}");
+            if (!Mathf.Approximately(sk.poiseDamage, 0f)) lines.Add($"韧性 {sk.poiseDamage:F0}");
+            if (!Mathf.Approximately(sk.cooldown, 0f))    lines.Add($"冷却 {sk.cooldown:F1}s");
+            if (!Mathf.Approximately(sk.manaCost, 0f))    lines.Add($"体力消耗 {sk.manaCost:F0}");
+        }
+        else
+        {
+            if (!Mathf.Approximately(sk.attackPercent, 0f))  lines.Add($"攻击加成 +{sk.attackPercent:F0}%");
+            if (!Mathf.Approximately(sk.defensePercent, 0f)) lines.Add($"防御加成 +{sk.defensePercent:F0}%");
+            if (!Mathf.Approximately(sk.perfectBlockWindowBonus, 0f)) lines.Add($"格挡窗口 +{sk.perfectBlockWindowBonus:F2}s");
+        }
+        return lines.Count > 0 ? string.Join("\n", lines) : "无属性加成";
+    }
+
     // 点一行 → 不直接买，弹出详情确认框
-    void AddRow(string label, string desc, int price, int quantity, Sprite icon, System.Func<bool> buyAction)
+    void AddRow(string label, string details, int price, int quantity, Sprite icon, System.Func<bool> buyAction)
     {
         var row = Instantiate(rowTemplate, listContent);
         row.gameObject.SetActive(true);
         bool canAfford = stats != null && stats.gold >= price;
         row.Setup(label, shop.FormatPrice(price, quantity), icon, canAfford,
-            () => ShowDetail(label, desc, price, quantity, icon, buyAction));
+            () => ShowDetail(label, details, price, quantity, icon, buyAction));
     }
 
-    // 选中一行 → 把详情填进常驻的右侧面板（不再开关弹窗）
-    void ShowDetail(string label, string desc, int price, int quantity, Sprite icon, System.Func<bool> buyAction)
+    // 选中一行 → 把详情填进常驻的右侧面板（不再开关弹窗）。详情区显示数值而非描述。
+    void ShowDetail(string label, string details, int price, int quantity, Sprite icon, System.Func<bool> buyAction)
     {
         AudioManager.Instance?.PlayUIClick();
-        reselect = () => ShowDetail(label, desc, price, quantity, icon, buyAction);
+        reselect = () => ShowDetail(label, details, price, quantity, icon, buyAction);
 
         bool canAfford = stats != null && stats.gold >= price;
         if (detailIcon != null) { detailIcon.sprite = icon; detailIcon.enabled = icon != null; }
         if (detailName != null) detailName.text = label;
-        if (detailDesc != null) detailDesc.text = string.IsNullOrEmpty(desc) ? "（无描述）" : desc;
+        if (detailDesc != null) detailDesc.text = string.IsNullOrEmpty(details) ? "" : details;
         if (detailPrice != null)
         {
             detailPrice.text  = shop.FormatPrice(price, quantity);

@@ -35,7 +35,6 @@ public class PoiseMeter : MonoBehaviour
         if (IsBroken) return;
         CurrentPoise = Mathf.Max(CurrentPoise - damage, 0f);
         regenTimer = regenDelay;
-        Debug.Log($"{gameObject.name} 韧性 -{damage}，剩余：{CurrentPoise}/{maxPoise}");
         OnPoiseChanged?.Invoke(CurrentPoise, maxPoise);
         if (IsBroken) OnPoiseBroken?.Invoke();
     }

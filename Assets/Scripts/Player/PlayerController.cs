@@ -58,7 +58,10 @@ public class PlayerController : Entity
     public LayerMask enemyLayer;
 
     [Header("Block")]
-    public float perfectBlockWindow = 0.15f;
+    public float perfectBlockWindow          = 0.15f;   // 完美格挡基础窗口(每次按下开窗)
+    public float perfectBlockMinWindow        = 0.03f;   // 连续狂按时窗口下限(防刷)
+    public float perfectBlockShrinkPerPress   = 0.05f;   // 每次近期重按缩小的窗口
+    public float perfectBlockPenaltyResetTime = 0.5f;    // 静默多久惩罚清零(成功精防也会清零)
 
     [Header("Counter")]
     public float counterWindow      = 0.3f;
@@ -76,7 +79,7 @@ public class PlayerController : Entity
     public bool InPerfectBlockWindow => IsBlocking && blockState.InPerfectWindow;
 
     public bool TryCounter(EnemyBase enemy)   => counterState.TryCounter(enemy);
-    public void ReceiveBlockHit(float damage) { if (IsBlocking) blockState.ReceiveAttack(damage); }
+    public void ReceiveBlockHit(float damage, EnemyBase attacker) { if (IsBlocking) blockState.ReceiveAttack(damage, attacker); }
 
     // ── Lifecycle ────────────────────────────────────────────────────
     protected override void Awake()

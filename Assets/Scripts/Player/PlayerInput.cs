@@ -7,6 +7,7 @@ public class PlayerInput : MonoBehaviour
     public bool    JumpPressed   { get; private set; }
     public bool    AttackPressed { get; private set; }
     public bool    BlockHeld     { get; private set; }
+    public bool    BlockPressed  { get; private set; }   // 格挡"按下边沿"(wasPressedThisFrame)：快速连点也能捕获
     public bool    DashPressed   { get; private set; }
     public bool    CounterPressed { get; private set; }
     public bool    ExecutePressed { get; private set; }
@@ -25,7 +26,7 @@ public class PlayerInput : MonoBehaviour
         if (InputBlocked)
         {
             MoveInput = Vector2.zero;
-            JumpPressed = AttackPressed = BlockHeld = DashPressed =
+            JumpPressed = AttackPressed = BlockHeld = BlockPressed = DashPressed =
                 CounterPressed = ExecutePressed = Skill1Pressed = Skill2Pressed = false;
             return;
         }
@@ -57,6 +58,7 @@ public class PlayerInput : MonoBehaviour
 
         AttackPressed  = leftDown  && !rightHeld;
         BlockHeld      = rightHeld && !leftHeld;
+        BlockPressed   = rightDown && !leftHeld;   // 按下边沿：哪怕松→按不足一帧也能捕获
         CounterPressed = (leftDown && rightHeld) || (rightDown && leftHeld);
     }
 }

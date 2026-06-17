@@ -9,7 +9,7 @@ public class Boss_BattleState : BossBaseState
     {
         base.Update();
 
-        if (!boss.DetectPlayer())
+        if (!boss.KeepEngaged())   // 开战后锁定玩家不脱战；只有玩家真不在场才回 Idle
         {
             stateMachine.ChangeState(boss.idleState);
             return;
@@ -28,6 +28,12 @@ public class Boss_BattleState : BossBaseState
         }
         else if (dist > boss.attackRange)
         {
+            // 出攻击范围 + 冷却好 → 直接抽突进技能(跳劈/闪身/瞬移)缩距，不限距离；冷却中才走近
+            if (boss.attackCooldownTimer <= 0f)
+            {
+                var step = boss.StartApproachCombo();
+                if (step != null) { boss.ExecuteStep(step); return; }
+            }
             stateMachine.ChangeState(boss.chaseState);
         }
         else

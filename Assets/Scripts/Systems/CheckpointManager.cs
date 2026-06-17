@@ -24,6 +24,8 @@ public class CheckpointManager : MonoBehaviour
 
     public void ActivateCheckpoint(string id, Vector3? respawnAnchor = null)
     {
+        if (EnemyBase.AnyBossInCombat()) return;   // boss 战期间禁用火堆（不存档、不回血、不刷新复活点）
+
         if (string.IsNullOrWhiteSpace(id))
             id = "Checkpoint";
 

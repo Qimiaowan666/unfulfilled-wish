@@ -48,10 +48,12 @@ MonoBehaviour:
   attack2WhooshClip: {fileID: 8300000, guid: 928d91b0a53dc304394aa3d87b8e9068, type: 3}
   attack3WhooshClip: {fileID: 8300000, guid: 2c3a3e5675d4eb24f98d7b9844ca78e5, type: 3}
   attack3ImpactClip: {fileID: 8300000, guid: 672ccc38cb76ba74da6ece3e2b8bb064, type: 3}
+  dashStrikeClip: {fileID: 0}
   blockClip: {fileID: 8300000, guid: 508d493044909b64082e397203c0c334, type: 3}
   perfectBlockClip: {fileID: 8300000, guid: 9cee7700b2cecce4ab27f72a5fb91425, type: 3}
   perfectBlockTailClip: {fileID: 8300000, guid: 3bd60d1dbd0cd564db0a897be6415608, type: 3}
   counterClip: {fileID: 8300000, guid: 61e6affa280d802408544f8f4e406fe7, type: 3}
+  counterWhiffClip: {fileID: 0}
   hitLightClip: {fileID: 8300000, guid: 5b4cd0cd6950f5c458d5bb0b2862a614, type: 3}
   hitHeavyClip: {fileID: 8300000, guid: 1689bf1abced31d43990660ca84bf671, type: 3}
   executeDrawClip: {fileID: 8300000, guid: bf7048c604729e64ebf148c465bd8ca9, type: 3}
@@ -62,21 +64,39 @@ MonoBehaviour:
   dashClip: {fileID: 8300000, guid: 8a9d96d62876e8f438600242a754ce99, type: 3}
   landClip: {fileID: 8300000, guid: 7ef90320dc6abc34983a4987fceaf3ec, type: 3}
   deathClip: {fileID: 8300000, guid: 455013c51a42832428d6968b70ccda55, type: 3}
+  healClip: {fileID: 0}
+  victoryClip: {fileID: 0}
   checkpointClip: {fileID: 8300000, guid: 63a24bea6bf9a074dbe301df17d521e5, type: 3}
   keyPickupClip: {fileID: 8300000, guid: 0a7043e07fc11184d940d0de1eee2753, type: 3}
   doorOpenClip: {fileID: 8300000, guid: 7352e490a0a29f040844d304c86a41ee, type: 3}
   shopBuyClip: {fileID: 8300000, guid: b9f67c45ec5ac814cbbc4ee0b406ecbb, type: 3}
   shopFailClip: {fileID: 8300000, guid: ad2c26efb6503c64996d4626d3240da9, type: 3}
   uiClickClip: {fileID: 8300000, guid: 5aaaf5b1d0069354caf41d4832bd3763, type: 3}
-  enemyAttackClip: {fileID: 8300000, guid: 819447cd9baa4714ebf3298e33a22bc5, type: 3}
-  enemyHitClip: {fileID: 8300000, guid: 0bb7ae326fb661940b94235d7195c796, type: 3}
+  uiOpenClip: {fileID: 0}
+  uiEquipClip: {fileID: 0}
+  uiUseClip: {fileID: 0}
+  enemyAttackClip: {fileID: 8300000, guid: dee16e308ca5f2446867574808328a81, type: 3}
+  enemyAttack2Clip: {fileID: 8300000, guid: 40f003c47ab86254cb7b8dd57dcaa107, type: 3}
+  enemyHitClip: {fileID: 8300000, guid: b4a7f0278abec1b4a949dbba0e7bb308, type: 3}
   enemyDeathClip: {fileID: 8300000, guid: d0887229b94d7c04095711dd98f99f76, type: 3}
+  bowShotClip: {fileID: 8300000, guid: 2989875a66b0f5f4b9c1699dfde3b6b0, type: 3}
+  bowHeavyClip: {fileID: 8300000, guid: 776ea7112742f054388de5b2c86a6389, type: 3}
+  arrowImpactClip: {fileID: 8300000, guid: 94a86c933e126bf44b827179a40995a7, type: 3}
   bossAttackClip: {fileID: 8300000, guid: 3b4bbc6267900cd47bcd0eda0c71fadb, type: 3}
-  bossRushClip: {fileID: 8300000, guid: 8a9d96d62876e8f438600242a754ce99, type: 3}
+  bossSlamClip: {fileID: 8300000, guid: 327b2c4374c32ec4d90fb251fe89b40d, type: 3}
+  bossTeleportClip: {fileID: 8300000, guid: ab369faf8767bd845b51e405f734a52b, type: 3}
   bossPhaseChangeClip: {fileID: 8300000, guid: 2b04cc76708d0db4aba86c968e37cecf, type: 3}
+  bossRoarClip: {fileID: 0}
+  bossChargeClip: {fileID: 0}
+  bossExplodeClip: {fileID: 0}
+  bossRageRoarClip: {fileID: 0}
+  bossDefeatClip: {fileID: 0}
+  bossDeathClip: {fileID: 8300000, guid: 4887d91b99c735a46827e46540efe2e2, type: 3}
+  bossLandClip: {fileID: 8300000, guid: 7bbe88d403428784298651c1e2e6a8fd, type: 3}
+  bossNameStampClip: {fileID: 0}
   menuBGMClip: {fileID: 8300000, guid: 62997103bbbc57445b739e0f392fe0d4, type: 3}
   bgmClip: {fileID: 8300000, guid: ae2ba66104513d349b7e2f8dd7dd8146, type: 3}
   bossBGMClip: {fileID: 8300000, guid: 162fd5171cd93f14d972303fe2b8f310, type: 3}
-  futureBossBGMClip: {fileID: 8300000, guid: 42b740ed19da2a7419e39d6dd0787794, type: 3}
+  bossPhase2BGMClip: {fileID: 8300000, guid: 42b740ed19da2a7419e39d6dd0787794, type: 3}
   bgmVolume: 0.5
   sfxVolume: 0.8

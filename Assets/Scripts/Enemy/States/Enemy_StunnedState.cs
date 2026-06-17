@@ -4,14 +4,15 @@ public class Enemy_StunnedState : EnemyBaseState
 {
     float duration;
 
-    public Enemy_StunnedState(AoTenguEnemy enemy, EnemyStateMachine sm)
-        : base(enemy, sm, "isStunned") { }
+    public Enemy_StunnedState(GroundEnemy enemy, EnemyStateMachine sm)
+        : base(enemy, sm) { }
 
     public void SetDuration(float d) => duration = d;
 
     public override void Enter()
     {
         base.Enter();
+        enemy.PlayHurt();
         stateTimer        = duration;
         rb.linearVelocity = Vector2.zero;
     }
@@ -30,7 +31,6 @@ public class Enemy_StunnedState : EnemyBaseState
     public override void Exit()
     {
         base.Exit();
-        // 无论怎么离开硬直都恢复韧性，避免韧性条永久卡空
-        enemy.ResetPoise();
+        enemy.ResetPoise();   // 无论怎么离开硬直都恢复韧性，避免韧性条永久卡空
     }
 }

@@ -96,6 +96,7 @@ MonoBehaviour:
   checkpointID: shrine_entrance
   displayName: "\u7834\u8D25\u795E\u793E\xB7\u5165\u53E3"
   prompt: "\u6309 F \u5B58\u6863\u5E76\u6062\u590D"
+  promptHeightOffset: 0.45
   respawnAnchor: {fileID: 1726357845309945786}
 --- !u!1 &4875862954186056940
 GameObject:

@@ -8,7 +8,7 @@ public class Boss_ChaseState : BossBaseState
     {
         base.Update();
 
-        if (!boss.DetectPlayer())
+        if (!boss.KeepEngaged())   // 开战后永不脱战，一路追到底
         {
             stateMachine.ChangeState(boss.idleState);
             return;
@@ -21,6 +21,13 @@ public class Boss_ChaseState : BossBaseState
         if (dist <= boss.attackRange)
         {
             stateMachine.ChangeState(boss.battleState);  // 进入范围 → 让 hub 决策
+            return;
+        }
+
+        // 冷却一好就回 Battle 重新决策（去抽突进技能扑过去），不再傻走全程
+        if (boss.attackCooldownTimer <= 0f)
+        {
+            stateMachine.ChangeState(boss.battleState);
             return;
         }
 

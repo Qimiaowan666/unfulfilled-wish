@@ -91,75 +91,6 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 0
   m_SpriteSortPoint: 0
---- !u!1 &2693832090284701735
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 7351708191386553218}
-  - component: {fileID: 1290438587109227412}
-  m_Layer: 8
-  m_Name: Hurtbox
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &7351708191386553218
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2693832090284701735}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.05, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 4428139849176560301}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!70 &1290438587109227412
-CapsuleCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2693832090284701735}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ForceSendLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ForceReceiveLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ContactCaptureLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_CallbackLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_IsTrigger: 1
-  m_UsedByEffector: 0
-  m_CompositeOperation: 0
-  m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
-  m_Size: {x: 0.44, y: 0.72}
-  m_Direction: 1
 --- !u!1 &4636001714618293406
 GameObject:
   m_ObjectHideFlags: 0
@@ -196,7 +127,6 @@ Transform:
   m_LocalScale: {x: 5, y: 5, z: 5}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 7351708191386553218}
   - {fileID: 1434262014869756615}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -383,7 +313,7 @@ MonoBehaviour:
   nextSceneOnDefeat: 
   profile: {fileID: 11400000, guid: 8e975c588650f8540ab562323ec9fa68, type: 2}
   combatEnabled: 1
-  maxHP: 220
+  maxHP: 5000
   attack: 2
   goldDrop: 100
   detectionRange: 12
@@ -391,38 +321,21 @@ MonoBehaviour:
   playerLayer:
     serializedVersion: 2
     m_Bits: 512
-  patrolMoveSpeed: 2
-  battleMoveSpeed: 3.5
-  patrolDistance: 3
-  preferredCombatDistance: 1.05
-  retreatDistance: 0.75
   attackCooldown: 1.5
-  specialAttackCooldown: 3
-  poiseDamagePerHit: 2
   specialHitStunDuration: 0.6
   specialHitKnockback: 8
   specialAttackWarningDuration: 0.5
-  dashAttackSpeed: 8
-  dashAttackDuration: 0.35
-  idleTime: 1.5
-  battleTimeDuration: 5
-  stunDuration: 4
   moveSpeed: 2.2
   phase2SpeedBonus: 1.2
   phase2HPThreshold: 0.5
   phase2AttackMultiplier: 1.5
   phase2FreezeBeat: 0.6
-  phase2ShakeMag: 0.25
   phase2RoarHold: 3
   phase2RageTint: {r: 1, g: 0.42, b: 0.4, a: 1}
+  rageAuraScale: 1
   phase2RoarKnockback: 20
   phase2RoarKnockTime: 0.55
   phase2RoarHitstop: 0.12
-  phase2ShockwaveDuration: 1.2
-  phase2ShockwaveScale: 16
-  shockwaveGlowMat: {fileID: 2100000, guid: 93778aaac4e8e5a498ddce1314f61148, type: 2}
-  phase2ChargeRate: 22
-  phase2BurstCount: 28
   staggerDuration: 0.6
   comboPatterns:
   - patternName: "\u5355\u6BB5\u666E\u653B"
@@ -462,7 +375,7 @@ MonoBehaviour:
   - patternName: "\u95EA\u8EAB\u65A9"
     steps:
     - attack: 0
-      preMove: 0
+      preMove: 1
     - attack: 0
       preMove: 2
     - attack: 0
@@ -482,10 +395,18 @@ MonoBehaviour:
   - patternName: "\u77AC\u79FB\u5927\u62DB"
     steps:
     - attack: 0
-      preMove: 0
+      preMove: 3
     - attack: 2
       preMove: 1
     weight: 3
+    phase2Only: 0
+  - patternName: "\u4E8C\u9636\u6BB5\u5F00\u573A"
+    steps:
+    - attack: 4
+      preMove: 3
+    - attack: 2
+      preMove: 0
+    weight: 0
     phase2Only: 0
   teleportDuration: 0.35
   teleportOffset: 4
@@ -496,6 +417,7 @@ MonoBehaviour:
   teleportClearance: 0.6
   jumpHeight: 3
   jumpAirborneTime: 0.75
+  jumpSlashStandoff: 2
   atk3RiseHeight: 4
   atk3LaunchTime: 0.4
   atk3BossJumpDelay: 0.25
@@ -544,3 +466,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DamageFeedback
   flashColor: {r: 1, g: 1, b: 1, a: 1}
   flashDuration: 0.08
+  flashMaterial: {fileID: 2100000, guid: 6e20bf32e09be244d89d5ec3700faba1, type: 2}
