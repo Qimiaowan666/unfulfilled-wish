@@ -17,16 +17,31 @@ public class Enemy_AttackState : EnemyBaseState
         enemy.PlayCurrentAttack();  // 播当前选中的招(含变身后缀)
     }
 
+    // 招式无论怎么结束(正常退出 / 被韧性破·死亡打断)都清掉红闪预警，避免 WarnEnd 没轮到导致身体卡红
+    public override void Exit()
+    {
+        base.Exit();
+        enemy.GetComponent<DamageFeedback>()?.ClearWarning();
+    }
+
     public override void Update()
     {
         base.Update();
 
-        // 突进招(lungeSpeed>0)：朝玩家冲，靠近到 ~1.2 就停(避免穿过去)
+        // 出招位移：前冲(朝玩家、靠近到 ~1.5 就停免穿模) / 后撤(背对玩家、到边缘就停免掉平台)
         var atk = enemy.CurrentAttack;
-        if (atk != null && atk.lungeSpeed > 0f)
-            rb.linearVelocity = new Vector2(
-                enemy.GetHorizontalDistToPlayer() > 1.5f ? enemy.FacingDir * atk.lungeSpeed : 0f,
-                rb.linearVelocity.y);
+        if (atk != null && atk.lungeDir != LungeDir.None && atk.lungeSpeed > 0f)
+        {
+            float vx = 0f;
+            if (atk.lungeDir == LungeDir.Forward)
+                vx = enemy.GetHorizontalDistToPlayer() > 1.5f ? enemy.FacingDir * atk.lungeSpeed : 0f;
+            else // Backward：朝背对玩家方向后撤，边缘检测防掉下平台
+            {
+                float dir = -enemy.FacingDir;
+                vx = enemy.LedgeAhead(dir) ? 0f : dir * atk.lungeSpeed;
+            }
+            rb.linearVelocity = new Vector2(vx, rb.linearVelocity.y);
+        }
 
         if (triggerCalled || stateTimer < 0f)
         {

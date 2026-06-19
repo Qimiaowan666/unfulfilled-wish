@@ -1,29 +1,19 @@
 using System.Collections;
 using UnityEngine;
 
-// 弓箭手(远程小怪)：复用 GroundEnemy 状态机/攻击池，AttackTrigger 改成发射箭矢。
+// 弓箭手(远程小怪)：复用 GroundEnemy 状态机/攻击池，命中事件 Fire(i) 走远程 hit 发射箭矢。
 // 不做持续风筝后退(把 retreatDistance 设 0)；改为生命首次跌破一半时，往后闪一次(dash 闪避带无敌)。
 public class ArcherEnemy : GroundEnemy
 {
-    [Header("弓箭手")]
-    public Arrow   arrowPrefab;
-    public Vector2 firePointOffset = new Vector2(0.7f, 0.2f);   // 出箭点(x 随朝向翻转)
-    public float   aimHeightOffset = 0f;                        // 瞄准点相对玩家 pivot(腰部)的垂直偏移(正=往上)
-
-    [Header("特殊重箭 (识破防御 — special_attack 末发)")]
-    public float heavyArrowDamageMultiplier = 2f;                  // 重箭伤害 = 基础攻击 × 此值
-    public float heavyArrowScale = 1.4f;                           // 重箭放大(更显眼)
-    public Color heavyArrowTint  = new Color(1f, 0.45f, 0.3f, 1f); // 偏红：提示"无法格挡，需识破"
-
+    // 出箭点/瞄准/普通箭已下沉到 GroundEnemy(firePointOffset/aimHeightOffset + delivery=Ranged 的招)
     [Header("尘土特效")]
     public GameObject dustPrefab;               // 脚下尘土(SpriteOneShot 预制)，起跳/后撤步时生成
     public float      dustYOffset = 0.3f;       // 尘土高度微调(碰撞体底部之上；气太低就调大)
 
-    [Header("大招悬空 + 重箭预警 (弦一郎式)")]
+    [Header("大招悬空 (弦一郎式)")]
     public float specialLeapVelocity  = 7f;     // 起跳上冲速度
     public float specialRiseTime      = 0.22f;  // 上冲时长(× 速度 ≈ 悬空高度)，之后悬停到大招结束
     public float specialLeapBackward  = 0f;     // 起跳横向后撤(背对玩家；>0 当心跳下平台)
-    public float heavyWarningDuration = 0.55f;  // 重箭红闪预警时长(覆盖到放箭)
 
     [Header("半血后撤步 (一次性)")]
     [Range(0f, 1f)] public float backstepHpThreshold = 0.5f;   // 生命跌破此比例触发
@@ -45,40 +35,7 @@ public class ArcherEnemy : GroundEnemy
         if (Rb != null) baseGravity = Rb.gravityScale;
     }
 
-    // 攻击动画里的 AttackTrigger 事件 → 放箭(覆盖基类近战命中)
-    // 轻箭(可格挡) —— 动画事件 AttackTrigger(单发 attack + 三连射前三发)
-    public override void AttackTrigger()
-    {
-        var a = CurrentAttack;
-        FireArrow(attack * (a != null ? a.damageMultiplier : 1f), false, Color.white, 1f);
-    }
-
-    // 重箭(无法格挡，需识破) —— 动画事件 HeavyArrowTrigger(special_attack 末尾那发，拖拍后到)
-    public void HeavyArrowTrigger()
-    {
-        FireArrow(attack * heavyArrowDamageMultiplier, true, heavyArrowTint, heavyArrowScale);
-    }
-
-    void FireArrow(float dmg, bool special, Color tint, float scale)
-    {
-        if (arrowPrefab == null) return;
-        Vector3 spawn = transform.position + new Vector3(firePointOffset.x * FacingDir, firePointOffset.y, 0f);
-
-        // 瞄准玩家身体中部(带高低差)；玩家不在时退化为水平
-        Vector2 aim = Vector2.right * FacingDir;
-        if (player != null)
-        {
-            aim = ((Vector2)player.position + Vector2.up * aimHeightOffset) - (Vector2)spawn;
-            if (aim.sqrMagnitude < 0.01f) aim = Vector2.right * FacingDir;
-        }
-
-        var arrow = Instantiate(arrowPrefab, spawn, Quaternion.identity);
-        if (!Mathf.Approximately(scale, 1f)) arrow.transform.localScale *= scale;
-        var sr = arrow.GetComponent<SpriteRenderer>();
-        if (sr != null) sr.color = tint;
-        arrow.Launch(this, aim, dmg, special);
-        AudioManager.Instance?.PlayBow(special);   // 放弦音(重箭用蓄力重音)
-    }
+    // 轻箭/红重箭都由基类 Fire(i) 走对应 hit(delivery=Ranged)自动发射，这里不再覆盖。
 
     // scene 里画尘土生成点(黄色小圈)，方便对齐 dustYOffset（运行时尘土本身才可见）
     protected override void OnDrawGizmos()
@@ -116,13 +73,6 @@ public class ArcherEnemy : GroundEnemy
         Rb.linearVelocity = new Vector2(-FacingDir * specialLeapBackward, specialLeapVelocity);
         yield return new WaitForSeconds(specialRiseTime);
         if (inSpecialAir && Rb != null) Rb.linearVelocity = Vector2.zero;   // 升到位 → 悬停
-    }
-
-    // 动画事件：重箭"危"提示(拉满→放箭之间染红，告诉玩家这发要识破)
-    public void HeavyWarning()
-    {
-        var fb = GetComponent<DamageFeedback>();
-        if (fb != null) fb.FlashWarning(heavyWarningDuration);
     }
 
     // 生命首次跌破一半 → 触发一次后撤步
@@ -170,7 +120,7 @@ public class ArcherEnemy : GroundEnemy
         }
         // 攻击中持续面向玩家：远程要追着玩家射，玩家绕到另一边也转身(否则朝反方向放箭)
         if (player != null && stateMachine.currentState == attackState)
-            SetFacing(Mathf.Sign(player.position.x - transform.position.x));
+            FaceToward(player.position);
         base.Update();
     }
 

@@ -17,7 +17,7 @@ public class KeyPickup : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D other)
     {
-        if (collected || !other.CompareTag("Player")) return;
+        if (collected || !other.CompareTag(Tags.Player)) return;
 
         collected = true;
         LevelKeyManager.Instance?.CollectKey(keyAmount);

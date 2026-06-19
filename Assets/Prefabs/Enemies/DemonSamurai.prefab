@@ -31,7 +31,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3717205072576395896}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -9.21, y: 0.213, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -214,6 +214,7 @@ MonoBehaviour:
   flashColor: {r: 1, g: 1, b: 1, a: 1}
   flashDuration: 0.08
   flashMaterial: {fileID: 2100000, guid: 6e20bf32e09be244d89d5ec3700faba1, type: 2}
+  knockbackDuration: 0.1
 --- !u!114 &456932251332295707
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -253,10 +254,26 @@ MonoBehaviour:
     weight: 1
     minRange: 0
     maxRange: 1.8
+    hits:
+    - delivery: 0
+      red: 0
+      damageMultiplier: 1
+      knockback: 5
+      hitStun: 0
+      hitboxOffset: {x: 0.9, y: -0.5}
+      hitboxSize: {x: 1.8, y: 2}
+      projectilePrefab: {fileID: 0}
     damageMultiplier: 1
-    poiseDamage: 10
+    specialDamageMultiplier: 1
+    delivery: 0
     hitboxOffset: {x: 0.9, y: -0.5}
     hitboxSize: {x: 1.8, y: 2}
+    projectilePrefab: {fileID: 0}
+    knockback: 5
+    hitStun: 0
+    specialKnockback: 8
+    specialHitStun: 0.5
+    lungeDir: 0
     lungeSpeed: 0
     cooldownOverride: 0
     showGizmo: 0
@@ -264,44 +281,94 @@ MonoBehaviour:
     weight: 1
     minRange: 0
     maxRange: 1.8
+    hits:
+    - delivery: 0
+      red: 0
+      damageMultiplier: 1.1
+      knockback: 5
+      hitStun: 0
+      hitboxOffset: {x: 1, y: -0.5}
+      hitboxSize: {x: 2, y: 2}
+      projectilePrefab: {fileID: 0}
     damageMultiplier: 1.1
-    poiseDamage: 10
+    specialDamageMultiplier: 1
+    delivery: 0
     hitboxOffset: {x: 1, y: -0.5}
     hitboxSize: {x: 2, y: 2}
+    projectilePrefab: {fileID: 0}
+    knockback: 5
+    hitStun: 0
+    specialKnockback: 8
+    specialHitStun: 0.5
+    lungeDir: 0
     lungeSpeed: 0
     cooldownOverride: 0
     showGizmo: 0
   - id: atk3
     weight: 0.8
     minRange: 0
-    maxRange: 2.2
+    maxRange: 2
+    hits:
+    - delivery: 0
+      red: 0
+      damageMultiplier: 1.4
+      knockback: 5
+      hitStun: 0
+      hitboxOffset: {x: 1, y: -0.5}
+      hitboxSize: {x: 2, y: 2}
+      projectilePrefab: {fileID: 0}
     damageMultiplier: 1.4
-    poiseDamage: 10
+    specialDamageMultiplier: 1
+    delivery: 0
     hitboxOffset: {x: 1, y: -0.5}
     hitboxSize: {x: 2, y: 2}
+    projectilePrefab: {fileID: 0}
+    knockback: 5
+    hitStun: 0
+    specialKnockback: 8
+    specialHitStun: 0.5
+    lungeDir: 0
     lungeSpeed: 0
     cooldownOverride: 0
     showGizmo: 0
   - id: jumpattack
     weight: 0.7
-    minRange: 2
+    minRange: 1
     maxRange: 6
+    hits:
+    - delivery: 0
+      red: 0
+      damageMultiplier: 1.2
+      knockback: 5
+      hitStun: 0
+      hitboxOffset: {x: 1, y: 0}
+      hitboxSize: {x: 2, y: 4}
+      projectilePrefab: {fileID: 0}
     damageMultiplier: 1.2
-    poiseDamage: 10
+    specialDamageMultiplier: 1
+    delivery: 0
     hitboxOffset: {x: 1, y: 0}
     hitboxSize: {x: 2, y: 4}
-    lungeSpeed: 7
+    projectilePrefab: {fileID: 0}
+    knockback: 5
+    hitStun: 0
+    specialKnockback: 8
+    specialHitStun: 0.5
+    lungeDir: 1
+    lungeSpeed: 12
     cooldownOverride: 0
     showGizmo: 0
+  firePointOffset: {x: 0.7, y: 0.2}
+  aimHeightOffset: 0
   patrolMoveSpeed: 2
   battleMoveSpeed: 3.5
-  patrolDistance: 4
-  preferredCombatDistance: 1.8
-  retreatDistance: 0.75
+  patrolDistance: 3
+  preferredCombatDistance: 1.7
+  retreatDistance: 1
   idleTime: 1.5
   battleTimeDuration: 5
   stunDuration: 3
-  detectionRange: 8
+  detectionRange: 7
   detectionHeight: 3
   chaseVerticalLimit: 2.5
   attackVerticalTolerance: 1.2
@@ -317,7 +384,7 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 0}
+    m_TransformParent: {fileID: 6085266133418827167}
     m_Modifications:
     - target: {fileID: 8927367383295272663, guid: 48ff36c7bef34474ab51f4ef12737e18, type: 3}
       propertyPath: m_Pivot.x

@@ -46,7 +46,7 @@ public class Player_BlockState : PlayerBaseState
         if (input.BlockPressed && Time.frameCount != armedFrame) ArmWindow();
 
         if (!input.BlockHeld)
-            stateMachine.ChangeState(player.IsGrounded ? (PlayerBaseState)player.idleState : player.fallState);
+            stateMachine.ChangeState(player.GroundedOrFall);
     }
 
     public void ReceiveAttack(float damage, EnemyBase attacker = null)
@@ -64,6 +64,7 @@ public class Player_BlockState : PlayerBaseState
             Vector3 bp = player.transform.position + new Vector3((player.FacingRight ? 1f : -1f) * 0.7f, 0.95f, 0f);
             VfxManager.Play("Vfx/GuardSpark", bp, Quaternion.identity, 0.95f,
                             new Color(0.8f, 0.95f, 1f), player.GetComponentInChildren<SpriteRenderer>());
+            CombatSignals.RaisePerfectBlocked();   // 完美格挡 → 只发完美信号(教程里与普通格挡分开计数)
         }
         else
         {
@@ -71,6 +72,7 @@ public class Player_BlockState : PlayerBaseState
             player.Stats.OnNormalBlock(damage);
             AudioManager.Instance?.PlayBlock();
             CameraShake.Shake(0.06f, 0.03f);
+            CombatSignals.RaiseBlocked();
         }
     }
 }

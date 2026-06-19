@@ -33,7 +33,7 @@ public class Player_ExecuteState : PlayerBaseState
         if (animFinished || stateTimer < 0f)
         {
             player.Stats.SetInvulnerable(false);
-            stateMachine.ChangeState(player.IsGrounded ? (PlayerBaseState)player.idleState : player.fallState);
+            stateMachine.ChangeState(player.GroundedOrFall);
         }
     }
 

@@ -32,7 +32,7 @@ public class Player_DashState : PlayerBaseState
 
         if (stateTimer < 0f)
         {
-            stateMachine.ChangeState(player.IsGrounded ? (PlayerBaseState)player.idleState : player.fallState);
+            stateMachine.ChangeState(player.GroundedOrFall);
         }
     }
 

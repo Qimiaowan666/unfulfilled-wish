@@ -20,8 +20,7 @@ public class Boss_WaitState : BossBaseState
             return;
         }
 
-        float dir = Mathf.Sign(boss.player.position.x - boss.transform.position.x);
-        boss.SetFacing(dir);
+        boss.FaceToward(boss.player.position);
 
         float dist = boss.GetHorizontalDistToPlayer();
 

@@ -235,7 +235,7 @@ public class MinotaurBoss : EnemyBase
         Rb.linearVelocity = Vector2.zero;
 
         // 冻结玩家：清速度 + 回 idle + 停物理，整段定身（蓄力）
-        var pgo = GameObject.FindGameObjectWithTag("Player");
+        var pgo = GameObject.FindGameObjectWithTag(Tags.Player);
         var pc  = pgo != null ? pgo.GetComponent<PlayerController>() : null;
         var prb = pgo != null ? pgo.GetComponent<Rigidbody2D>() : null;
         if (prb != null) prb.linearVelocity = Vector2.zero;
@@ -301,8 +301,7 @@ public class MinotaurBoss : EnemyBase
         if (phasePlayerRb != null) phasePlayerRb.simulated = true;
         if (phasePlayerPc != null && phasePlayerPc.stateMachine != null &&
             phasePlayerPc.stateMachine.currentState == phasePlayerPc.knockedState)
-            phasePlayerPc.stateMachine.ChangeState(phasePlayerPc.IsGrounded
-                ? (PlayerBaseState)phasePlayerPc.idleState : phasePlayerPc.fallState);
+            phasePlayerPc.stateMachine.ChangeState(phasePlayerPc.GroundedOrFall);
         if (phasePlayerBar != null) phasePlayerBar.SetHudHidden(false);
         if (phaseBossBar   != null) phaseBossBar.SetHidden(false);
         Invincible      = false;
@@ -515,8 +514,7 @@ public class MinotaurBoss : EnemyBase
     public void RefreshFacingToPlayer()
     {
         if (player == null) return;
-        float dir = Mathf.Sign(player.position.x - transform.position.x);
-        SetFacing(dir);
+        FaceToward(player.position);
     }
 
     bool IsAttackAvailable(AttackId id)
@@ -574,7 +572,7 @@ public class MinotaurBoss : EnemyBase
     {
         if (player == null) return desired;
 
-        LayerMask mask = teleportWallLayer.value != 0 ? teleportWallLayer : LayerMask.GetMask("Ground");
+        LayerMask mask = teleportWallLayer.value != 0 ? teleportWallLayer : LayerMask.GetMask(Layers.Ground);
         if (mask.value == 0) return desired;   // 没有可用的墙层 → 不 clamp（安全降级）
 
         var col = GetComponent<Collider2D>();

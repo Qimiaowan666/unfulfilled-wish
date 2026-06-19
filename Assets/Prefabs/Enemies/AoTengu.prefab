@@ -31,7 +31,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2600347881496172697}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -0.41, y: -5.39, z: 0}
   m_LocalScale: {x: 3, y: 3, z: 3}
   m_ConstrainProportionsScale: 1
@@ -237,19 +237,37 @@ MonoBehaviour:
   - id: attack
     weight: 1
     minRange: 0
-    maxRange: 1.8
+    maxRange: 2
+    hits:
+    - delivery: 0
+      red: 0
+      damageMultiplier: 1
+      knockback: 5
+      hitStun: 0
+      hitboxOffset: {x: 1, y: 0}
+      hitboxSize: {x: 2, y: 2}
+      projectilePrefab: {fileID: 0}
     damageMultiplier: 1
-    poiseDamage: 15
+    specialDamageMultiplier: 1
+    delivery: 0
     hitboxOffset: {x: 1, y: 0}
     hitboxSize: {x: 2, y: 2}
+    projectilePrefab: {fileID: 0}
+    knockback: 5
+    hitStun: 0
+    specialKnockback: 8
+    specialHitStun: 0.5
+    lungeDir: 0
     lungeSpeed: 0
     cooldownOverride: 0
     showGizmo: 1
+  firePointOffset: {x: 0.7, y: 0.2}
+  aimHeightOffset: 0
   patrolMoveSpeed: 2
   battleMoveSpeed: 3.5
   patrolDistance: 5
-  preferredCombatDistance: 1.05
-  retreatDistance: 0.75
+  preferredCombatDistance: 1.9
+  retreatDistance: 1
   idleTime: 1.5
   battleTimeDuration: 5
   stunDuration: 3
@@ -274,13 +292,14 @@ MonoBehaviour:
   flashColor: {r: 1, g: 1, b: 1, a: 1}
   flashDuration: 0.08
   flashMaterial: {fileID: 2100000, guid: 6e20bf32e09be244d89d5ec3700faba1, type: 2}
+  knockbackDuration: 0.1
 --- !u!1001 &6025724465489044588
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 0}
+    m_TransformParent: {fileID: 8642846680377532294}
     m_Modifications:
     - target: {fileID: 8927367383295272663, guid: 48ff36c7bef34474ab51f4ef12737e18, type: 3}
       propertyPath: m_Pivot.x

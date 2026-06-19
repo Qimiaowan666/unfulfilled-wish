@@ -85,7 +85,7 @@ public class Player_AttackState : PlayerBaseState
         }
         else
         {
-            stateMachine.ChangeState(player.IsGrounded ? (PlayerBaseState)player.idleState : player.fallState);
+            stateMachine.ChangeState(player.GroundedOrFall);
         }
     }
 
@@ -98,7 +98,7 @@ public class Player_AttackState : PlayerBaseState
         var hits = Physics2D.OverlapBoxAll(origin, player.hitboxSize, 0f, player.enemyLayer);
         foreach (var hit in hits)
         {
-            var enemy = hit.GetComponent<EnemyBase>() ?? hit.GetComponentInParent<EnemyBase>();
+            var enemy = hit.GetComponent<EnemyBase>();
             if (enemy == null) continue;
 
             int  idx    = Mathf.Min(comboStep, player.attackDamageMultipliers.Length - 1);
@@ -106,7 +106,7 @@ public class Player_AttackState : PlayerBaseState
             float poise = player.attackPoiseDamage[Mathf.Min(comboStep, player.attackPoiseDamage.Length - 1)];
 
             enemy.TakeDamage(dmg, poise);
-            var feedback = hit.GetComponent<DamageFeedback>() ?? hit.GetComponentInParent<DamageFeedback>();
+            var feedback = hit.GetComponent<DamageFeedback>();
             feedback?.ApplyKnockback(player.transform.position, 4f);
             player.Stats.OnAttackHit();
 

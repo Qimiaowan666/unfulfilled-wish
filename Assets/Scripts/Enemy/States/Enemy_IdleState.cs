@@ -18,7 +18,7 @@ public class Enemy_IdleState : Enemy_GroundedState
         base.Update();
         if (stateMachine.currentState != this) return;
 
-        if (stateTimer < 0f)
+        if (stateTimer < 0f && !enemy.Passive && !enemy.Stationary)   // 被动/钉死态不巡逻，永远站着
             stateMachine.ChangeState(enemy.moveState);
     }
 }

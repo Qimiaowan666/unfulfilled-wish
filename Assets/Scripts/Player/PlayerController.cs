@@ -24,6 +24,9 @@ public class PlayerController : Entity
     public Player_HealState    healState     { get; private set; }
     public Player_DeadState    deadState     { get; private set; }
 
+    // 各状态收尾统一回归：落地 → idle，半空 → fall
+    public PlayerBaseState GroundedOrFall => IsGrounded ? (PlayerBaseState)idleState : fallState;
+
     // ── Player-specific Components ───────────────────────────────────
     public PlayerStats         Stats        { get; private set; }
     public PlayerInputBuffer   InputBuffer  { get; private set; }

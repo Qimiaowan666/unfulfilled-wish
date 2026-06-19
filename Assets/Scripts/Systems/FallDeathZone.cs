@@ -10,7 +10,7 @@ public class FallDeathZone : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D other)
     {
-        if (!other.CompareTag("Player")) return;
+        if (!other.CompareTag(Tags.Player)) return;
 
         var rb = other.GetComponent<Rigidbody2D>();
         if (rb != null)

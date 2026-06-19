@@ -108,11 +108,9 @@ public class SaveSystem : MonoBehaviour
     }
 
     // 读档的统一触发点：每个游戏场景加载后等一帧自动 apply（不再依赖场景里是否挂了 LevelManager）
-    static readonly string[] NoAutoLoadScenes = { "MainMenu", "Bootstrap" };
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        foreach (var n in NoAutoLoadScenes)
-            if (scene.name == n) return;
+        if (SceneNames.IsNonGameplay(scene.name)) return;
         StartCoroutine(ApplyAfterFrame());
     }
 

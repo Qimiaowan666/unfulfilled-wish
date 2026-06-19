@@ -8,8 +8,6 @@ public class GameOverUI : MonoBehaviour
 {
     public static GameOverUI Instance { get; private set; }
 
-    const string MainMenuSceneName = "MainMenu";
-
     static readonly Color OverlayColor   = new Color(0.06f, 0.01f, 0.01f, 0.86f);
     static readonly Color TitleColor     = new Color(0.82f, 0.12f, 0.10f, 1f);
     static readonly Color ButtonColor    = new Color(0.30f, 0.28f, 0.24f, 0.92f);
@@ -65,7 +63,7 @@ public class GameOverUI : MonoBehaviour
     {
         Hide();
         Time.timeScale = 1f;
-        GameManager.Instance?.LoadScene(MainMenuSceneName);
+        GameManager.Instance?.LoadScene(SceneNames.MainMenu);
     }
 
     // ── 程序化构建 UI ──────────────────────────────────────────────

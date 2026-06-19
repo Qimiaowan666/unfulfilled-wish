@@ -96,8 +96,8 @@ public class AudioManager : MonoBehaviour
         transform.SetParent(null);
         DontDestroyOnLoad(gameObject);
 
-        bgmVolume = PlayerPrefs.GetFloat("set_bgm", bgmVolume);   // 读上次设置的音量
-        sfxVolume = PlayerPrefs.GetFloat("set_sfx", sfxVolume);
+        bgmVolume = PlayerPrefs.GetFloat(GameSettings.KeyBgm, bgmVolume);   // 读上次设置的音量
+        sfxVolume = PlayerPrefs.GetFloat(GameSettings.KeySfx, sfxVolume);
 
         source = gameObject.AddComponent<AudioSource>();
         source.playOnAwake = false;

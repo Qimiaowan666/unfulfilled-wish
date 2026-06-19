@@ -78,7 +78,7 @@ MonoBehaviour:
   enemyAttackClip: {fileID: 8300000, guid: dee16e308ca5f2446867574808328a81, type: 3}
   enemyAttack2Clip: {fileID: 8300000, guid: 40f003c47ab86254cb7b8dd57dcaa107, type: 3}
   enemyHitClip: {fileID: 8300000, guid: b4a7f0278abec1b4a949dbba0e7bb308, type: 3}
-  enemyDeathClip: {fileID: 8300000, guid: d0887229b94d7c04095711dd98f99f76, type: 3}
+  enemyDeathClip: {fileID: 8300000, guid: 56170446e47bed44d98d70a8c964079a, type: 3}
   bowShotClip: {fileID: 8300000, guid: 2989875a66b0f5f4b9c1699dfde3b6b0, type: 3}
   bowHeavyClip: {fileID: 8300000, guid: 776ea7112742f054388de5b2c86a6389, type: 3}
   arrowImpactClip: {fileID: 8300000, guid: 94a86c933e126bf44b827179a40995a7, type: 3}

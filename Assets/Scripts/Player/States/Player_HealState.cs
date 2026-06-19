@@ -66,7 +66,7 @@ public class Player_HealState : PlayerBaseState
 
     void ExitToGroundedOrFall()
     {
-        stateMachine.ChangeState(player.IsGrounded ? (PlayerBaseState)player.idleState : player.fallState);
+        stateMachine.ChangeState(player.GroundedOrFall);
     }
 
     public override void Exit()

@@ -25,14 +25,14 @@ public class Player_CounterState : PlayerBaseState
 
         if (!isInCounterWindow && animFinished)
         {
-            stateMachine.ChangeState(player.IsGrounded ? (PlayerBaseState)player.idleState : player.fallState);
+            stateMachine.ChangeState(player.GroundedOrFall);
             return;
         }
 
         // Fallback: timer expired
         if (stateTimer < 0f)
         {
-            stateMachine.ChangeState(player.IsGrounded ? (PlayerBaseState)player.idleState : player.fallState);
+            stateMachine.ChangeState(player.GroundedOrFall);
         }
     }
 
@@ -66,6 +66,7 @@ public class Player_CounterState : PlayerBaseState
                         new Color(1f, 0.8f, 0.45f), player.GetComponentInChildren<SpriteRenderer>());
         enemy.OnCountered();   // 切到 boss 的 staggerState，结束当前攻击 + 短暂停顿
         enemy.ApplyPoiseDamage(player.Stats.counterPoiseDamage);   // 识破再削一截韧性（凑满 → 升级成破韧大硬直）
+        CombatSignals.RaiseCountered();
         return true;
     }
 }

@@ -27,9 +27,6 @@ public class CharacterPanelUI : MonoBehaviour
     [Header("四页 View（顺序对应 tab）")]
     public CharacterPageView[] pages;
 
-    // 非游玩场景：主菜单 / Bootstrap 里不允许开角色面板
-    static readonly string[] NonGameplayScenes = { "MainMenu", "Bootstrap" };
-
     static readonly string[] TabTitles = { "状态", "装备", "背包", "技能" };
     static readonly Color TabOn      = new Color(1f, 1f, 1f, 1f);          // 选中：木牌原色(最亮)
     static readonly Color TabOff     = new Color(0.66f, 0.63f, 0.60f, 1f); // 未选中：略压暗
@@ -87,13 +84,7 @@ public class CharacterPanelUI : MonoBehaviour
         if (kb.digit4Key.wasPressedThisFrame) SetTab(3);
     }
 
-    static bool InGameplayScene()
-    {
-        string active = SceneManager.GetActiveScene().name;
-        foreach (var s in NonGameplayScenes)
-            if (active == s) return false;
-        return true;
-    }
+    static bool InGameplayScene() => SceneNames.IsGameplay(SceneManager.GetActiveScene().name);
 
     void SetOpen(bool value)
     {

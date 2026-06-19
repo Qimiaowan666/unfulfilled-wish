@@ -26,6 +26,8 @@ public class Enemy_ChaseState : EnemyBaseState
 
     public override void Update()
     {
+        if (enemy.Passive) { stateMachine.ChangeState(enemy.idleState); return; }   // 被动态绝不交战，被打进来也立刻退回待命
+
         base.Update();
 
         // 只有"看得到且够得到"才刷新交战计时；高差过大 → 计入脱战
@@ -42,7 +44,7 @@ public class Enemy_ChaseState : EnemyBaseState
         if (enemy.player == null) return;
 
         float dist = enemy.GetHorizontalDistToPlayer();
-        float dir  = Mathf.Sign(enemy.player.position.x - enemy.transform.position.x);
+        float dir  = enemy.DirToward(enemy.player.position);
         enemy.SetFacing(dir);
 
         // 同台阶 + 冷却好 → 抽招打
@@ -51,6 +53,14 @@ public class Enemy_ChaseState : EnemyBaseState
         {
             rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
             stateMachine.ChangeState(enemy.attackState);
+            return;
+        }
+
+        // 钉死态(训练射手)：站定面向玩家放箭,绝不移动 / 不跑步 → 跳过所有接近/后退逻辑
+        if (enemy.Stationary)
+        {
+            rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
+            SetMoveAnim(false);
             return;
         }
 

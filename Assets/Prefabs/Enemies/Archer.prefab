@@ -31,7 +31,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4585860486613630296}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 3.59, y: -5.23, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
@@ -181,8 +181,8 @@ CapsuleCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: -0.3}
-  m_Size: {x: 0.9, y: 2.2}
+  m_Offset: {x: 0, y: -0.10564351}
+  m_Size: {x: 0.9, y: 1.7285814}
   m_Direction: 0
 --- !u!114 &5911315250799022115
 MonoBehaviour:
@@ -214,6 +214,7 @@ MonoBehaviour:
   flashColor: {r: 1, g: 1, b: 1, a: 1}
   flashDuration: 0.08
   flashMaterial: {fileID: 2100000, guid: 6e20bf32e09be244d89d5ec3700faba1, type: 2}
+  knockbackDuration: 0.1
 --- !u!114 &1667738334882946402
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -237,7 +238,7 @@ MonoBehaviour:
   nextSceneOnDefeat: 
   profile: {fileID: 0}
   combatEnabled: 1
-  maxHP: 120
+  maxHP: 250
   attack: 8
   goldDrop: 10
   attackRange: 9
@@ -250,32 +251,74 @@ MonoBehaviour:
   specialAttackWarningDuration: 0.5
   attacks:
   - id: attack
-    weight: 3
-    minRange: 3
+    weight: 4
+    minRange: 0
     maxRange: 9
+    hits:
+    - delivery: 1
+      red: 0
+      damageMultiplier: 1
+      knockback: 5
+      hitStun: 0
+      hitboxOffset: {x: 0, y: 0}
+      hitboxSize: {x: 0, y: 0}
+      projectilePrefab: {fileID: 2890174170218546002, guid: b09cfdeece551bd4dad71d8d21c8d572, type: 3}
     damageMultiplier: 1
-    poiseDamage: 0
+    specialDamageMultiplier: 1
+    delivery: 1
     hitboxOffset: {x: 0, y: 0}
     hitboxSize: {x: 0, y: 0}
+    projectilePrefab: {fileID: 2890174170218546002, guid: b09cfdeece551bd4dad71d8d21c8d572, type: 3}
+    knockback: 5
+    hitStun: 0
+    specialKnockback: 8
+    specialHitStun: 0.5
+    lungeDir: 0
     lungeSpeed: 0
     cooldownOverride: 0
     showGizmo: 0
   - id: special_attack
     weight: 1
-    minRange: 4
+    minRange: 0
     maxRange: 9
+    hits:
+    - delivery: 1
+      red: 0
+      damageMultiplier: 0.7
+      knockback: 5
+      hitStun: 0
+      hitboxOffset: {x: 0, y: 0}
+      hitboxSize: {x: 0, y: 0}
+      projectilePrefab: {fileID: 2890174170218546002, guid: b09cfdeece551bd4dad71d8d21c8d572, type: 3}
+    - delivery: 1
+      red: 1
+      damageMultiplier: 2
+      knockback: 8
+      hitStun: 0.5
+      hitboxOffset: {x: 0, y: 0}
+      hitboxSize: {x: 0, y: 0}
+      projectilePrefab: {fileID: 2890174170218546002, guid: b09cfdeece551bd4dad71d8d21c8d572, type: 3}
     damageMultiplier: 0.7
-    poiseDamage: 0
+    specialDamageMultiplier: 2
+    delivery: 1
     hitboxOffset: {x: 0, y: 0}
     hitboxSize: {x: 0, y: 0}
+    projectilePrefab: {fileID: 2890174170218546002, guid: b09cfdeece551bd4dad71d8d21c8d572, type: 3}
+    knockback: 5
+    hitStun: 0
+    specialKnockback: 8
+    specialHitStun: 0.5
+    lungeDir: 0
     lungeSpeed: 0
     cooldownOverride: 2.2
     showGizmo: 0
+  firePointOffset: {x: 0.7, y: 0.2}
+  aimHeightOffset: 0
   patrolMoveSpeed: 1.5
   battleMoveSpeed: 2.5
   patrolDistance: 4
-  preferredCombatDistance: 6
-  retreatDistance: 0
+  preferredCombatDistance: 9
+  retreatDistance: 1
   idleTime: 1.5
   battleTimeDuration: 5
   stunDuration: 3
@@ -285,20 +328,13 @@ MonoBehaviour:
   attackVerticalTolerance: 3
   wallCheckDistance: 0.35
   ledgeCheckDistance: 0.9
-  arrowPrefab: {fileID: 2890174170218546002, guid: b09cfdeece551bd4dad71d8d21c8d572, type: 3}
-  firePointOffset: {x: 0.7, y: 0.2}
-  aimHeightOffset: 0
-  heavyArrowDamageMultiplier: 2
-  heavyArrowScale: 1.4
-  heavyArrowTint: {r: 1, g: 0.45, b: 0.3, a: 1}
   dustPrefab: {fileID: 6693854316277848307, guid: aba5593d3e77fbd45b1abdf65673bf01, type: 3}
-  dustYOffset: 0.3
+  dustYOffset: 0.35
   specialLeapVelocity: 7
   specialRiseTime: 0.22
   specialLeapBackward: 0
-  heavyWarningDuration: 0.55
   backstepHpThreshold: 0.5
-  backstepSpeed: 12
+  backstepSpeed: 20
   backstepDuration: 0.3
   backstepInvincible: 1
 --- !u!1001 &1369433200508033973
@@ -307,7 +343,7 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 0}
+    m_TransformParent: {fileID: 3184845009226086815}
     m_Modifications:
     - target: {fileID: 8927367383295272663, guid: 48ff36c7bef34474ab51f4ef12737e18, type: 3}
       propertyPath: m_Pivot.x

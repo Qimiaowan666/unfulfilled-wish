@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 8253919066817342201}
   - component: {fileID: 8290423908907385228}
   m_Layer: 0
-  m_Name: SavePoint_Shrine
+  m_Name: Campfire
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -93,10 +93,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5c5020c450e520a43b3ea376c5a2269e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CheckpointTrigger
-  checkpointID: shrine_entrance
-  displayName: "\u7834\u8D25\u795E\u793E\xB7\u5165\u53E3"
   prompt: "\u6309 F \u5B58\u6863\u5E76\u6062\u590D"
-  promptHeightOffset: 0.45
+  promptHeightOffset: 2
+  checkpointID: 
+  displayName: 
   respawnAnchor: {fileID: 1726357845309945786}
 --- !u!1 &4875862954186056940
 GameObject:

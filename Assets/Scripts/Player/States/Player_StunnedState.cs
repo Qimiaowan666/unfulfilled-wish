@@ -19,6 +19,6 @@ public class Player_StunnedState : PlayerBaseState
         base.Update();
 
         if (stateTimer < 0f)
-            stateMachine.ChangeState(player.IsGrounded ? (PlayerBaseState)player.idleState : player.fallState);
+            stateMachine.ChangeState(player.GroundedOrFall);
     }
 }

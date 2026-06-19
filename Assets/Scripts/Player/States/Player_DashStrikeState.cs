@@ -68,10 +68,10 @@ public class Player_DashStrikeState : PlayerBaseState
         float dmg = player.Stats.attack * skill.DmgMul;
         foreach (var hit in hits)
         {
-            var enemy = hit.GetComponent<EnemyBase>() ?? hit.GetComponentInParent<EnemyBase>();
+            var enemy = hit.GetComponent<EnemyBase>();
             if (enemy == null) continue;
             enemy.TakeDamage(dmg);
-            var fb = hit.GetComponent<DamageFeedback>() ?? hit.GetComponentInParent<DamageFeedback>();
+            var fb = hit.GetComponent<DamageFeedback>();
             fb?.ApplyKnockback(player.transform.position, 4f);
         }
 
@@ -109,7 +109,7 @@ public class Player_DashStrikeState : PlayerBaseState
         {
             player.transform.position = endPos;
             TrySpawnAfterimages(skill.AfterimageCount); // 补齐
-            stateMachine.ChangeState(player.IsGrounded ? (PlayerBaseState)player.idleState : player.fallState);
+            stateMachine.ChangeState(player.GroundedOrFall);
         }
     }
 

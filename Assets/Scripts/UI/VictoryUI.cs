@@ -17,8 +17,6 @@ public class VictoryUI : MonoBehaviour
     public Button menuButton;   // 回主菜单
     public Button quitButton;
 
-    const string MainMenuScene = "MainMenu";
-
     void Awake()
     {
         if (Instance != null && Instance != this)
@@ -55,7 +53,7 @@ public class VictoryUI : MonoBehaviour
         IsOpen = false;
         if (panelRoot != null) panelRoot.SetActive(false);
         Time.timeScale = 1f;
-        GameManager.Instance?.LoadScene(MainMenuScene);
+        GameManager.Instance?.LoadScene(SceneNames.MainMenu);
     }
 
     void OnQuit()

@@ -21,6 +21,6 @@ public class Player_KnockedState : PlayerBaseState
         // 不清速度(让击退滑行)，不接收输入/全局过渡(硬直)
         stateTimer -= Time.deltaTime;
         if (stateTimer <= 0f)
-            stateMachine.ChangeState(player.IsGrounded ? (PlayerBaseState)player.idleState : player.fallState);
+            stateMachine.ChangeState(player.GroundedOrFall);
     }
 }

@@ -60,7 +60,7 @@ public class VictoryGate : MonoBehaviour
 
         if (player == null)
         {
-            var p = GameObject.FindGameObjectWithTag("Player");
+            var p = GameObject.FindGameObjectWithTag(Tags.Player);
             if (p == null) return;
             player = p.transform;
         }

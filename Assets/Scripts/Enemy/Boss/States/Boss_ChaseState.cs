@@ -14,7 +14,7 @@ public class Boss_ChaseState : BossBaseState
             return;
         }
 
-        float dir  = Mathf.Sign(boss.player.position.x - boss.transform.position.x);
+        float dir  = boss.DirToward(boss.player.position);
         boss.SetFacing(dir);
 
         float dist = boss.GetHorizontalDistToPlayer();

@@ -112,7 +112,7 @@ public class EnemyBase : Entity
         poiseMeter      = GetComponent<PoiseMeter>();
         poiseMeter.OnPoiseBroken += OnPoiseBroken;
 
-        int playerLayerIndex = LayerMask.NameToLayer("Player");
+        int playerLayerIndex = LayerMask.NameToLayer(Layers.Player);
         if (playerLayerIndex >= 0 && (playerLayer.value & (1 << playerLayerIndex)) == 0)
             playerLayer = 1 << playerLayerIndex;
     }
@@ -127,7 +127,7 @@ public class EnemyBase : Entity
     {
         if (player == null)
         {
-            var p = GameObject.FindGameObjectWithTag("Player");
+            var p = GameObject.FindGameObjectWithTag(Tags.Player);
             if (p != null) player = p.transform;
         }
         return player != null;
@@ -142,13 +142,19 @@ public class EnemyBase : Entity
         return Mathf.Abs(player.position.x - transform.position.x);
     }
 
+    // boss / 简单调用：isSpecial 决定击退/硬直(普通 5/0；特殊用 specialHit*)
     public bool PerformAttack(float damage, Vector2 offset, Vector2 size, bool isSpecialAttack = false)
+        => PerformAttack(damage, offset, size, isSpecialAttack,
+                         isSpecialAttack ? specialHitKnockback : 5f,
+                         isSpecialAttack ? specialHitStunDuration : 0f);
+
+    // 地面怪逐招：显式 unblockable + 击退 + 硬直
+    public bool PerformAttack(float damage, Vector2 offset, Vector2 size, bool unblockable, float knockback, float hitStun)
     {
-        Vector2 origin = (Vector2)transform.position +
-                         new Vector2(offset.x * FacingDir, offset.y);
+        Vector2 origin = (Vector2)transform.position + new Vector2(offset.x * FacingDir, offset.y);
         var hits = Physics2D.OverlapBoxAll(origin, size, 0f, playerLayer);
         foreach (var hit in hits)
-            ApplyHitToCollider(hit, damage, isSpecialAttack);
+            ApplyHitToCollider(hit, damage, unblockable, knockback, hitStun);
         return hits.Length > 0;
     }
 
@@ -173,43 +179,43 @@ public class EnemyBase : Entity
     }
 
     // public：近战 PerformAttack 与远程 Arrow 共用同一套命中处理(格挡/识破/击退)
-    public void ApplyHitToCollider(Collider2D hit, float damage, bool isSpecialAttack = false)
+    public void ApplyHitToCollider(Collider2D hit, float damage, bool unblockable, float knockback, float hitStun)
     {
         if (hit == null) return;
-        var ctrl  = hit.GetComponent<PlayerController>()  ?? hit.GetComponentInParent<PlayerController>();
-        var stats = hit.GetComponent<PlayerStats>()       ?? hit.GetComponentInParent<PlayerStats>();
+        var ctrl  = hit.GetComponent<PlayerController>();
+        var stats = hit.GetComponent<PlayerStats>();
         if (stats == null || stats.IsInvulnerable) return;
 
         // 被命中（无论格挡与否）→ 转身面向攻击来源
         if (ctrl != null)
-            ctrl.SetFacing(Mathf.Sign(transform.position.x - ctrl.transform.position.x));
+            ctrl.FaceToward(transform.position);
 
         bool isBlocking   = ctrl != null && ctrl.IsBlocking;
         bool isCountering = ctrl != null && ctrl.IsCountering;
-        var  feedback     = hit.GetComponent<DamageFeedback>() ?? hit.GetComponentInParent<DamageFeedback>();
+        var  feedback     = hit.GetComponent<DamageFeedback>();
 
-        if (isSpecialAttack)
+        // ── 防御判定（剪刀石头布）：普通招只能「格挡」防、危招(unblockable)只能「识破」防 ──
+        if (unblockable)
         {
-            // 特殊攻击：识破成功 → 不受伤，给boss poise伤害
+            // 危招无视格挡；识破成功 → 免伤(并给敌人 poise)，否则继续往下吃实打
             if (isCountering && ctrl.TryCounter(this)) return;
-            // 特殊攻击无视格挡 → 全伤 + 击退 + 硬直（阻断后续段识破）
-            stats.TakeDamage(damage);
-            ctrl?.Stun(specialHitStunDuration);                                   // 先切到 stunnedState（Enter 会归零速度）
-            feedback?.ApplyKnockback(transform.position, specialHitKnockback);    // 再设击退速度（KnockbackRoutine 在 stunnedState 之后接管）
-            return;
         }
-
-        // 普通攻击：识破状态无法防御 → 全伤
-        if (isCountering)
+        else if (isBlocking)
         {
-            stats.TakeDamage(damage);
-            feedback?.ApplyKnockback(transform.position, 5f);
+            // 普通招被格挡 → 走格挡处理(削韧/掉耐久)，不吃伤不击退
+            ctrl.ReceiveBlockHit(damage, this);
             return;
         }
 
-        if (feedback != null && !isBlocking) feedback.ApplyKnockback(transform.position, 5f);
-        if (isBlocking) ctrl.ReceiveBlockHit(damage, this);
-        else            stats.TakeDamage(damage);
+        // ── 没防住：扣血 + 击退 ──
+        // 击退是 DamageFeedback 给的一段会衰减的水平速度，但 idle/move 每帧会重设速度盖掉它；
+        // 所以推人前必须先把玩家切进硬直态(StunnedState 不清速度)，击退才滑得出来。
+        stats.TakeDamage(damage);
+        float stun = hitStun;
+        if (knockback > 0f && feedback != null)
+            stun = Mathf.Max(stun, feedback.knockbackDuration);            // 至少硬直到击退滑完
+        if (stun > 0f) ctrl?.Stun(stun);                                   // 先进硬直(Enter 归零速度)
+        feedback?.ApplyKnockback(transform.position, knockback);           // 再给击退速度
     }
 
     public void StartAttackCooldown()           => attackCooldownTimer = attackCooldown;
@@ -255,7 +261,7 @@ public class EnemyBase : Entity
         if (SavesPermanentDeath)
             SaveSystem.Instance?.MarkEnemyDefeated(SaveID);
 
-        AudioManager.Instance?.PlayEnemyDeath();
+        // 死亡音改由死亡动画"摔倒落地"帧的 AnimDeathFall 事件触发，避免和受击音同帧叠掉
         var playerStats = FindAnyObjectByType<PlayerStats>();
         if (playerStats != null) playerStats.AddGold(goldDrop);
         OnDied?.Invoke();

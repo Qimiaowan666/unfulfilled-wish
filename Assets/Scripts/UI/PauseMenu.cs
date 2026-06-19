@@ -54,8 +54,7 @@ public class PauseMenu : MonoBehaviour
     public Dropdown resolutionDropdown;
     public Button settingsBackButton;
 
-    const string MainMenuScene = "MainMenu";
-    static readonly string[] NonPausableScenes = { "MainMenu", "Bootstrap" };
+    // 场景名 / 非游玩判定统一见 SceneNames
 
     enum Page { Main, Save, Load, Settings }
     bool settingsBound;
@@ -174,9 +173,7 @@ public class PauseMenu : MonoBehaviour
         if (GameManager.Instance == null || GameManager.Instance.IsGameOver || GameManager.Instance.IsPaused) return false;
         if (ShopUI.IsOpen || CharacterPanelUI.IsOpen || VictoryUI.IsOpen || DialogueUI.IsPlaying || BossIntroTrigger.Sequencing || BossFinishUI.IsPlaying || MinotaurBoss.PhaseTransition) return false;
 
-        string active = SceneManager.GetActiveScene().name;
-        foreach (var s in NonPausableScenes)
-            if (active == s) return false;
+        if (SceneNames.IsNonGameplay(SceneManager.GetActiveScene().name)) return false;
 
         return true;
     }
@@ -417,7 +414,7 @@ public class PauseMenu : MonoBehaviour
     void OnReturnMainMenu() => ShowConfirm("返回主菜单？\n当前未保存的进度会丢失。", () =>
     {
         Close();
-        GameManager.Instance?.LoadScene(MainMenuScene);
+        GameManager.Instance?.LoadScene(SceneNames.MainMenu);
     });
 
     void OnQuit() => ShowConfirm("退出游戏？\n当前未保存的进度会丢失。", () =>
@@ -474,7 +471,8 @@ public class PauseMenu : MonoBehaviour
     {
         switch (scene)
         {
-            case "ForsakenShrine": return "被弃神殿";
+            case SceneNames.Tutorial:       return "教程";
+            case SceneNames.ForsakenShrine: return "被弃神殿";
             default: return string.IsNullOrEmpty(scene) ? "未知" : scene;
         }
     }

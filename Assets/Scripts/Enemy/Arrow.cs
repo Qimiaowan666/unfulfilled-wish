@@ -17,7 +17,9 @@ public class Arrow : MonoBehaviour
 
     EnemyBase owner;
     float     damage;
-    bool      isSpecial;
+    bool      unblockable;       // 无法格挡(需识破)
+    float     knockback;         // 命中击退力
+    float     hitStun;           // 命中玩家硬直时长(0=不硬直)
     Vector2   velocity;
     bool      consumed;
     SpriteRenderer sr;
@@ -26,10 +28,11 @@ public class Arrow : MonoBehaviour
 
     void Awake() => sr = GetComponent<SpriteRenderer>();
 
-    // 由 ArcherEnemy 在放箭动画事件里调用；dir = 指向目标的方向向量(可带高低差)
-    public void Launch(EnemyBase owner, Vector2 dir, float damage, bool isSpecial)
+    // 由 GroundEnemy.SpawnProjectile 在放箭动画事件里调用；dir = 指向目标的方向向量(可带高低差)
+    public void Launch(EnemyBase owner, Vector2 dir, float damage, bool unblockable, float knockback, float hitStun)
     {
-        this.owner = owner; this.damage = damage; this.isSpecial = isSpecial;
+        this.owner = owner; this.damage = damage;
+        this.unblockable = unblockable; this.knockback = knockback; this.hitStun = hitStun;
         if (dir.sqrMagnitude < 0.0001f) dir = Vector2.right;
         velocity = dir.normalized * speed;
         // 箭头转向飞行方向(精灵原本朝右；旋转一并处理左右朝向，无需翻 scale)
@@ -50,10 +53,10 @@ public class Arrow : MonoBehaviour
         if (consumed) return;
         if (((1 << other.gameObject.layer) & hitMask) == 0) return;
 
-        var stats = other.GetComponent<PlayerStats>() ?? other.GetComponentInParent<PlayerStats>();
+        var stats = other.GetComponent<PlayerStats>();
         if (stats != null && owner != null)
         {
-            owner.ApplyHitToCollider(other, damage, isSpecial);   // 复用近战那套(格挡/识破/击退)
+            owner.ApplyHitToCollider(other, damage, unblockable, knockback, hitStun);   // 复用近战那套(格挡/识破/击退)
             // 命中玩家：碎裂吸附到玩家表面(消除箭长造成的空隙)，并跟随被击退的玩家
             var follow = other.attachedRigidbody != null ? other.attachedRigidbody.transform : stats.transform;
             transform.position = other.ClosestPoint(transform.position);

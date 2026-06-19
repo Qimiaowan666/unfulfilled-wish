@@ -30,6 +30,14 @@ public abstract class Entity : MonoBehaviour
         else if (dir < 0f && FacingRight) Flip();
     }
 
+    // 指向某世界位置的水平方向(-1/0/1)——朝向 + 位移共用，省掉到处写 Mathf.Sign(目标.x - 自身.x)
+    public float DirToward(float worldX)    => Mathf.Sign(worldX - transform.position.x);
+    public float DirToward(Vector3 worldPos) => DirToward(worldPos.x);
+
+    // 直接转身面向某世界位置/目标
+    public void FaceToward(float worldX)     => SetFacing(DirToward(worldX));
+    public void FaceToward(Vector3 worldPos) => FaceToward(worldPos.x);
+
     void Flip()
     {
         FacingRight = !FacingRight;

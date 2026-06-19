@@ -62,7 +62,7 @@ public class BossIntroTrigger : MonoBehaviour
     {
         if (played || !BossActive()) return;
         // 兜底：读档/复活点已落在 boss 一侧 → 直接亮条开打、不演出。
-        var player = GameObject.FindGameObjectWithTag("Player");
+        var player = GameObject.FindGameObjectWithTag(Tags.Player);
         if (player != null && PlayerPastTrigger(player.transform.position))
         {
             played = true;
@@ -72,7 +72,7 @@ public class BossIntroTrigger : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D other)
     {
-        if (played || !other.CompareTag("Player")) return;
+        if (played || !other.CompareTag(Tags.Player)) return;
         if (!BossActive()) { played = true; return; }   // boss 已死/不在 → 不演出
         played = true;
         StartCoroutine(IntroSequence());
@@ -88,7 +88,7 @@ public class BossIntroTrigger : MonoBehaviour
         FaceBossAtPlayer();
 
         // 进剧情即冻住玩家：清速度 + 取消当前动作(回 idle) + 停物理，整段演出原地不动。StartCombat 再解冻。
-        var playerGo = GameObject.FindGameObjectWithTag("Player");
+        var playerGo = GameObject.FindGameObjectWithTag(Tags.Player);
         var pc  = playerGo != null ? playerGo.GetComponent<PlayerController>() : null;
         var prb = playerGo != null ? playerGo.GetComponent<Rigidbody2D>() : null;
         if (prb != null) prb.linearVelocity = Vector2.zero;
@@ -197,7 +197,7 @@ public class BossIntroTrigger : MonoBehaviour
     {
         Sequencing = false;
         // 解冻玩家（登场演出里冻住了它）+ 清残速，从静止开打
-        var pgo = GameObject.FindGameObjectWithTag("Player");
+        var pgo = GameObject.FindGameObjectWithTag(Tags.Player);
         var prb = pgo != null ? pgo.GetComponent<Rigidbody2D>() : null;
         if (prb != null) { prb.simulated = true; prb.linearVelocity = Vector2.zero; }
         if (boss != null) boss.Activate();
@@ -216,9 +216,9 @@ public class BossIntroTrigger : MonoBehaviour
     void FaceBossAtPlayer()
     {
         if (boss == null) return;
-        var player = GameObject.FindGameObjectWithTag("Player");
+        var player = GameObject.FindGameObjectWithTag(Tags.Player);
         if (player != null)
-            boss.SetFacing(Mathf.Sign(player.transform.position.x - boss.transform.position.x));
+            boss.FaceToward(player.transform.position);
     }
 
     BossHealthBarUI Bar() => FindAnyObjectByType<BossHealthBarUI>();

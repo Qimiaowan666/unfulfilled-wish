@@ -1201,7 +1201,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 57c4436039299324cb68bd16dbd066a7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MainMenuUI
-  firstGameplayScene: ForsakenShrine
+  firstGameplayScene: Tutorial
   newGameButton: {fileID: 1022034605}
   continueButton: {fileID: 656167268}
   loadButton: {fileID: 1525300044}

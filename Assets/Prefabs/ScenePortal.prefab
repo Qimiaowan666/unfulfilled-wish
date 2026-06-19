@@ -103,7 +103,7 @@ GameObject:
   - component: {fileID: 8611272930304134842}
   - component: {fileID: 4986166235009594209}
   m_Layer: 0
-  m_Name: ScenePortal_Exit
+  m_Name: ScenePortal
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -183,5 +183,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 359c6490465f687448e1bf5f10ef30e2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SceneLoadTrigger
+  portalID: 
   sceneName: StoneCrossing
+  targetPortalID: 
   prompt: "\u6309 F \u8FDB\u5165"
+  promptHeightOffset: 4
