@@ -12399,6 +12399,52 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 4585860486613630296, guid: fd13fde9da3061748a615499be67d5bb, type: 3}
   m_PrefabInstance: {fileID: 1969681753}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &353506857
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 353506859}
+  - component: {fileID: 353506858}
+  m_Layer: 0
+  m_Name: CameraFollowTarget
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &353506858
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 353506857}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a0e304591d6b19645964e887195ced05, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CameraFollowTarget
+  upRange: 15
+  downRange: 5
+--- !u!4 &353506859
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 353506857}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &443108557
 GameObject:
   m_ObjectHideFlags: 0
@@ -12656,11 +12702,6 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
---- !u!4 &558071666 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 1540454100483942304, guid: d6654af584b7d3441937d19756cda17e, type: 3}
-  m_PrefabInstance: {fileID: 754563574227039582}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &578758071
 GameObject:
   m_ObjectHideFlags: 0
@@ -12686,7 +12727,7 @@ Transform:
   m_GameObject: {fileID: 578758071}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -68, y: -1.9, z: 0}
+  m_LocalPosition: {x: 0, y: 5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
   m_Children:
@@ -13858,7 +13899,7 @@ Transform:
   m_GameObject: {fileID: 1433499835}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -73.04222, y: -4.9900002, z: -10}
+  m_LocalPosition: {x: -1.4222217, y: 3.9999995, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -14527,6 +14568,10 @@ PrefabInstance:
       value: 250000
       objectReference: {fileID: 0}
     - target: {fileID: 1667738334882946402, guid: fd13fde9da3061748a615499be67d5bb, type: 3}
+      propertyPath: attack
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1667738334882946402, guid: fd13fde9da3061748a615499be67d5bb, type: 3}
       propertyPath: patrolMoveSpeed
       value: 0
       objectReference: {fileID: 0}
@@ -14850,8 +14895,6 @@ GameObject:
   - component: {fileID: 1845337796}
   - component: {fileID: 1845337795}
   - component: {fileID: 1845337794}
-  - component: {fileID: 1845337793}
-  - component: {fileID: 1845337797}
   - component: {fileID: 1845337798}
   m_Layer: 0
   m_Name: CinemachineCamera
@@ -14860,26 +14903,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1845337793
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1845337792}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f453f694addf4275988fac205bc91968, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.Cinemachine::Unity.Cinemachine.CinemachineConfiner2D
-  BoundingShape2D: {fileID: 0}
-  Damping: 0.5
-  SlowingDistance: 5
-  OversizeWindow:
-    Enabled: 0
-    MaxWindowSize: 0
-    Padding: 0
-  m_LegacyMaxWindowSize: -2
 --- !u!114 &1845337794
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14895,10 +14918,10 @@ MonoBehaviour:
   CameraDistance: 10
   DeadZoneDepth: 0
   Composition:
-    ScreenPosition: {x: 0.05, y: 0}
+    ScreenPosition: {x: 0.05, y: 0.25}
     DeadZone:
       Enabled: 1
-      Size: {x: 0.2, y: 0.35}
+      Size: {x: 0.2, y: 0}
     HardLimits:
       Enabled: 1
       Size: {x: 0.6, y: 0.8}
@@ -14931,7 +14954,7 @@ MonoBehaviour:
   m_StreamingVersion: 20241001
   m_LegacyPriority: 0
   Target:
-    TrackingTarget: {fileID: 558071666}
+    TrackingTarget: {fileID: 353506859}
     LookAtTarget: {fileID: 0}
     CustomLookAtTarget: 0
   Lens:
@@ -14963,30 +14986,12 @@ Transform:
   m_GameObject: {fileID: 1845337792}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -73.04222, y: -4.9900002, z: -10}
+  m_LocalPosition: {x: -1.4222217, y: 3.9999995, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 18855585}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1845337797
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1845337792}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 755367f6ca5101e479a1889889ea1842, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CinemachineDeadZoneGizmo
-  showDeadZone: 1
-  showHardLimits: 1
-  alwaysVisible: 1
-  deadZoneColor: {r: 0, g: 1, b: 0, a: 0.85}
-  hardLimitsColor: {r: 1, g: 0.3, b: 0.3, a: 0.85}
-  drawFilled: 0
 --- !u!114 &1845337798
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15929,10 +15934,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 1183578778618374012, guid: d6654af584b7d3441937d19756cda17e, type: 3}
-      propertyPath: jumpForce
-      value: 12
-      objectReference: {fileID: 0}
     - target: {fileID: 1204039863639461142, guid: d6654af584b7d3441937d19756cda17e, type: 3}
       propertyPath: staminaCost
       value: 40
@@ -16109,6 +16110,7 @@ SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 18855585}
+  - {fileID: 353506859}
   - {fileID: 306552501}
   - {fileID: 754563574227039582}
   - {fileID: 2030903773}

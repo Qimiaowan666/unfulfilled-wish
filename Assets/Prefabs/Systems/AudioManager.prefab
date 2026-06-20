@@ -69,6 +69,8 @@ MonoBehaviour:
   checkpointClip: {fileID: 8300000, guid: 63a24bea6bf9a074dbe301df17d521e5, type: 3}
   keyPickupClip: {fileID: 8300000, guid: 0a7043e07fc11184d940d0de1eee2753, type: 3}
   doorOpenClip: {fileID: 8300000, guid: 7352e490a0a29f040844d304c86a41ee, type: 3}
+  chestCreakClip: {fileID: 8300000, guid: 63a24bea6bf9a074dbe301df17d521e5, type: 3}
+  chestCoinsClip: {fileID: 8300000, guid: 0a7043e07fc11184d940d0de1eee2753, type: 3}
   shopBuyClip: {fileID: 8300000, guid: b9f67c45ec5ac814cbbc4ee0b406ecbb, type: 3}
   shopFailClip: {fileID: 8300000, guid: ad2c26efb6503c64996d4626d3240da9, type: 3}
   uiClickClip: {fileID: 8300000, guid: 5aaaf5b1d0069354caf41d4832bd3763, type: 3}

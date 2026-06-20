@@ -86,7 +86,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 10
   m_MaskInteraction: 0
   m_Sprite: {fileID: 815424164945274260, guid: 9ea4a159e15031e4fad1475ce9e64eef, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -196,8 +196,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5c243bfd3573c654a98db555441019a0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PoiseMeter
-  maxPoise: 100
-  poiseRegenRate: 7
+  maxPoise: 80
+  poiseRegenRate: 0
   regenDelay: 2.5
 --- !u!114 &6213741496884541422
 MonoBehaviour:
@@ -249,6 +249,7 @@ MonoBehaviour:
   specialHitStunDuration: 0.6
   specialHitKnockback: 8
   specialAttackWarningDuration: 0.5
+  executePromptHeight: 1.2
   attacks:
   - id: atk1
     weight: 1
@@ -263,16 +264,6 @@ MonoBehaviour:
       hitboxOffset: {x: 0.9, y: -0.5}
       hitboxSize: {x: 1.8, y: 2}
       projectilePrefab: {fileID: 0}
-    damageMultiplier: 1
-    specialDamageMultiplier: 1
-    delivery: 0
-    hitboxOffset: {x: 0.9, y: -0.5}
-    hitboxSize: {x: 1.8, y: 2}
-    projectilePrefab: {fileID: 0}
-    knockback: 5
-    hitStun: 0
-    specialKnockback: 8
-    specialHitStun: 0.5
     lungeDir: 0
     lungeSpeed: 0
     cooldownOverride: 0
@@ -290,16 +281,6 @@ MonoBehaviour:
       hitboxOffset: {x: 1, y: -0.5}
       hitboxSize: {x: 2, y: 2}
       projectilePrefab: {fileID: 0}
-    damageMultiplier: 1.1
-    specialDamageMultiplier: 1
-    delivery: 0
-    hitboxOffset: {x: 1, y: -0.5}
-    hitboxSize: {x: 2, y: 2}
-    projectilePrefab: {fileID: 0}
-    knockback: 5
-    hitStun: 0
-    specialKnockback: 8
-    specialHitStun: 0.5
     lungeDir: 0
     lungeSpeed: 0
     cooldownOverride: 0
@@ -317,16 +298,6 @@ MonoBehaviour:
       hitboxOffset: {x: 1, y: -0.5}
       hitboxSize: {x: 2, y: 2}
       projectilePrefab: {fileID: 0}
-    damageMultiplier: 1.4
-    specialDamageMultiplier: 1
-    delivery: 0
-    hitboxOffset: {x: 1, y: -0.5}
-    hitboxSize: {x: 2, y: 2}
-    projectilePrefab: {fileID: 0}
-    knockback: 5
-    hitStun: 0
-    specialKnockback: 8
-    specialHitStun: 0.5
     lungeDir: 0
     lungeSpeed: 0
     cooldownOverride: 0
@@ -344,16 +315,6 @@ MonoBehaviour:
       hitboxOffset: {x: 1, y: 0}
       hitboxSize: {x: 2, y: 4}
       projectilePrefab: {fileID: 0}
-    damageMultiplier: 1.2
-    specialDamageMultiplier: 1
-    delivery: 0
-    hitboxOffset: {x: 1, y: 0}
-    hitboxSize: {x: 2, y: 4}
-    projectilePrefab: {fileID: 0}
-    knockback: 5
-    hitStun: 0
-    specialKnockback: 8
-    specialHitStun: 0.5
     lungeDir: 1
     lungeSpeed: 12
     cooldownOverride: 0
@@ -367,7 +328,7 @@ MonoBehaviour:
   retreatDistance: 1
   idleTime: 1.5
   battleTimeDuration: 5
-  stunDuration: 3
+  stunDuration: 5
   detectionRange: 7
   detectionHeight: 3
   chaseVerticalLimit: 2.5

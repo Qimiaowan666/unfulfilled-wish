@@ -86,7 +86,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 10
   m_MaskInteraction: 0
   m_Sprite: {fileID: 815424164945274260, guid: 51f457f476c1a084d98672716d4cfdde, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -196,7 +196,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5c243bfd3573c654a98db555441019a0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PoiseMeter
-  maxPoise: 100
+  maxPoise: 50
   poiseRegenRate: 0
   regenDelay: 3
 --- !u!114 &7554187700326714717
@@ -249,6 +249,7 @@ MonoBehaviour:
   specialHitStunDuration: 0.6
   specialHitKnockback: 8
   specialAttackWarningDuration: 0.5
+  executePromptHeight: 1.2
   attacks:
   - id: attack
     weight: 4
@@ -263,16 +264,6 @@ MonoBehaviour:
       hitboxOffset: {x: 0, y: 0}
       hitboxSize: {x: 0, y: 0}
       projectilePrefab: {fileID: 2890174170218546002, guid: b09cfdeece551bd4dad71d8d21c8d572, type: 3}
-    damageMultiplier: 1
-    specialDamageMultiplier: 1
-    delivery: 1
-    hitboxOffset: {x: 0, y: 0}
-    hitboxSize: {x: 0, y: 0}
-    projectilePrefab: {fileID: 2890174170218546002, guid: b09cfdeece551bd4dad71d8d21c8d572, type: 3}
-    knockback: 5
-    hitStun: 0
-    specialKnockback: 8
-    specialHitStun: 0.5
     lungeDir: 0
     lungeSpeed: 0
     cooldownOverride: 0
@@ -298,16 +289,6 @@ MonoBehaviour:
       hitboxOffset: {x: 0, y: 0}
       hitboxSize: {x: 0, y: 0}
       projectilePrefab: {fileID: 2890174170218546002, guid: b09cfdeece551bd4dad71d8d21c8d572, type: 3}
-    damageMultiplier: 0.7
-    specialDamageMultiplier: 2
-    delivery: 1
-    hitboxOffset: {x: 0, y: 0}
-    hitboxSize: {x: 0, y: 0}
-    projectilePrefab: {fileID: 2890174170218546002, guid: b09cfdeece551bd4dad71d8d21c8d572, type: 3}
-    knockback: 5
-    hitStun: 0
-    specialKnockback: 8
-    specialHitStun: 0.5
     lungeDir: 0
     lungeSpeed: 0
     cooldownOverride: 2.2
@@ -321,7 +302,7 @@ MonoBehaviour:
   retreatDistance: 1
   idleTime: 1.5
   battleTimeDuration: 5
-  stunDuration: 3
+  stunDuration: 5
   detectionRange: 10
   detectionHeight: 4
   chaseVerticalLimit: 2.5

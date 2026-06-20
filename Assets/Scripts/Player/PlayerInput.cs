@@ -47,7 +47,7 @@ public class PlayerInput : MonoBehaviour
                                         kb.upArrowKey.wasPressedThisFrame);
         DashPressed    = kb != null && (kb.leftShiftKey.wasPressedThisFrame ||
                                         kb.rightShiftKey.wasPressedThisFrame);
-        ExecutePressed = kb != null && kb.rKey.wasPressedThisFrame;   // R：处决
+        ExecutePressed = kb != null && kb.rKey.wasPressedThisFrame;   // R 处决
         Skill1Pressed  = kb != null && kb.qKey.wasPressedThisFrame;
         Skill2Pressed  = kb != null && kb.eKey.wasPressedThisFrame;
 

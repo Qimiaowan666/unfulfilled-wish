@@ -44,7 +44,13 @@ public class GameManager : MonoBehaviour
         IsPaused = false;
         Time.timeScale = 1f;
         SaveSystem.Instance?.PrepareRespawn();   // 重生：全局态回存档 + 落火堆复活点
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+
+        // 死亡 → 回到“上次火堆所在的场景”(存档 sceneName);没存档则重载当前场景
+        string target = SceneManager.GetActiveScene().name;
+        var data = SaveSystem.Instance?.Load();
+        if (data != null && !string.IsNullOrEmpty(data.sceneName))
+            target = data.sceneName;
+        SceneManager.LoadScene(target);
     }
 
     public void LoadScene(string sceneName)

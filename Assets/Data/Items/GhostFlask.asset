@@ -17,7 +17,7 @@ MonoBehaviour:
   description: "\u6218\u573A\u4E0A\u6551\u6025\u7684\u5C0F\u836F\u6C34\uFF0C\u5173\u952E\u65F6\u523B\u7EED\u547D\u3002"
   icon: {fileID: 21300000, guid: fd2e075fc123d6f4988af6f6036d10e6, type: 3}
   type: 0
-  price: 40
+  price: 20
   healAmount: 15
   attackBonus: 0
   defenseBonus: 0

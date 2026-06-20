@@ -2,6 +2,7 @@ using UnityEngine;
 
 public enum AttackDelivery { Melee, Ranged }              // 招的出伤方式：近战命中盒 / 远程发射箭矢
 public enum LungeDir       { None, Forward, Backward }    // 出招时移动：不动 / 朝玩家前冲 / 背对后撤
+public enum StepMove       { None, Approach, Retreat }    // 连段段前位移：不动 / 朝玩家逼近 / 后撤
 
 // 地面型小怪共享基类：状态机(Idle/Move/Chase/Attack/Stunned/Dead) + 攻击池 + 命中盒 + 统一 Anim.Play。
 // AoTengu(最基础，1 招)与 DemonSamurai(多招 + 变身)都继承它；boss 不走这套(自有 BossStateMachine)。
@@ -46,6 +47,40 @@ public abstract class GroundEnemy : EnemyBase
 
     [Header("Attacks (攻击池)")]
     public EnemyAttack[] attacks = { new EnemyAttack() };
+
+    // 连段里的一段:打哪招(引用 attacks[].id) + 出招前位移 + 段后停顿
+    [System.Serializable]
+    public class ComboStep
+    {
+        public string   attackId = "attack";              // 引用 attacks[].id
+        public StepMove move     = StepMove.None;          // 挥刀前先逼近 / 后撤 / 不动
+        [Tooltip("本段打完后的停顿(秒);<0 = 用连段的 stepGap")]
+        public float    gap      = -1f;
+    }
+
+    // 连段:把 attacks 里的招按顺序串起来。一只怪可配多套,按权重 + 距离 + 血量抽。
+    // 不配 combos → 走单招(TryPickAttack),老怪不受影响。某招 weight 设 0 → 只在连段里出、不被单抽。
+    [System.Serializable]
+    public class EnemyCombo
+    {
+        public string      name     = "combo";
+        public float       weight   = 1f;       // 连段之间的权重
+        public float       minRange = 0f;        // 可被选中的水平距离区间
+        public float       maxRange = 2f;
+        [Tooltip("可被选中的血量区间(0~1 百分比)。配低血段 → 残血才放,不必写阶段状态")]
+        public float       minHPPercent = 0f;
+        public float       maxHPPercent = 1f;
+        [Tooltip("勾上 = 不连续抽到同一套(增加变化)")]
+        public bool        noRepeat = false;
+        [Tooltip("整套打完的冷却(秒);<=0 = 用敌人默认 attackCooldown")]
+        public float       cooldownAfter = 0f;
+        [Tooltip("段间默认停顿(秒),0 = 无缝;每段可用自己的 gap 覆盖")]
+        public float       stepGap  = 0.08f;
+        public ComboStep[] steps    = new ComboStep[0];
+    }
+
+    [Header("Combos (连段;留空=只用单招)")]
+    public EnemyCombo[] combos;
 
     // 红色 hit(HitProfile.red=true)统一视觉:红染 + 放大,所有红 hit 长一个样(固定视觉约定);
     // 击退/硬直/伤害这些「数值」归 HitProfile 逐 hit 配。
@@ -153,6 +188,10 @@ public abstract class GroundEnemy : EnemyBase
     public Enemy_DeadState    deadState    { get; private set; }
 
     public EnemyAttack CurrentAttack { get; private set; }
+    public EnemyCombo  CurrentCombo  { get; private set; }   // 非空 = 正在打连段
+    public ComboStep   CurrentStep   { get; private set; }   // 当前段(含位移 / 停顿)
+    EnemyCombo         lastCombo;                             // 上一套(noRepeat 用)
+    int comboStep;
 
     protected override void Awake()
     {
@@ -191,6 +230,16 @@ public abstract class GroundEnemy : EnemyBase
                 if (a.hits[j] != null && a.hits[j].delivery == AttackDelivery.Ranged && a.hits[j].projectilePrefab == null)
                     Debug.LogWarning($"[{name}] 招 '{a.id}' 第 {j} 下是远程(Ranged)却没配 projectilePrefab → 不会出箭", this);
         }
+
+        // 连段自检:每段引用的 id 必须在 attacks 里存在
+        if (combos != null)
+            foreach (var c in combos)
+            {
+                if (c == null || c.steps == null) continue;
+                foreach (var s in c.steps)
+                    if (s != null && FindAttack(s.attackId) == null)
+                        Debug.LogWarning($"[{name}] 连段 '{c.name}' 引用了不存在的招 id '{s.attackId}' → 该段会中断连段", this);
+            }
     }
 #endif
 
@@ -241,14 +290,62 @@ public abstract class GroundEnemy : EnemyBase
     // 动画事件：死亡动画"摔倒落地"那一帧 → 播倒地音(从 Die 挪来，和受击音错开)
     public void AnimDeathFall() => AudioManager.Instance?.PlayEnemyDeath();
 
-    // ── 选招：按距离区间 + 权重抽一个 ──
+    // ── 选招：按距离区间 + 权重抽一个单招 ──
     public bool TryPickAttack(float dist)
     {
         if (attacks == null || attacks.Length == 0) return false;
         var pick = PickAttack(attacks, a => (dist >= a.minRange && dist <= a.maxRange) ? Mathf.Max(0f, a.weight) : 0f);
         if (pick == null) return false;
+        ResetCombo();           // 单招:清掉连段状态
         CurrentAttack = pick;
         return true;
+    }
+
+    // ── 选连段：按距离 + 血量 + 权重(可排除上一套)抽一套,载入第一段 ──
+    public bool TryPickCombo(float dist)
+    {
+        if (combos == null || combos.Length == 0) return false;
+        float hp = maxHP > 0f ? CurrentHP / maxHP : 1f;
+        var c = PickAttack(combos, x =>
+        {
+            if (x == null || x.steps == null || x.steps.Length == 0) return 0f;
+            if (dist < x.minRange || dist > x.maxRange)             return 0f;
+            if (hp  < x.minHPPercent || hp > x.maxHPPercent)        return 0f;
+            if (x.noRepeat && x == lastCombo)                       return 0f;
+            return Mathf.Max(0f, x.weight);
+        });
+        if (c == null) return false;
+        CurrentCombo = c;
+        lastCombo    = c;
+        comboStep    = 0;
+        return AdvanceCombo();   // 载入第 0 段 → CurrentStep / CurrentAttack
+    }
+
+    // 推进连段到下一段;载入成功 = true,连段打完 / 配错 = false(并清空)
+    public bool AdvanceCombo()
+    {
+        if (CurrentCombo == null || CurrentCombo.steps == null || comboStep >= CurrentCombo.steps.Length)
+        {
+            ResetCombo();
+            return false;
+        }
+        var step = CurrentCombo.steps[comboStep];
+        comboStep++;
+        var atk = step != null ? FindAttack(step.attackId) : null;
+        if (atk == null) { ResetCombo(); return false; }   // id 配错 → 结束,不卡死
+        CurrentStep   = step;
+        CurrentAttack = atk;
+        return true;
+    }
+
+    public void ResetCombo() { CurrentCombo = null; CurrentStep = null; comboStep = 0; }
+
+    EnemyAttack FindAttack(string id)
+    {
+        if (attacks == null) return null;
+        foreach (var a in attacks)
+            if (a != null && a.id == id) return a;
+        return null;
     }
 
     // ── 命中：攻击 clip 上的动画事件 Fire(i) 调用(可多帧多次,i=hits 下标) ──

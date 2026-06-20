@@ -79,7 +79,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 2
+  m_SortingOrder: 12
   m_MaskInteraction: 0
   m_Sprite: {fileID: 0}
   m_Color: {r: 0.21960786, g: 0.21960786, b: 0.21960786, a: 1}
@@ -177,7 +177,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 10
   m_MaskInteraction: 0
   m_Sprite: {fileID: 4634751926912297294, guid: 1fd0585a50c919043aecd336c1c71701, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -316,7 +316,6 @@ MonoBehaviour:
   maxHP: 5000
   attack: 2
   goldDrop: 100
-  detectionRange: 12
   attackRange: 4
   playerLayer:
     serializedVersion: 2
@@ -325,6 +324,7 @@ MonoBehaviour:
   specialHitStunDuration: 0.6
   specialHitKnockback: 8
   specialAttackWarningDuration: 0.5
+  executePromptHeight: 2
   moveSpeed: 2.2
   phase2SpeedBonus: 1.2
   phase2HPThreshold: 0.5
@@ -452,6 +452,7 @@ MonoBehaviour:
   indicatorOffset: {x: 2, y: 0}
   indicatorWarningColor: {r: 1, g: 0.2, b: 0.2, a: 0.35}
   indicatorImpactColor: {r: 1, g: 0.7, b: 0.2, a: 0.85}
+  executeStunDuration: 1
 --- !u!114 &6123051498341902235
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -467,3 +468,4 @@ MonoBehaviour:
   flashColor: {r: 1, g: 1, b: 1, a: 1}
   flashDuration: 0.08
   flashMaterial: {fileID: 2100000, guid: 6e20bf32e09be244d89d5ec3700faba1, type: 2}
+  knockbackDuration: 0.15

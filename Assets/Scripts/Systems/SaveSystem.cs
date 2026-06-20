@@ -48,6 +48,7 @@ public class SaveData
 
     public float currentHP;
     public float currentGhostHP;
+    public float currentStamina;
     public int gold;
     public float playerX;
     public float playerY;
@@ -120,6 +121,7 @@ public class SaveSystem : MonoBehaviour
         if (HasSave())
             ApplyOnSceneLoaded();
         nextLoadIsRespawn = false;   // 兜底清标志，避免“没档可读”时残留导致下次读档落点出错
+        globalStateLoaded = true;    // 本场景玩家状态已确立(全新/读档)；之后过门不再用存档覆盖常驻玩家，只有继续/重生(RequestFullReload/PrepareRespawn)才会
     }
 
     public void Save(PlayerStats stats, Vector3 respawnPosition, CheckpointManager checkpoints)
@@ -150,6 +152,7 @@ public class SaveSystem : MonoBehaviour
 
             currentHP = stats.CurrentHP,
             currentGhostHP = stats.CurrentGhostHP,
+            currentStamina = stats.CurrentStamina,
             gold = stats.gold,
             playerX = landPosition.x,
             playerY = landPosition.y,
@@ -280,7 +283,7 @@ public class SaveSystem : MonoBehaviour
         nextLoadIsRespawn = false;
 
         if (stats != null)
-            stats.LoadSavedVitals(data.currentHP, data.currentGhostHP, data.gold);
+            stats.LoadSavedVitals(data.currentHP, data.currentGhostHP, data.currentStamina, data.gold);
 
         PlayerInputBuffer.ClearAll();
     }
@@ -735,6 +738,11 @@ public class SaveSystem : MonoBehaviour
             if (states.TryGetValue(door.SaveID, out var state))
                 door.LoadOpened(state.opened);
         }
+
+        // 宝箱复用同一套"已开"持久化(开过的 id 在 runtimeOpenedDoorIDs 里)
+        var chests = FindObjectsByType<ChestInteract>(FindObjectsInactive.Include);
+        foreach (var chest in chests)
+            if (chest != null) chest.LoadOpened(runtimeOpenedDoorIDs.Contains(chest.SaveID));
     }
 
     void ApplyShopStates(ShopSaveData[] shopStates)

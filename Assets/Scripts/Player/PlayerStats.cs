@@ -1,5 +1,6 @@
-using UnityEngine;
 using System;
+using System.Collections;
+using UnityEngine;
 
 public class PlayerStats : MonoBehaviour
 {
@@ -155,6 +156,21 @@ public class PlayerStats : MonoBehaviour
         IsInvulnerable = value;
     }
 
+    // 限时无敌:设无敌并在 duration 秒后自动解除(处决收尾的"后摇无敌帧")
+    Coroutine invulnCo;
+    public void SetInvulnerableFor(float duration)
+    {
+        SetInvulnerable(true);
+        if (invulnCo != null) StopCoroutine(invulnCo);
+        invulnCo = StartCoroutine(InvulnTimer(duration));
+    }
+    IEnumerator InvulnTimer(float d)
+    {
+        yield return new WaitForSeconds(d);
+        SetInvulnerable(false);
+        invulnCo = null;
+    }
+
     public void ApplyStatBonus(float attackDelta, float defenseDelta, float maxHPDelta, bool healMaxHPIncrease = false)
     {
         baseAttack += attackDelta;
@@ -258,14 +274,16 @@ public class PlayerStats : MonoBehaviour
         NotifyStatsChanged();
     }
 
-    public void LoadSavedVitals(float currentHP, float currentGhostHP, int savedGold)
+    public void LoadSavedVitals(float currentHP, float currentGhostHP, float savedStamina, int savedGold)
     {
         deathTriggered = false;
         IsInvulnerable = false;
         CurrentHP = Mathf.Clamp(currentHP, 0f, maxHP);
         CurrentGhostHP = Mathf.Max(0f, currentGhostHP);
+        CurrentStamina = Mathf.Clamp(savedStamina, 0f, maxStamina);
         gold = Mathf.Max(0, savedGold);
         NotifyStatsChanged();
+        OnStaminaChanged?.Invoke(CurrentStamina, maxStamina);
 
         if (CurrentHP <= 0f)
             Die();

@@ -48,7 +48,6 @@ GameObject:
   - component: {fileID: 9161862221462641032}
   - component: {fileID: 8013564179037574981}
   - component: {fileID: 1183578778618374012}
-  - component: {fileID: 1691549285628318921}
   m_Layer: 9
   m_Name: Player
   m_TagString: Player
@@ -120,7 +119,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 5
+  m_SortingOrder: 20
   m_MaskInteraction: 0
   m_Sprite: {fileID: -2326761095400532479, guid: 9e796fd7a0d294846a67cc9e7e114d43, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -169,7 +168,7 @@ Rigidbody2D:
   m_Mass: 1
   m_LinearDamping: 0
   m_AngularDamping: 0.05
-  m_GravityScale: 2
+  m_GravityScale: 5
   m_Material: {fileID: 6200000, guid: 279dcf943fae886408ac584e9615ff42, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
@@ -291,7 +290,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   moveSpeed: 6
-  jumpForce: 15
+  airMoveSpeedMultiplier: 1
+  jumpForce: 21
   dashSpeed: 20
   dashDuration: 0.15
   dashCooldown: 1
@@ -322,24 +322,9 @@ MonoBehaviour:
   counterWindow: 0.3
   counterCooldown: 0.5
   counterPoiseDamage: 60
-  executeDamageMultiplier: 5
+  executeDamageMultiplier: 20
   executeDuration: 0.8
   executeRange: 1.5
---- !u!114 &1691549285628318921
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5564040729449949759}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5c243bfd3573c654a98db555441019a0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PoiseMeter
-  maxPoise: 100
-  poiseRegenRate: 10
-  regenDelay: 3
 --- !u!1 &7077950619054027648
 GameObject:
   m_ObjectHideFlags: 0

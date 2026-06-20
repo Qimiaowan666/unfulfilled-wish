@@ -19,7 +19,7 @@ public abstract class Player_AiredState : PlayerBaseState
         float h = input.MoveInput.x;
         if (h != 0f)
         {
-            rb.linearVelocity = new Vector2(h * player.moveSpeed * 0.8f, rb.linearVelocity.y);
+            rb.linearVelocity = new Vector2(h * player.moveSpeed * player.airMoveSpeedMultiplier, rb.linearVelocity.y);
             player.SetFacing(h);
         }
 

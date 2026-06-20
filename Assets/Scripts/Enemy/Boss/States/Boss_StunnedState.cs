@@ -4,11 +4,14 @@ public class Boss_StunnedState : BossBaseState
 {
     public Boss_StunnedState(MinotaurBoss b, BossStateMachine sm) : base(b, sm, "isHit") {}
 
+    public float nextDurationOverride = -1f;   // >0 时本次硬直用这个时长(处决后单独设),用完即清
+
     public override void Enter()
     {
         base.Enter();
         rb.linearVelocity = Vector2.zero;
-        stateTimer = boss.IsPhase2 ? 2f : 3f;
+        stateTimer = nextDurationOverride > 0f ? nextDurationOverride : (boss.IsPhase2 ? 2f : 3f);
+        nextDurationOverride = -1f;
     }
 
     public override void Update()

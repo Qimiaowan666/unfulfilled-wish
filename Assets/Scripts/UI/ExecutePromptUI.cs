@@ -1,128 +1,80 @@
 using UnityEngine;
-using UnityEngine.UI;
+using TMPro;
 
+// 处决提示(木框 + "R 处决"):浮在最近的"可处决"(韧性破)敌人头顶。常驻单例,实例摆 Bootstrap。
+// 木框/字体复用 InteractPromptUI 那套(由 Bootstrap 里搭好的 box/text 引用驱动,脱离代码)。
 public class ExecutePromptUI : MonoBehaviour
 {
-    public PlayerController playerController;
-    public Text promptText;
-    public CanvasGroup canvasGroup;
-    public string prompt = "F 处决";
-    public Vector3 worldOffset = new Vector3(0f, 1.2f, 0f);
-    public float pulseScale = 0.08f;
-    public float pulseSpeed = 6f;
+    public static ExecutePromptUI Instance { get; private set; }
 
-    Canvas canvas;
-    RectTransform canvasRect;
-    RectTransform promptRect;
-    EnemyBase currentTarget;
+    [Tooltip("木框+文字根(显隐用)")]
+    public GameObject box;
+    public RectTransform boxRect;
+    public TMP_Text text;
+    public string label = "<b>R</b>";
+    public Vector2 screenOffset = Vector2.zero;
+
+    PlayerController player;
+    EnemyBase target;
 
     void Awake()
     {
-        canvas = GetComponentInParent<Canvas>();
-        if (canvas != null) canvasRect = canvas.GetComponent<RectTransform>();
-
-        EnsurePromptObjects();
-        Hide();
+        if (Instance != null && Instance != this) { Destroy(gameObject); return; }
+        Instance = this;
+        transform.SetParent(null);
+        DontDestroyOnLoad(gameObject);
+        if (text != null) text.text = label;
+        if (box != null) box.SetActive(false);
     }
+
+    void OnDestroy() { if (Instance == this) Instance = null; }
 
     void LateUpdate()
     {
-        if (playerController == null)
-            playerController = FindAnyObjectByType<PlayerController>();
+        if (player == null)
+            player = PlayerController.Instance != null ? PlayerController.Instance : FindAnyObjectByType<PlayerController>();
 
-        currentTarget = FindExecutableTarget();
-        if (currentTarget == null)
+        target = (player != null && Time.timeScale > 0f) ? FindExecutableTarget() : null;
+        if (target == null)
         {
-            Hide();
+            if (box != null && box.activeSelf) box.SetActive(false);
             return;
         }
-
-        ShowAt(currentTarget.transform.position + worldOffset);
+        if (text != null) text.text = label;
+        if (box != null && !box.activeSelf) box.SetActive(true);
+        Reposition();
     }
 
     EnemyBase FindExecutableTarget()
     {
-        if (playerController == null) return null;
-
-        LayerMask layerMask = playerController.enemyLayer;
-        float range = playerController.executeRange;
-        Collider2D[] nearby = layerMask.value == 0
-            ? Physics2D.OverlapCircleAll(playerController.transform.position, range)
-            : Physics2D.OverlapCircleAll(playerController.transform.position, range, layerMask);
+        LayerMask mask = player.enemyLayer;
+        float range = player.executeRange;
+        var nearby = mask.value == 0
+            ? Physics2D.OverlapCircleAll(player.transform.position, range)
+            : Physics2D.OverlapCircleAll(player.transform.position, range, mask);
 
         EnemyBase closest = null;
-        float closestSqrDistance = float.MaxValue;
-
+        float best = float.MaxValue;
         foreach (var col in nearby)
         {
-            var enemy = col.GetComponent<EnemyBase>();
-            if (enemy == null || !enemy.IsExecutable) continue;
-
-            float sqrDistance = (enemy.transform.position - playerController.transform.position).sqrMagnitude;
-            if (sqrDistance >= closestSqrDistance) continue;
-
-            closest = enemy;
-            closestSqrDistance = sqrDistance;
+            var e = col.GetComponent<EnemyBase>();
+            if (e == null || !e.IsExecutable) continue;
+            float d = (e.transform.position - player.transform.position).sqrMagnitude;
+            if (d < best) { best = d; closest = e; }
         }
-
         return closest;
     }
 
-    void ShowAt(Vector3 worldPosition)
+    void Reposition()
     {
-        if (promptText == null || promptRect == null || canvasRect == null) return;
+        var cam = Camera.main;
+        if (cam == null || boxRect == null || target == null) return;
 
-        promptText.text = prompt;
-        if (canvasGroup != null) canvasGroup.alpha = 1f;
-        else promptText.gameObject.SetActive(true);
+        // 逐怪高度:从敌人原点往上 executePromptHeight(每个怪 prefab 上单独调)
+        Vector3 head = target.transform.position + Vector3.up * target.executePromptHeight;
 
-        Camera uiCamera = canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : canvas.worldCamera;
-        Vector3 screenPosition = Camera.main != null
-            ? Camera.main.WorldToScreenPoint(worldPosition)
-            : worldPosition;
-
-        if (RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRect, screenPosition, uiCamera, out Vector2 localPoint))
-            promptRect.anchoredPosition = localPoint;
-
-        float scale = 1f + Mathf.Sin(Time.time * pulseSpeed) * pulseScale;
-        promptRect.localScale = new Vector3(scale, scale, 1f);
-    }
-
-    void Hide()
-    {
-        if (canvasGroup != null) canvasGroup.alpha = 0f;
-        else if (promptText != null) promptText.gameObject.SetActive(false);
-    }
-
-    void EnsurePromptObjects()
-    {
-        if (promptText == null)
-        {
-            GameObject textObject = new GameObject("ExecutePromptText", typeof(RectTransform), typeof(CanvasRenderer), typeof(Text));
-            textObject.transform.SetParent(transform, false);
-
-            promptText = textObject.GetComponent<Text>();
-            promptText.alignment = TextAnchor.MiddleCenter;
-            promptText.fontSize = 22;
-            promptText.fontStyle = FontStyle.Bold;
-            promptText.color = new Color(1f, 0.92f, 0.18f);
-            promptText.raycastTarget = false;
-
-            Font font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            if (font == null) font = Resources.GetBuiltinResource<Font>("Arial.ttf");
-            promptText.font = font;
-        }
-
-        promptRect = promptText.GetComponent<RectTransform>();
-        promptRect.sizeDelta = new Vector2(140f, 36f);
-
-        if (canvasGroup == null)
-        {
-            canvasGroup = promptText.GetComponent<CanvasGroup>();
-            if (canvasGroup == null) canvasGroup = promptText.gameObject.AddComponent<CanvasGroup>();
-        }
-
-        canvasGroup.interactable = false;
-        canvasGroup.blocksRaycasts = false;
+        Vector3 sp = cam.WorldToScreenPoint(head);
+        if (sp.z < 0f) { if (box != null) box.SetActive(false); return; }
+        boxRect.position = (Vector2)sp + screenOffset;
     }
 }

@@ -37,12 +37,7 @@ public class ShopSystem : MonoBehaviour
     [Header("Save")]
     public string shopID;
 
-    [Header("Legacy Stock")]
-    public List<ItemData> itemStock = new List<ItemData>();
-    public List<EquipmentData> equipmentStock = new List<EquipmentData>();
-    public List<SkillData> skillStock = new List<SkillData>();
-
-    [Header("Runtime Stock")]
+    [Header("Stock")]
     public List<ShopItemEntry> itemEntries = new List<ShopItemEntry>();
     public List<ShopEquipmentEntry> equipmentEntries = new List<ShopEquipmentEntry>();
     public List<ShopSkillEntry> skillEntries = new List<ShopSkillEntry>();
@@ -52,7 +47,6 @@ public class ShopSystem : MonoBehaviour
     {
         get
         {
-            EnsureEntriesFromLegacyLists();
             foreach (var entry in itemEntries)
                 if (entry != null && entry.IsAvailable)
                     yield return entry;
@@ -63,7 +57,6 @@ public class ShopSystem : MonoBehaviour
     {
         get
         {
-            EnsureEntriesFromLegacyLists();
             foreach (var entry in equipmentEntries)
                 if (entry != null && entry.IsAvailable)
                     yield return entry;
@@ -74,7 +67,6 @@ public class ShopSystem : MonoBehaviour
     {
         get
         {
-            EnsureEntriesFromLegacyLists();
             var skillSystem = SkillSystem.GetOrCreate();
             foreach (var entry in skillEntries)
             {
@@ -154,7 +146,6 @@ public class ShopSystem : MonoBehaviour
 
     public ShopSaveData CaptureSaveData()
     {
-        EnsureEntriesFromLegacyLists();
         return new ShopSaveData
         {
             id = SaveID,
@@ -168,7 +159,6 @@ public class ShopSystem : MonoBehaviour
     {
         if (data == null) return;
 
-        EnsureEntriesFromLegacyLists();
         ApplyItemEntryQuantities(data.itemEntries);
         ApplyEquipmentEntryQuantities(data.equipmentEntries);
         ApplySkillEntryQuantities(data.skillEntries);
@@ -191,7 +181,6 @@ public class ShopSystem : MonoBehaviour
 
     ShopItemEntry FindOrCreateEntry(ItemData item)
     {
-        EnsureEntriesFromLegacyLists();
         var entry = itemEntries.Find(candidate => candidate != null && candidate.item == item);
         if (entry != null) return entry;
 
@@ -202,7 +191,6 @@ public class ShopSystem : MonoBehaviour
 
     ShopEquipmentEntry FindOrCreateEntry(EquipmentData equipment)
     {
-        EnsureEntriesFromLegacyLists();
         var entry = equipmentEntries.Find(candidate => candidate != null && candidate.equipment == equipment);
         if (entry != null) return entry;
 
@@ -213,37 +201,12 @@ public class ShopSystem : MonoBehaviour
 
     ShopSkillEntry FindOrCreateEntry(SkillData skill)
     {
-        EnsureEntriesFromLegacyLists();
         var entry = skillEntries.Find(candidate => candidate != null && candidate.skill == skill);
         if (entry != null) return entry;
 
         entry = new ShopSkillEntry { skill = skill, quantity = 1 };
         skillEntries.Add(entry);
         return entry;
-    }
-
-    void EnsureEntriesFromLegacyLists()
-    {
-        if (itemEntries.Count == 0)
-        {
-            foreach (var item in itemStock)
-                if (item != null)
-                    itemEntries.Add(new ShopItemEntry { item = item, quantity = -1 });
-        }
-
-        if (equipmentEntries.Count == 0)
-        {
-            foreach (var equipment in equipmentStock)
-                if (equipment != null)
-                    equipmentEntries.Add(new ShopEquipmentEntry { equipment = equipment, quantity = 1 });
-        }
-
-        if (skillEntries.Count == 0)
-        {
-            foreach (var skill in skillStock)
-                if (skill != null)
-                    skillEntries.Add(new ShopSkillEntry { skill = skill, quantity = 1 });
-        }
     }
 
     ShopStockEntrySaveData[] CaptureItemEntries()

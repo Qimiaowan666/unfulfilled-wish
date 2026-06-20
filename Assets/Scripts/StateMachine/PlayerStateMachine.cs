@@ -20,4 +20,5 @@ public class PlayerStateMachine
 
     public void Update() => currentState.Update();
     public void Lock()   => canChangeState = false;
+    public void Unlock() => canChangeState = true;
 }

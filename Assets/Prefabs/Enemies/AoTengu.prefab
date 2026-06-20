@@ -86,7 +86,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 10
   m_MaskInteraction: 0
   m_Sprite: {fileID: -4417450626788747768, guid: 30c8cb00fce832845a46635c6bec05d1, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -196,7 +196,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5c243bfd3573c654a98db555441019a0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PoiseMeter
-  maxPoise: 100
+  maxPoise: 70
   poiseRegenRate: 0
   regenDelay: 3
 --- !u!114 &8734399613253280555
@@ -233,6 +233,7 @@ MonoBehaviour:
   specialHitStunDuration: 0.6
   specialHitKnockback: 8
   specialAttackWarningDuration: 0.5
+  executePromptHeight: 1.2
   attacks:
   - id: attack
     weight: 1
@@ -247,16 +248,6 @@ MonoBehaviour:
       hitboxOffset: {x: 1, y: 0}
       hitboxSize: {x: 2, y: 2}
       projectilePrefab: {fileID: 0}
-    damageMultiplier: 1
-    specialDamageMultiplier: 1
-    delivery: 0
-    hitboxOffset: {x: 1, y: 0}
-    hitboxSize: {x: 2, y: 2}
-    projectilePrefab: {fileID: 0}
-    knockback: 5
-    hitStun: 0
-    specialKnockback: 8
-    specialHitStun: 0.5
     lungeDir: 0
     lungeSpeed: 0
     cooldownOverride: 0
@@ -270,7 +261,7 @@ MonoBehaviour:
   retreatDistance: 1
   idleTime: 1.5
   battleTimeDuration: 5
-  stunDuration: 3
+  stunDuration: 5
   detectionRange: 7
   detectionHeight: 3
   chaseVerticalLimit: 3

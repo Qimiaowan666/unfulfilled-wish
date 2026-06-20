@@ -45,6 +45,8 @@ public class AudioManager : MonoBehaviour
     public AudioClip checkpointClip;
     public AudioClip keyPickupClip;
     public AudioClip doorOpenClip;
+    public AudioClip chestCreakClip;   // 开宝箱:箱盖吱呀
+    public AudioClip chestCoinsClip;   // 开宝箱:金币哗啦(延迟一点叠在 creak 后)
     public AudioClip shopBuyClip;
     public AudioClip shopFailClip;
     public AudioClip uiClickClip;
@@ -214,6 +216,7 @@ public class AudioManager : MonoBehaviour
     public void PlayCheckpoint()     => Play(checkpointClip);
     public void PlayKeyPickup()      => Play(keyPickupClip);
     public void PlayDoorOpen()       => Play(doorOpenClip);
+    public void PlayChestOpen()      { Play(chestCreakClip != null ? chestCreakClip : doorOpenClip); if (chestCoinsClip != null) PlayDelayed(chestCoinsClip, 0.28f); }
     public void PlayShopBuy()        => Play(shopBuyClip);
     public void PlayShopFail()       => Play(shopFailClip);
     public void PlayUIClick()        => Play(uiClickClip);

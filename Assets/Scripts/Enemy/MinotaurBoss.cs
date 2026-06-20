@@ -395,6 +395,21 @@ public class MinotaurBoss : EnemyBase
         stateMachine.ChangeState(staggerState);
     }
 
+    // 处决对 boss 不即死:吃大额伤害(玩家攻击 × executeDamageMultiplier),血归 0 才死;并清掉本次硬直窗口防连按 R
+    [Tooltip("被处决后的硬直时长(秒),独立于普通破韧硬直(2/3秒)")]
+    public float executeStunDuration = 1f;
+
+    public override void OnExecuted(float damage)
+    {
+        if (CurrentHP <= 0f) return;
+        TakeDamage(damage, 0f);
+        if (CurrentHP > 0f)
+        {
+            stunnedState.nextDurationOverride = executeStunDuration;   // 处决后单独的硬直时长
+            stateMachine.ChangeState(stunnedState);                    // Exit 顺带 ResetPoise
+        }
+    }
+
     // ── Animation Event Entry Points（动画事件直接调这里）─────────────
     public void AnimHitOpen()  => (stateMachine.currentState as BossBaseState)?.OnHitWindowOpen();
     public void AnimHitClose() => (stateMachine.currentState as BossBaseState)?.OnHitWindowClose();

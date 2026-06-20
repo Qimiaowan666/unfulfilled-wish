@@ -40,7 +40,8 @@ public class ShopUI : MonoBehaviour
     PlayerStats stats;
     bool  pausedByShop;
     float previousTimeScale = 1f;
-    System.Action reselect;   // 重新展示当前选中项（购买后刷新金币/可购性）
+    readonly List<System.Action> rowSelectActions = new List<System.Action>();   // 每行的"选中"动作,Refresh 重建,顺序同列表
+    int selectedIndex = -1;                                                       // 当前选中行在 rowSelectActions 里的下标
 
     void Awake()
     {
@@ -104,6 +105,7 @@ public class ShopUI : MonoBehaviour
         // 清掉旧行（保留模板）
         foreach (Transform child in listContent)
             if (child != rowTemplate.transform) Destroy(child.gameObject);
+        rowSelectActions.Clear();
 
         if (goldText != null) goldText.text = stats != null ? $"金币 {stats.gold}" : "金币 0";
 
@@ -174,18 +176,20 @@ public class ShopUI : MonoBehaviour
     // 点一行 → 不直接买，弹出详情确认框
     void AddRow(string label, string details, int price, int quantity, Sprite icon, System.Func<bool> buyAction)
     {
+        int index = rowSelectActions.Count;
+        System.Action select = () => { selectedIndex = index; ShowDetail(label, details, price, quantity, icon, buyAction); };
+        rowSelectActions.Add(select);
+
         var row = Instantiate(rowTemplate, listContent);
         row.gameObject.SetActive(true);
         bool canAfford = stats != null && stats.gold >= price;
-        row.Setup(label, shop.FormatPrice(price, quantity), icon, canAfford,
-            () => ShowDetail(label, details, price, quantity, icon, buyAction));
+        row.Setup(label, shop.FormatPrice(price, quantity), icon, canAfford, select);
     }
 
     // 选中一行 → 把详情填进常驻的右侧面板（不再开关弹窗）。详情区显示数值而非描述。
     void ShowDetail(string label, string details, int price, int quantity, Sprite icon, System.Func<bool> buyAction)
     {
         AudioManager.Instance?.PlayUIClick();
-        reselect = () => ShowDetail(label, details, price, quantity, icon, buyAction);
 
         bool canAfford = stats != null && stats.gold >= price;
         if (detailIcon != null) { detailIcon.sprite = icon; detailIcon.enabled = icon != null; }
@@ -211,7 +215,9 @@ public class ShopUI : MonoBehaviour
                 {
                     AudioManager.Instance?.PlayShopBuy();
                     Refresh();           // 刷新列表 + 金币
-                    reselect?.Invoke();  // 重填详情，更新金币/价格颜色，可连续购买
+                    // 自动选中:还有货→重选当前(刷新数量/金币);售罄→跳到下一个未售罄的;全空→清空
+                    if (rowSelectActions.Count == 0) { ClearDetail(); selectedIndex = -1; }
+                    else rowSelectActions[Mathf.Clamp(selectedIndex, 0, rowSelectActions.Count - 1)].Invoke();
                 }
                 else
                 {
@@ -229,7 +235,6 @@ public class ShopUI : MonoBehaviour
     // 未选中 / 取消 / 刚打开：详情面板显示占位，购买键禁用
     void ClearDetail()
     {
-        reselect = null;
         if (detailIcon != null) { detailIcon.sprite = null; detailIcon.enabled = false; }
         if (detailName != null) detailName.text = "选择商品查看详情";
         if (detailDesc != null) detailDesc.text = "";

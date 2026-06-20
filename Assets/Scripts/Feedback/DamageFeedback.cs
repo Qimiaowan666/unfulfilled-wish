@@ -29,6 +29,25 @@ public class DamageFeedback : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
     }
 
+    // 还原闪白材质(把被换成 flashMaterial 的渲染器恢复原材质)。任何"打断闪白"的地方都要调,否则卡白剪影。
+    void RestoreMaterials()
+    {
+        if (flashMaterial == null || renderers == null) return;
+        for (int i = 0; i < renderers.Length; i++)
+            if (renderers[i] != null && i < originalMaterials.Length) renderers[i].sharedMaterial = originalMaterials[i];
+    }
+
+    // 失活兜底:闪白途中被禁用 → 协程停在白材质上,这里还原,避免再启用时卡白
+    void OnDisable()
+    {
+        if (renderers == null) return;
+        if (flashRoutine != null) { StopCoroutine(flashRoutine); flashRoutine = null; }
+        RestoreMaterials();
+        warningHeld = false;
+        for (int i = 0; i < renderers.Length; i++)
+            if (renderers[i] != null && i < originalColors.Length) renderers[i].color = originalColors[i];
+    }
+
     // 命中闪白：换纯白材质(真正变白)
     public void Flash()
     {
@@ -50,6 +69,7 @@ public class DamageFeedback : MonoBehaviour
     {
         if (renderers.Length == 0) return;
         if (flashRoutine != null) { StopCoroutine(flashRoutine); flashRoutine = null; }
+        RestoreMaterials();   // 若正卡在闪白材质先还原,否则红染会变成白/红剪影
         warningHeld = true;
         for (int i = 0; i < renderers.Length; i++)
             if (renderers[i] != null) renderers[i].color = Color.red;
@@ -60,6 +80,7 @@ public class DamageFeedback : MonoBehaviour
     {
         warningHeld = false;
         if (flashRoutine != null) { StopCoroutine(flashRoutine); flashRoutine = null; }
+        RestoreMaterials();   // 中断闪白时也还原材质,避免卡白剪影
         for (int i = 0; i < renderers.Length; i++)
             if (renderers[i] != null && i < originalColors.Length) renderers[i].color = originalColors[i];
     }

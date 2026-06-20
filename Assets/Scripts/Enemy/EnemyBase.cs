@@ -81,6 +81,10 @@ public class EnemyBase : Entity
     public bool SavesPermanentDeath => permanentDeath || GetComponent<MinotaurBoss>() != null;
     public bool RespawnsAtCheckpoint => !SavesPermanentDeath;
     public bool IsExecutable        => GetComponent<PoiseMeter>().IsBroken && CurrentHP > 0f;
+
+    [Header("处决")]
+    [Tooltip("处决提示浮在头顶的高度(世界单位,从敌人原点往上)。逐怪单独调,Scene 里黄线尖端就是它。")]
+    public float executePromptHeight = 2f;
     public string SaveID            => SaveIdUtility.GetSceneObjectID(this, saveID);
 
     // ── Events ───────────────────────────────────────────────────────
@@ -349,6 +353,16 @@ public class EnemyBase : Entity
         base.OnDrawGizmos();
         DrawDetectionGizmo();
         // hitboxes 由具体子类 OnDrawGizmos 调 DrawHitboxGizmo 绘制
+
+        // 处决提示锚点:原点 → executePromptHeight 处(框就浮在这里),逐怪调高度时看这条线
+        Vector3 anchor = transform.position + Vector3.up * executePromptHeight;
+        Gizmos.color = new Color(1f, 0.82f, 0.28f, 0.9f);
+        Gizmos.DrawLine(transform.position, anchor);
+        Gizmos.DrawWireSphere(anchor, 0.12f);
+#if UNITY_EDITOR
+        UnityEditor.Handles.color = Gizmos.color;
+        UnityEditor.Handles.Label(anchor + Vector3.up * 0.18f, "处决提示");
+#endif
     }
 
     // boss 不用感知(开战后靠 tag 锁定玩家、永不脱战)，只画攻击距离；GroundEnemy 覆盖为横向探测框

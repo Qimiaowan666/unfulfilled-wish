@@ -1,10 +1,13 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(PlayerStats))]
 public class PlayerController : Entity
 {
+    public static PlayerController Instance { get; private set; }   // 常驻单例:贯穿所有游玩场景,数据天然不丢
+
     Coroutine queuedAttackCo;
 
     // ── State Machine ────────────────────────────────────────────────
@@ -40,6 +43,8 @@ public class PlayerController : Entity
     // ── Inspector Config ─────────────────────────────────────────────
     [Header("Movement")]
     public float moveSpeed = 6f;
+    [Tooltip("空中移速 = moveSpeed × 此系数(跳跃/下落时的左右移动)")]
+    public float airMoveSpeedMultiplier = 0.8f;
 
     [Header("Jump")]
     public float jumpForce = 12f;
@@ -87,6 +92,18 @@ public class PlayerController : Entity
     // ── Lifecycle ────────────────────────────────────────────────────
     protected override void Awake()
     {
+        if (Instance != null && Instance != this)   // 新场景里的重复玩家 → 把常驻玩家挪到这个出生点后自毁
+        {
+            Instance.transform.position = transform.position;            // 默认落点 = 本场景出生点(随后传送门/读档会再覆盖)
+            if (Instance.Rb != null) Instance.Rb.linearVelocity = Vector2.zero;
+            gameObject.SetActive(false);
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
+        SceneManager.sceneLoaded += OnSceneLoadedCleanup;
+
         base.Awake();
         Stats       = GetComponent<PlayerStats>();
         InputBuffer = GetComponent<PlayerInputBuffer>();
@@ -118,10 +135,34 @@ public class PlayerController : Entity
 
     protected override void Update()
     {
+        if (stateMachine == null) return;   // 未初始化(自毁中的重复实例)兜底,防空引用
         base.Update();
         if (dashCooldownTimer    > 0f) dashCooldownTimer    -= Time.deltaTime;
         if (counterCooldownTimer > 0f) counterCooldownTimer -= Time.deltaTime;
         stateMachine.Update();
+    }
+
+    void OnDestroy()
+    {
+        if (Instance != this) return;
+        Instance = null;
+        SceneManager.sceneLoaded -= OnSceneLoadedCleanup;
+    }
+
+    // 回主菜单 / Bootstrap → 销毁常驻玩家(新游戏/继续会在游玩场景重新生成,保证全新状态)
+    void OnSceneLoadedCleanup(Scene s, LoadSceneMode m)
+    {
+        if (SceneNames.IsNonGameplay(s.name)) { Destroy(gameObject); return; }
+        // 常驻玩家带着死亡态进了新场景(重生/读档)→ 解死复活(HP/死标已由 SaveSystem.LoadSavedVitals 复原)
+        if (stateMachine != null && stateMachine.currentState == deadState) Revive();
+    }
+
+    // 复活:解开死亡态(恢复物理 + 解状态机锁),回到 idle。deadState.Exit 会自动清掉 isDead 动画。
+    public void Revive()
+    {
+        if (Rb != null) { Rb.simulated = true; Rb.linearVelocity = Vector2.zero; }
+        stateMachine.Unlock();
+        stateMachine.ChangeState(idleState);
     }
 
     // ── Called by State Classes ──────────────────────────────────────

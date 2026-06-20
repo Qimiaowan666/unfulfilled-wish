@@ -47,9 +47,10 @@ public class Enemy_ChaseState : EnemyBaseState
         float dir  = enemy.DirToward(enemy.player.position);
         enemy.SetFacing(dir);
 
-        // 同台阶 + 冷却好 → 抽招打
+        // 同台阶 + 冷却好 → 抽连段(没配/没匹配再退单招)打
         if (enemy.VerticalDistToPlayer <= enemy.attackVerticalTolerance
-            && enemy.attackCooldownTimer <= 0f && enemy.TryPickAttack(dist))
+            && enemy.attackCooldownTimer <= 0f
+            && (enemy.TryPickCombo(dist) || enemy.TryPickAttack(dist)))
         {
             rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
             stateMachine.ChangeState(enemy.attackState);
