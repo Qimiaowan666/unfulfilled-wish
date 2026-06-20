@@ -1,6 +1,7 @@
 using UnityEngine;
 
-// 路由 hub state：不绑动画，进入即根据距离/冷却分发到 chase/wait/attack
+// 路由 hub state：不绑动画，进入即根据距离/冷却分发到 attack(连段) / chase / wait。
+// 连段选择走统一 TryPickCombo:按距离 gating(近距任意、远距只缩距招/瞬移开场)+ 强制开场。
 public class Boss_BattleState : BossBaseState
 {
     public Boss_BattleState(MinotaurBoss b, BossStateMachine sm) : base(b, sm, "") {}
@@ -19,25 +20,15 @@ public class Boss_BattleState : BossBaseState
 
         float dist = boss.GetHorizontalDistToPlayer();
 
-        if (dist <= boss.attackRange && boss.attackCooldownTimer <= 0f)
+        // 冷却好 → 抽一套连段(强制开场优先,否则按距离/权重)。抽中就打。
+        if (boss.attackCooldownTimer <= 0f && boss.TryPickCombo(dist))
         {
-            var step = boss.StartNewCombo();
-            if (step != null) boss.ExecuteStep(step);
-            else stateMachine.ChangeState(boss.waitState);   // 都没选中也站着等
+            stateMachine.ChangeState(boss.attackState);
+            return;
         }
-        else if (dist > boss.attackRange)
-        {
-            // 出攻击范围 + 冷却好 → 直接抽突进技能(跳劈/闪身/瞬移)缩距，不限距离；冷却中才走近
-            if (boss.attackCooldownTimer <= 0f)
-            {
-                var step = boss.StartApproachCombo();
-                if (step != null) { boss.ExecuteStep(step); return; }
-            }
-            stateMachine.ChangeState(boss.chaseState);
-        }
-        else
-        {
-            stateMachine.ChangeState(boss.waitState);
-        }
+
+        // 没抽中 / 冷却中：远了去追，近了站等
+        if (dist > boss.attackRange) stateMachine.ChangeState(boss.chaseState);
+        else                         stateMachine.ChangeState(boss.waitState);
     }
 }

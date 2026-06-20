@@ -2,98 +2,17 @@ using UnityEngine;
 
 public enum AttackDelivery { Melee, Ranged }              // 招的出伤方式：近战命中盒 / 远程发射箭矢
 public enum LungeDir       { None, Forward, Backward }    // 出招时移动：不动 / 朝玩家前冲 / 背对后撤
-public enum StepMove       { None, Approach, Retreat }    // 连段段前位移：不动 / 朝玩家逼近 / 后撤
+public enum StepMove       { None, Approach, Retreat, TeleportBehind, TeleportFront, TeleportOtherSide, Jump }   // 连段段前位移(Jump=跳劈接近)
 
-// 地面型小怪共享基类：状态机(Idle/Move/Chase/Attack/Stunned/Dead) + 攻击池 + 命中盒 + 统一 Anim.Play。
-// AoTengu(最基础，1 招)与 DemonSamurai(多招 + 变身)都继承它；boss 不走这套(自有 BossStateMachine)。
+// 地面型小怪共享基类：状态机(Idle/Move/Chase/Attack/Stunned/Dead) + 巡逻/探测/位移。
+// 攻击池/连段/命中/动画 已上移到 EnemyBase(小怪与 boss 共用)。
+// AoTengu(最基础，1 招)与 DemonSamurai(多招 + 变身)都继承它。
 public abstract class GroundEnemy : EnemyBase
 {
-    // 一招的配置：动画状态名 + 触发距离 + 伤害/韧性 + 命中盒
-    // 一「下」命中:自包含。一招(EnemyAttack)挂一串 hits,动画事件 Fire(i) 引用第 i 下。
-    [System.Serializable]
-    public class HitProfile
-    {
-        public AttackDelivery delivery = AttackDelivery.Melee;   // 近战命中盒 / 远程发射
-        public bool    red = false;                              // 红=不可格挡 + 红视觉;白=可格挡
-        public float   damageMultiplier = 1f;                    // 伤害 = 敌人 attack × 此值
-        public float   knockback = 5f;
-        public float   hitStun   = 0f;
-        [Header("近战(delivery=Melee)")]
-        public Vector2 hitboxOffset = new Vector2(0.7f, 0f);
-        public Vector2 hitboxSize   = new Vector2(1f, 0.8f);
-        [Header("远程(delivery=Ranged)")]
-        public Arrow   projectilePrefab;
-    }
-
-    [System.Serializable]
-    public class EnemyAttack
-    {
-        public string  id = "attack";                       // animator 状态名(= Anim.Play 用)
-        public float   weight = 1f;                          // 抽招权重
-        public float   minRange = 0f;                        // 可触发的水平距离区间
-        public float   maxRange = 1.5f;
-
-        [Header("命中:这招打出的每一下(动画事件 Fire(i) 引用第 i 下)")]
-        public HitProfile[] hits = new HitProfile[0];
-
-        [Header("位移")]
-        public LungeDir lungeDir   = LungeDir.None;          // 出招时移动：不动/前冲/后撤
-        public float    lungeSpeed = 0f;                     // 移动速度(配合 lungeDir)
-
-        [Header("节奏")]
-        public float   cooldownOverride = 0f;                // >0：这招专属冷却(覆盖敌人 attackCooldown)
-        public bool    showGizmo = true;
-    }
-
-    [Header("Attacks (攻击池)")]
-    public EnemyAttack[] attacks = { new EnemyAttack() };
-
-    // 连段里的一段:打哪招(引用 attacks[].id) + 出招前位移 + 段后停顿
-    [System.Serializable]
-    public class ComboStep
-    {
-        public string   attackId = "attack";              // 引用 attacks[].id
-        public StepMove move     = StepMove.None;          // 挥刀前先逼近 / 后撤 / 不动
-        [Tooltip("本段打完后的停顿(秒);<0 = 用连段的 stepGap")]
-        public float    gap      = -1f;
-    }
-
-    // 连段:把 attacks 里的招按顺序串起来。一只怪可配多套,按权重 + 距离 + 血量抽。
-    // 不配 combos → 走单招(TryPickAttack),老怪不受影响。某招 weight 设 0 → 只在连段里出、不被单抽。
-    [System.Serializable]
-    public class EnemyCombo
-    {
-        public string      name     = "combo";
-        public float       weight   = 1f;       // 连段之间的权重
-        public float       minRange = 0f;        // 可被选中的水平距离区间
-        public float       maxRange = 2f;
-        [Tooltip("可被选中的血量区间(0~1 百分比)。配低血段 → 残血才放,不必写阶段状态")]
-        public float       minHPPercent = 0f;
-        public float       maxHPPercent = 1f;
-        [Tooltip("勾上 = 不连续抽到同一套(增加变化)")]
-        public bool        noRepeat = false;
-        [Tooltip("整套打完的冷却(秒);<=0 = 用敌人默认 attackCooldown")]
-        public float       cooldownAfter = 0f;
-        [Tooltip("段间默认停顿(秒),0 = 无缝;每段可用自己的 gap 覆盖")]
-        public float       stepGap  = 0.08f;
-        public ComboStep[] steps    = new ComboStep[0];
-    }
-
-    [Header("Combos (连段;留空=只用单招)")]
-    public EnemyCombo[] combos;
-
-    // 红色 hit(HitProfile.red=true)统一视觉:红染 + 放大,所有红 hit 长一个样(固定视觉约定);
-    // 击退/硬直/伤害这些「数值」归 HitProfile 逐 hit 配。
-    public static readonly Color DangerTint  = new Color(1f, 0.45f, 0.3f, 1f);
-    public const           float DangerScale = 1.4f;
-
-    [Header("远程通用 (delivery=Ranged 的招用)")]
-    public Vector2 firePointOffset = new Vector2(0.7f, 0.2f);   // 出箭点(x 随朝向翻转)
-    public float   aimHeightOffset = 0f;                         // 瞄准点相对玩家 pivot 的垂直偏移
-
     [Header("Movement")]
     public float patrolMoveSpeed         = 2f;
     public float battleMoveSpeed         = 3.5f;
+    public override float AttackMoveSpeed => battleMoveSpeed;   // 攻击运行器段前位移用
     public float patrolDistance          = 3f;
     public float preferredCombatDistance = 1.05f;
     public float retreatDistance         = 0.75f;
@@ -155,7 +74,7 @@ public abstract class GroundEnemy : EnemyBase
     }
 
     // 前脚外侧下方探不到地(悬崖) → true
-    public bool LedgeAhead(float dir)
+    public override bool LedgeAhead(float dir)
     {
         var mask = GroundMask;
         if (mask.value == 0) return false;
@@ -163,20 +82,6 @@ public abstract class GroundEnemy : EnemyBase
         Vector2 origin = new Vector2(b.center.x + dir * (b.extents.x + 0.1f), b.min.y + 0.05f);
         return !Physics2D.Raycast(origin, Vector2.down, ledgeCheckDistance, mask);
     }
-
-    // ── 动画 clip 名(子类可覆盖；统一走 Anim.Play) ──
-    public virtual string IdleClip  => "idle";
-    public virtual string MoveClip  => "walk";
-    public virtual string HurtClip  => "hit";
-    public virtual string DeathClip => "death";
-    protected virtual string ResolveClip(string baseName) => baseName;   // 变身等可加后缀
-    public void PlayClip(string baseName) { if (Anim != null && !string.IsNullOrEmpty(baseName)) Anim.Play(ResolveClip(baseName), 0, 0f); }
-
-    public void PlayIdle()          => PlayClip(IdleClip);
-    public void PlayMove()          => PlayClip(MoveClip);
-    public void PlayHurt()          => PlayClip(HurtClip);
-    public void PlayDeath()         => PlayClip(DeathClip);
-    public void PlayCurrentAttack() => PlayClip(CurrentAttack != null ? CurrentAttack.id : "attack");
 
     // ── 状态机 ──
     public EnemyStateMachine  stateMachine { get; private set; }
@@ -186,12 +91,6 @@ public abstract class GroundEnemy : EnemyBase
     public Enemy_AttackState  attackState  { get; private set; }
     public Enemy_StunnedState stunnedState { get; private set; }
     public Enemy_DeadState    deadState    { get; private set; }
-
-    public EnemyAttack CurrentAttack { get; private set; }
-    public EnemyCombo  CurrentCombo  { get; private set; }   // 非空 = 正在打连段
-    public ComboStep   CurrentStep   { get; private set; }   // 当前段(含位移 / 停顿)
-    EnemyCombo         lastCombo;                             // 上一套(noRepeat 用)
-    int comboStep;
 
     protected override void Awake()
     {
@@ -260,22 +159,6 @@ public abstract class GroundEnemy : EnemyBase
     protected override void OnDeath()   => stateMachine.ChangeState(deadState);
     protected override void OnRespawn() { ResetForm(); stateMachine.ChangeState(idleState); }
 
-    // 取 animator 里某 clip 的时长(没有则 0)
-    public float ClipLength(string clipName)
-    {
-        if (Anim != null && Anim.runtimeAnimatorController != null)
-            foreach (var c in Anim.runtimeAnimatorController.animationClips)
-                if (c.name == clipName) return c.length;
-        return 0f;
-    }
-
-    // 当前选中招式对应 clip 的时长(含变身 _flame 后缀解析)——攻击态兜底超时用
-    public float CurrentAttackClipLength()
-    {
-        string id = CurrentAttack != null ? CurrentAttack.id : "attack";
-        return ClipLength(ResolveClip(id));
-    }
-
     // 死亡后等死亡动画播完再消失
     protected override float DeathDisableDelay
     {
@@ -284,116 +167,11 @@ public abstract class GroundEnemy : EnemyBase
 
     protected virtual void ResetForm() { }   // 子类(变身)复活时重置形态
 
-    // 动画事件 → 当前状态(攻击状态用它结束)
-    public void AnimationTrigger() => stateMachine.currentState?.AnimationTrigger();
+    // 动画事件 → 统一攻击运行器(攻击 clip 放完 → 推进连段 / 退出)
+    public void AnimationTrigger() => Attack.OnAnimEnd();
 
     // 动画事件：死亡动画"摔倒落地"那一帧 → 播倒地音(从 Die 挪来，和受击音错开)
     public void AnimDeathFall() => AudioManager.Instance?.PlayEnemyDeath();
-
-    // ── 选招：按距离区间 + 权重抽一个单招 ──
-    public bool TryPickAttack(float dist)
-    {
-        if (attacks == null || attacks.Length == 0) return false;
-        var pick = PickAttack(attacks, a => (dist >= a.minRange && dist <= a.maxRange) ? Mathf.Max(0f, a.weight) : 0f);
-        if (pick == null) return false;
-        ResetCombo();           // 单招:清掉连段状态
-        CurrentAttack = pick;
-        return true;
-    }
-
-    // ── 选连段：按距离 + 血量 + 权重(可排除上一套)抽一套,载入第一段 ──
-    public bool TryPickCombo(float dist)
-    {
-        if (combos == null || combos.Length == 0) return false;
-        float hp = maxHP > 0f ? CurrentHP / maxHP : 1f;
-        var c = PickAttack(combos, x =>
-        {
-            if (x == null || x.steps == null || x.steps.Length == 0) return 0f;
-            if (dist < x.minRange || dist > x.maxRange)             return 0f;
-            if (hp  < x.minHPPercent || hp > x.maxHPPercent)        return 0f;
-            if (x.noRepeat && x == lastCombo)                       return 0f;
-            return Mathf.Max(0f, x.weight);
-        });
-        if (c == null) return false;
-        CurrentCombo = c;
-        lastCombo    = c;
-        comboStep    = 0;
-        return AdvanceCombo();   // 载入第 0 段 → CurrentStep / CurrentAttack
-    }
-
-    // 推进连段到下一段;载入成功 = true,连段打完 / 配错 = false(并清空)
-    public bool AdvanceCombo()
-    {
-        if (CurrentCombo == null || CurrentCombo.steps == null || comboStep >= CurrentCombo.steps.Length)
-        {
-            ResetCombo();
-            return false;
-        }
-        var step = CurrentCombo.steps[comboStep];
-        comboStep++;
-        var atk = step != null ? FindAttack(step.attackId) : null;
-        if (atk == null) { ResetCombo(); return false; }   // id 配错 → 结束,不卡死
-        CurrentStep   = step;
-        CurrentAttack = atk;
-        return true;
-    }
-
-    public void ResetCombo() { CurrentCombo = null; CurrentStep = null; comboStep = 0; }
-
-    EnemyAttack FindAttack(string id)
-    {
-        if (attacks == null) return null;
-        foreach (var a in attacks)
-            if (a != null && a.id == id) return a;
-        return null;
-    }
-
-    // ── 命中：攻击 clip 上的动画事件 Fire(i) 调用(可多帧多次,i=hits 下标) ──
-    int attackSwing;
-    public void ResetAttackSwings() => attackSwing = 0;
-    // 命中事件:打出当前招的第 i 下(读 CurrentAttack.hits[i])。red=true 的下 → 不可格挡 + 红视觉,否则白·可格挡。
-    public virtual void Fire(int i)
-    {
-        var a = CurrentAttack ?? (attacks != null && attacks.Length > 0 ? attacks[0] : null);
-        if (a == null || a.hits == null || i < 0 || i >= a.hits.Length || a.hits[i] == null) return;
-        var h = a.hits[i];
-        float dmg = attack * h.damageMultiplier;
-        if (h.delivery == AttackDelivery.Ranged)
-        {
-            SpawnProjectile(h.projectilePrefab, dmg, h.red, h.knockback, h.hitStun,
-                            h.red ? DangerTint : Color.white, h.red ? DangerScale : 1f);
-            AudioManager.Instance?.PlayBow(h.red);
-        }
-        else
-        {
-            PerformAttack(dmg, h.hitboxOffset, h.hitboxSize, h.red, h.knockback, h.hitStun);
-            AudioManager.Instance?.PlayEnemySwing(attackSwing);
-            attackSwing++;
-        }
-    }
-
-    // 红闪预警:成对事件。Warn=开始染红身体(保持)，WarnEnd=结束恢复。红的时长由两事件在时间轴上的位置决定，不用填数字。
-    // 放在危招(某下 red=true)出手前预警(玩家看到红 → 准备识破)。攻击态退出会兜底清红，招式被打断也不会卡红。
-    public void Warn()    => GetComponent<DamageFeedback>()?.HoldWarning();
-    public void WarnEnd() => GetComponent<DamageFeedback>()?.ClearWarning();
-
-    // 远程出箭(朝玩家瞄准带高低差)；Fire 的远程 hit 用
-    protected void SpawnProjectile(Arrow prefab, float dmg, bool unblockable, float knockback, float hitStun, Color tint, float scale)
-    {
-        if (prefab == null) return;
-        Vector3 spawn = transform.position + new Vector3(firePointOffset.x * FacingDir, firePointOffset.y, 0f);
-        Vector2 aim = Vector2.right * FacingDir;
-        if (player != null)
-        {
-            aim = ((Vector2)player.position + Vector2.up * aimHeightOffset) - (Vector2)spawn;
-            if (aim.sqrMagnitude < 0.01f) aim = Vector2.right * FacingDir;
-        }
-        var arrow = Instantiate(prefab, spawn, Quaternion.identity);
-        if (!Mathf.Approximately(scale, 1f)) arrow.transform.localScale *= scale;
-        var sr = arrow.GetComponent<SpriteRenderer>();
-        if (sr != null) sr.color = tint;
-        arrow.Launch(this, aim, dmg, unblockable, knockback, hitStun);
-    }
 
     // 横向矩形探测：宽 = detectionRange×2(左右各 detectionRange)，高 = detectionHeight
     public bool DetectPlayer()
