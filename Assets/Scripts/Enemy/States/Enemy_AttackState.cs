@@ -22,5 +22,6 @@ public class Enemy_AttackState : EnemyBaseState
     public override void Exit()
     {
         if (enemy.Attack.Active) enemy.Attack.Cancel();   // 被破韧/死亡打断 → 收尾(恢复驱动/动画/连段)
+        enemy.SetAnimBool("");   // 清 isAttacking → 释放 hold 过渡回 idle(和 boss/主角一致)
     }
 }

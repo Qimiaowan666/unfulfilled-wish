@@ -18,9 +18,9 @@ public class Boss_ChaseState : BossBaseState
         boss.SetFacing(dir);
 
         float dist = boss.GetHorizontalDistToPlayer();
-        if (dist <= boss.attackRange)
+        if (dist <= boss.MaxComboRange())
         {
-            stateMachine.ChangeState(boss.battleState);  // 进入范围 → 让 hub 决策
+            stateMachine.ChangeState(boss.battleState);  // 进入最远连段范围 → 让 hub 决策
             return;
         }
 

@@ -4,7 +4,7 @@ using UnityEngine;
 // 攻击动画仍由运行器 Anim.Play(clip) 强制进入(和老 boss 攻击态一致);打完回 battleState,由 chase/wait 的 SetAnimBool 返回 idle/move。
 public class Boss_AttackState : BossBaseState
 {
-    // 每段的 animator bool 由运行器按 atk.animBool 设(atk1=isAttacking / atk2·跳劈=isAttacking2 / 大招=isSpecialAttacking / atk3=isAttacking3)。
+    // 攻击态的 animator bool 由运行器统一设 isAttacking(和小怪/主角一致)。
     public Boss_AttackState(MinotaurBoss b, BossStateMachine sm) : base(b, sm, "") { }
 
     public override void Enter()

@@ -36,19 +36,10 @@ public class MinotaurBoss : EnemyBase
     [Header("Counter Reaction")]
     public float staggerDuration        = 0.6f;   // 被识破后的停顿时长
 
-    [Header("Special Attack Indicator")]
-    public bool           showAttackIndicator    = true;
-    public SpriteRenderer indicatorRenderer;
-    public Vector2        indicatorSize          = new Vector2(2f, 1.5f);
-    public Vector2        indicatorOffset        = new Vector2(2f, 0f);
-    public Color          indicatorWarningColor  = new Color(1f, 0.2f, 0.2f, 0.35f);
-    public Color          indicatorImpactColor   = new Color(1f, 0.7f, 0.2f, 0.85f);
-
     // ── Runtime ──────────────────────────────────────────────────────
     public bool  IsPhase2     { get; private set; }
 
     DamageFeedback damageFeedback;
-    Coroutine      indicatorRoutine;
     SpriteRenderer spriteRenderer;
     Color          baseSpriteColor = Color.white;   // 原始基色（怒气染色后复活还原用）
 
@@ -65,21 +56,8 @@ public class MinotaurBoss : EnemyBase
     // ── 统一攻击系统钩子(招/连段/驱动在 EnemyBase + AttackRunner)──────────
     public override float DamageMultiplier => IsPhase2 ? phase2AttackMultiplier : 1f;   // 二阶段加伤
     public override float AttackMoveSpeed  => moveSpeed * (IsPhase2 ? phase2SpeedBonus : 1f);
-    public override void  ShowAttackIndicator(float duration) => ShowIndicator(duration);   // 大招指示器预警
 
-    // ── SetAnimBool（所有 8 个 bool）──────────────────────────────────
-    static readonly string[] boolNames =
-    {
-        "isIdle", "isMoving", "isAttacking", "isAttacking2", "isAttacking3",
-        "isSpecialAttacking", "isDefending", "isHit", "isDead"
-    };
-
-    public override void SetAnimBool(string boolName)
-    {
-        if (Anim == null || Anim.runtimeAnimatorController == null) return;
-        foreach (var name in boolNames)
-            Anim.SetBool(name, name == boolName);
-    }
+    // SetAnimBool 用基类即可（遍历 Anim 的 bool 参数，一次只亮一个；boss 也已统一到单个 isAttacking）
 
     // combatEnabled / Activate() 已上移到 EnemyBase（所有 boss 通用的登场沉睡/唤醒）
 
@@ -103,8 +81,6 @@ public class MinotaurBoss : EnemyBase
         deadState     = new Boss_DeadState(this, stateMachine);
 
         stateMachine.Initialize(idleState);
-
-        if (indicatorRenderer != null) indicatorRenderer.gameObject.SetActive(false);
     }
 
     protected override void Update()
@@ -298,8 +274,6 @@ public class MinotaurBoss : EnemyBase
     {
         StopAllCoroutines();   // 清掉读档/复活前残留的协程（转阶段染色/击退、攻击指示器跟随等）
         Attack.Cancel();       // 清掉进行中的连段/驱动(恢复无敌·物理·动画速度)
-        if (indicatorRenderer != null) indicatorRenderer.gameObject.SetActive(false);
-        indicatorRoutine = null;
         IsPhase2 = false;
         PhaseTransition = false;
         StopRageAura();
@@ -341,49 +315,4 @@ public class MinotaurBoss : EnemyBase
 
     public void SetInvincible(bool on) => Invincible = on;
 
-    // ── Attack Indicator（大招预警指示器，由 ShowAttackIndicator 钩子调）─
-    public void ShowIndicator(float duration)
-    {
-        if (!showAttackIndicator || indicatorRenderer == null) return;
-        if (indicatorRoutine != null) StopCoroutine(indicatorRoutine);
-        indicatorRoutine = StartCoroutine(IndicatorRoutine(duration));
-    }
-
-    IEnumerator IndicatorRoutine(float duration)
-    {
-        indicatorRenderer.gameObject.SetActive(true);
-        indicatorRenderer.transform.localScale = new Vector3(indicatorSize.x, indicatorSize.y, 1f);
-
-        float elapsed = 0f;
-        while (elapsed < duration)
-        {
-            Vector3 worldOffset = new Vector3(indicatorOffset.x * FacingDir, indicatorOffset.y, 0f);
-            indicatorRenderer.transform.position = transform.position + worldOffset;
-
-            float t = elapsed / duration;
-            indicatorRenderer.color = Color.Lerp(indicatorWarningColor, indicatorImpactColor, t);
-
-            elapsed += Time.deltaTime;
-            yield return null;
-        }
-
-        indicatorRenderer.gameObject.SetActive(false);
-        indicatorRoutine = null;
-    }
-
-    // ── Gizmos ───────────────────────────────────────────────────────
-    protected override void OnDrawGizmos()
-    {
-        base.OnDrawGizmos();   // 父类画 detection / attack range + 每招命中盒(HitProfile)
-
-        if (showAttackIndicator)
-        {
-            int dir = FacingDir;
-            Vector3 center = transform.position + new Vector3(indicatorOffset.x * dir, indicatorOffset.y, 0f);
-            Gizmos.color = new Color(1f, 0.4f, 0f, 0.4f);
-            Gizmos.DrawCube(center, new Vector3(indicatorSize.x, indicatorSize.y, 0.1f));
-            Gizmos.color = new Color(1f, 0.4f, 0f, 1f);
-            Gizmos.DrawWireCube(center, new Vector3(indicatorSize.x, indicatorSize.y, 0.1f));
-        }
-    }
 }

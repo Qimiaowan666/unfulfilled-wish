@@ -1,19 +1,2 @@
-public class EnemyStateMachine
-{
-    public EnemyBaseState currentState { get; private set; }
-
-    public void Initialize(EnemyBaseState startState)
-    {
-        currentState = startState;
-        currentState.Enter();
-    }
-
-    public void ChangeState(EnemyBaseState newState)
-    {
-        currentState?.Exit();
-        currentState = newState;
-        currentState.Enter();
-    }
-
-    public void Update() => currentState?.Update();
-}
+// 只给小怪状态机起个名;逻辑全在 StateMachine。
+public class EnemyStateMachine : StateMachine { }

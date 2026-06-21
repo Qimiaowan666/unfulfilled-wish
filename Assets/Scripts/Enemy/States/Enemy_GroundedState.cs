@@ -1,7 +1,7 @@
 public class Enemy_GroundedState : EnemyBaseState
 {
-    public Enemy_GroundedState(GroundEnemy enemy, EnemyStateMachine sm)
-        : base(enemy, sm) { }
+    public Enemy_GroundedState(GroundEnemy enemy, EnemyStateMachine sm, string animBoolName = "")
+        : base(enemy, sm, animBoolName) { }
 
     public override void Update()
     {

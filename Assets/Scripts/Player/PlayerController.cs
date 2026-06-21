@@ -89,6 +89,17 @@ public class PlayerController : Entity
     public bool TryCounter(EnemyBase enemy)   => counterState.TryCounter(enemy);
     public void ReceiveBlockHit(float damage, EnemyBase attacker) { if (IsBlocking) blockState.ReceiveAttack(damage, attacker); }
 
+    [Header("Ground Check (落地检测;只玩家用)")]
+    public Transform groundCheck;
+    public float     groundCheckRadius = 0.1f;
+
+    // 落地检测:脚下 OverlapCircle(groundLayer 在基类 Entity)。基类 Update → CheckGrounded 调到这里。
+    protected override void CheckGrounded()
+    {
+        IsGrounded = groundCheck != null &&
+            Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
+    }
+
     // ── Lifecycle ────────────────────────────────────────────────────
     protected override void Awake()
     {
@@ -212,13 +223,19 @@ public class PlayerController : Entity
     }
 
     // ── Called by PlayerAnimationEvents ─────────────────────────────
-    public void AnimFinished()      => stateMachine.currentState?.OnAnimationFinished();
-    public void AnimHitFrame()      => stateMachine.currentState?.OnHitFrame();
-    public void AnimCounterClosed() => stateMachine.currentState?.OnCounterWindowClosed();
+    // currentState 现在是公共基类 EntityState,这几个是主角专属回调 → 转型到 PlayerBaseState(主角的态必是它)
+    public void AnimFinished()      => (stateMachine.currentState as PlayerBaseState)?.OnAnimationFinished();
+    public void AnimHitFrame()      => (stateMachine.currentState as PlayerBaseState)?.OnHitFrame();
+    public void AnimCounterClosed() => (stateMachine.currentState as PlayerBaseState)?.OnCounterWindowClosed();
 
     protected override void OnDrawGizmos()
     {
         base.OnDrawGizmos();
+        if (groundCheck != null)
+        {
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
+        }
         if (!showAttackHitbox) return;
         float dir = FacingRight ? 1f : -1f;
         Vector2 origin = (Vector2)transform.position +

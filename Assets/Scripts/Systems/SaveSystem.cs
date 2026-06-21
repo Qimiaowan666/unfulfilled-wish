@@ -269,10 +269,11 @@ public class SaveSystem : MonoBehaviour
         if (skills != null)
             skills.LoadSkills(ResolveSkills(data.learnedSkillIDs));
 
+        bool isRespawn = nextLoadIsRespawn;   // 死亡重生(满血回火堆)≠ 普通读档(读存档血量)
         if (player != null)
         {
             // 死亡重生 → 火堆复活点(respawnX/Y)；普通读档/进入 → 读档落点(playerX/Y)。旧档无 respawn 坐标时回退 playerX/Y
-            bool useRespawn = nextLoadIsRespawn && (data.respawnX != 0f || data.respawnY != 0f);
+            bool useRespawn = isRespawn && (data.respawnX != 0f || data.respawnY != 0f);
             float px = useRespawn ? data.respawnX : data.playerX;
             float py = useRespawn ? data.respawnY : data.playerY;
             player.transform.position = new Vector3(px, py, player.transform.position.z);
@@ -283,7 +284,13 @@ public class SaveSystem : MonoBehaviour
         nextLoadIsRespawn = false;
 
         if (stats != null)
-            stats.LoadSavedVitals(data.currentHP, data.currentGhostHP, data.currentStamina, data.gold);
+        {
+            // 死亡重生:满血满体力、虚血清零(绝不读死时存档里的 0 血,否则会 Die→Revive 后空血站着)
+            if (isRespawn)
+                stats.LoadSavedVitals(stats.maxHP, 0f, stats.maxStamina, data.gold);
+            else
+                stats.LoadSavedVitals(data.currentHP, data.currentGhostHP, data.currentStamina, data.gold);
+        }
 
         PlayerInputBuffer.ClearAll();
     }

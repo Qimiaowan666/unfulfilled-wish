@@ -12,8 +12,14 @@ public class Enemy_ChaseState : EnemyBaseState
     {
         base.Enter();
         moveAnim = false;
-        enemy.PlayIdle();   // 先 idle(覆盖刚结束的攻击 clip)，Update 立刻按移动情况切 move
+        enemy.SetAnimBool("isIdle");   // 先 idle，Update 立刻按移动情况切 move(纯 bool)
         lastTimeDetected = Time.time;
+    }
+
+    public override void Exit()
+    {
+        base.Exit();
+        enemy.SetAnimBool("");   // 清掉 chase 期间设的 isIdle/isMoving，避免带进下一态(保持一次只亮一个)
     }
 
     // 站定时播 idle、移动时播 move（等 CD 站桩不再原地跑）
@@ -21,7 +27,8 @@ public class Enemy_ChaseState : EnemyBaseState
     {
         if (moving == moveAnim) return;
         moveAnim = moving;
-        if (moving) enemy.PlayMove(); else enemy.PlayIdle();
+        if (moving) enemy.SetAnimBool("isMoving");
+        else        enemy.SetAnimBool("isIdle");
     }
 
     public override void Update()
@@ -47,10 +54,10 @@ public class Enemy_ChaseState : EnemyBaseState
         float dir  = enemy.DirToward(enemy.player.position);
         enemy.SetFacing(dir);
 
-        // 同台阶 + 冷却好 → 抽连段(没配/没匹配再退单招)打
+        // 同台阶 + 冷却好 → 抽连段打(小怪每招也是个单段 combo)
         if (enemy.VerticalDistToPlayer <= enemy.attackVerticalTolerance
             && enemy.attackCooldownTimer <= 0f
-            && (enemy.TryPickCombo(dist) || enemy.TryPickAttack(dist)))
+            && enemy.TryPickCombo(dist))
         {
             rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
             stateMachine.ChangeState(enemy.attackState);

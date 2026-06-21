@@ -5,14 +5,13 @@ public class Enemy_StunnedState : EnemyBaseState
     float duration;
 
     public Enemy_StunnedState(GroundEnemy enemy, EnemyStateMachine sm)
-        : base(enemy, sm) { }
+        : base(enemy, sm, "isHit") { }
 
     public void SetDuration(float d) => duration = d;
 
     public override void Enter()
     {
-        base.Enter();
-        enemy.PlayHurt();
+        base.Enter();   // isHit=true → Animator 播 hit/hurt(纯 bool 驱动)
         stateTimer        = duration;
         rb.linearVelocity = Vector2.zero;
     }

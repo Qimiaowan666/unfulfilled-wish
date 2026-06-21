@@ -4,13 +4,11 @@ public abstract class Entity : MonoBehaviour
 {
     public Rigidbody2D Rb          { get; private set; }
     public Animator    Anim        { get; private set; }
-    public bool        IsGrounded  { get; private set; }
+    public bool        IsGrounded  { get; protected set; }   // 玩家覆盖 CheckGrounded 设置;敌人不读
     public bool        FacingRight { get; protected set; } = true;
     public int         FacingDir   => FacingRight ? 1 : -1;
 
-    [Header("Ground Detection")]
-    public Transform  groundCheck;
-    public float      groundCheckRadius = 0.1f;
+    [Tooltip("地面/墙体层。敌人悬崖·墙检测(GroundMask)、玩家落地·冲刺撞墙等共用;留空多数地方会 fallback 到 Ground 命名层")]
     public LayerMask  groundLayer;
 
     protected virtual void Awake()
@@ -23,6 +21,9 @@ public abstract class Entity : MonoBehaviour
     {
         CheckGrounded();
     }
+
+    // 落地检测:默认空(敌人用射线 LedgeAhead/WallAhead,不需要 IsGrounded)。玩家覆盖做 OverlapCircle。
+    protected virtual void CheckGrounded() { }
 
     public void SetFacing(float dir)
     {
@@ -46,16 +47,5 @@ public abstract class Entity : MonoBehaviour
         transform.localScale = s;
     }
 
-    void CheckGrounded()
-    {
-        IsGrounded = groundCheck != null &&
-            Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
-    }
-
-    protected virtual void OnDrawGizmos()
-    {
-        if (groundCheck == null) return;
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
-    }
+    protected virtual void OnDrawGizmos() { }
 }

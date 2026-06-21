@@ -241,7 +241,6 @@ MonoBehaviour:
   maxHP: 250
   attack: 8
   goldDrop: 10
-  attackRange: 9
   playerLayer:
     serializedVersion: 2
     m_Bits: 0
@@ -252,9 +251,6 @@ MonoBehaviour:
   executePromptHeight: 1.2
   attacks:
   - id: attack
-    weight: 4
-    minRange: 0
-    maxRange: 9
     hits:
     - delivery: 1
       red: 0
@@ -264,14 +260,8 @@ MonoBehaviour:
       hitboxOffset: {x: 0, y: 0}
       hitboxSize: {x: 0, y: 0}
       projectilePrefab: {fileID: 2890174170218546002, guid: b09cfdeece551bd4dad71d8d21c8d572, type: 3}
-    lungeDir: 0
-    lungeSpeed: 0
-    cooldownOverride: 0
     showGizmo: 0
   - id: special_attack
-    weight: 1
-    minRange: 0
-    maxRange: 9
     hits:
     - delivery: 1
       red: 0
@@ -289,12 +279,56 @@ MonoBehaviour:
       hitboxOffset: {x: 0, y: 0}
       hitboxSize: {x: 0, y: 0}
       projectilePrefab: {fileID: 2890174170218546002, guid: b09cfdeece551bd4dad71d8d21c8d572, type: 3}
-    lungeDir: 0
-    lungeSpeed: 0
-    cooldownOverride: 2.2
     showGizmo: 0
+  combos:
+  - name: attack
+    weight: 4
+    range: {x: 0, y: 9}
+    hpPercent: {x: 0, y: 1}
+    noRepeat: 0
+    cooldownAfter: 0
+    stepGap: 0
+    steps:
+    - attackId: attack
+      preMove:
+        rid: -2
+      driver:
+        rid: -2
+      animSpeed: 0
+      move: 0
+      lungeDir: 0
+      lungeSpeed: 0
+      gap: -1
+  - name: special_attack
+    weight: 1
+    range: {x: 0, y: 9}
+    hpPercent: {x: 0, y: 1}
+    noRepeat: 0
+    cooldownAfter: 2.2
+    stepGap: 0
+    steps:
+    - attackId: special_attack
+      preMove:
+        rid: -2
+      driver:
+        rid: -2
+      animSpeed: 0
+      move: 0
+      lungeDir: 0
+      lungeSpeed: 0
+      gap: -1
   firePointOffset: {x: 0.7, y: 0.2}
   aimHeightOffset: 0
+  teleportOffset: 0.8
+  teleportDuration: 0.35
+  teleportClearance: 0.6
+  teleportLanding: 0.12
+  teleportWallLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  jumpMoveHeight: 3
+  jumpMoveTime: 0.75
+  jumpMoveStandoff: 2
   patrolMoveSpeed: 1.5
   battleMoveSpeed: 2.5
   patrolDistance: 4
@@ -318,6 +352,11 @@ MonoBehaviour:
   backstepSpeed: 20
   backstepDuration: 0.3
   backstepInvincible: 1
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
 --- !u!1001 &1369433200508033973
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -1,49 +1,34 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public abstract class PlayerBaseState
+// 主角状态基类:公共部分(anim/rb/animBool/timer + Enter/Exit/Update)在 EntityState;这里加 owner + 输入 + 全局过渡。
+public abstract class PlayerBaseState : EntityState
 {
     protected PlayerController   player;
-    protected PlayerStateMachine stateMachine;
-    protected Rigidbody2D        rb;
-    protected Animator           anim;
     protected PlayerInputBuffer  inputBuffer;
     protected PlayerInput        input;
-    protected string             animBoolName;
 
-    protected float stateTimer;
-    protected bool  IsInputBlocked => ShopUI.IsOpen;
+    protected bool IsInputBlocked => ShopUI.IsOpen;
 
     public PlayerBaseState(PlayerController player, PlayerStateMachine stateMachine, string animBoolName)
+        : base(stateMachine, animBoolName)
     {
-        this.player        = player;
-        this.stateMachine  = stateMachine;
-        this.animBoolName  = animBoolName;
+        this.player = player;
         rb          = player.Rb;
         anim        = player.Anim;
         inputBuffer = player.InputBuffer;
         input       = player.Input;
     }
 
-    public virtual void Enter()
+    public override void Update()
     {
-        anim.SetBool(animBoolName, true);
-    }
-
-    public virtual void Update()
-    {
-        stateTimer -= Time.deltaTime;
+        base.Update();
         UpdateAnimationParameters();
     }
 
     public virtual void UpdateAnimationParameters()
     {
         anim.SetFloat("yVelocity", rb.linearVelocity.y);
-    }
-
-    public virtual void Exit()
-    {
-        anim.SetBool(animBoolName, false);
     }
 
     public virtual void OnAnimationFinished()   { }

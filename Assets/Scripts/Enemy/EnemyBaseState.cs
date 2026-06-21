@@ -1,35 +1,22 @@
 using UnityEngine;
 
-public abstract class EnemyBaseState
+// 小怪状态基类:公共部分(anim/rb/animBool/timer + Enter/Exit/Update)在 EntityState;这里只加 owner。
+// 小怪非攻击态走 Anim.Play(animBool 留空);攻击态的 isAttacking 由运行器设、Enemy_AttackState.Exit 清。
+public abstract class EnemyBaseState : EntityState
 {
-    protected GroundEnemy       enemy;
-    protected EnemyStateMachine stateMachine;
-    protected Rigidbody2D       rb;
-    protected Animator          anim;
-    protected float             stateTimer;
-    protected bool              triggerCalled;
+    protected GroundEnemy enemy;
 
-    public EnemyBaseState(GroundEnemy enemy, EnemyStateMachine stateMachine)
+    public EnemyBaseState(GroundEnemy enemy, EnemyStateMachine stateMachine, string animBoolName = "")
+        : base(stateMachine, animBoolName)
     {
-        this.enemy        = enemy;
-        this.stateMachine = stateMachine;
+        this.enemy = enemy;
         rb   = enemy.Rb;
         anim = enemy.Anim;
     }
 
-    // 动画统一由各状态调 enemy.PlayXxx()(Anim.Play)，不再用 animator bool 过渡。
-    public virtual void Enter()
+    public override void Enter()
     {
-        stateTimer    = 0f;
-        triggerCalled = false;
+        base.Enter();
+        stateTimer = 0f;   // 保留小怪原行为:进状态清计时
     }
-
-    public void AnimationTrigger() => triggerCalled = true;
-
-    public virtual void Update()
-    {
-        stateTimer -= Time.deltaTime;
-    }
-
-    public virtual void Exit() { }
 }

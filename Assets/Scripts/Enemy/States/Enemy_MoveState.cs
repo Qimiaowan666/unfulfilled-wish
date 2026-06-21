@@ -5,13 +5,12 @@ public class Enemy_MoveState : Enemy_GroundedState
     float patrolDir = 1f;
 
     public Enemy_MoveState(GroundEnemy enemy, EnemyStateMachine sm)
-        : base(enemy, sm) { }
+        : base(enemy, sm, "isMoving") { }
 
     public override void Enter()
     {
-        base.Enter();
+        base.Enter();   // isMoving=true → Animator 播 walk/run(纯 bool 驱动)
         patrolDir = enemy.FacingDir;
-        enemy.PlayMove();
     }
 
     public override void Update()

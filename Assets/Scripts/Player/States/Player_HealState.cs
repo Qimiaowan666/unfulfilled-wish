@@ -26,9 +26,7 @@ public class Player_HealState : PlayerBaseState
         interrupted       = false;
         rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
 
-        // 强切 rest 动画（避开任何 transition 延迟）
-        if (!string.IsNullOrEmpty(skill.AnimStateName) && anim != null)
-            anim.Play(skill.AnimStateName, 0, 0f);
+        // rest 动画由 isHealing 驱动(Entry→rest(isHealing) + rest→Exit(!isHealing)),纯 bool
 
         if (skill.VfxEnabled)
             activeVfx = VfxManager.PlayLoop("Vfx/HealAura", player.transform, (Vector3)skill.VfxLocalOffset, 1f,

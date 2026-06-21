@@ -11,8 +11,7 @@ public class Player_KnockedState : PlayerBaseState
 
     public override void Enter()
     {
-        base.Enter();                          // isHealing = true → 维持 rest 状态
-        if (anim != null) anim.Play("rest", 0, 0f);   // 强切 rest，避开过渡延迟
+        base.Enter();                          // isHealing = true → Entry→rest(isHealing) 进 rest(纯 bool)
         stateTimer = Duration;
     }
 

@@ -241,7 +241,6 @@ MonoBehaviour:
   maxHP: 400
   attack: 5
   goldDrop: 30
-  attackRange: 1.8
   playerLayer:
     serializedVersion: 2
     m_Bits: 0
@@ -252,9 +251,6 @@ MonoBehaviour:
   executePromptHeight: 1.2
   attacks:
   - id: atk1
-    weight: 1
-    minRange: 0
-    maxRange: 1.8
     hits:
     - delivery: 0
       red: 0
@@ -264,14 +260,8 @@ MonoBehaviour:
       hitboxOffset: {x: 0.9, y: -0.5}
       hitboxSize: {x: 1.8, y: 2}
       projectilePrefab: {fileID: 0}
-    lungeDir: 0
-    lungeSpeed: 0
-    cooldownOverride: 0
     showGizmo: 0
   - id: atk2
-    weight: 1
-    minRange: 0
-    maxRange: 1.8
     hits:
     - delivery: 0
       red: 0
@@ -281,14 +271,8 @@ MonoBehaviour:
       hitboxOffset: {x: 1, y: -0.5}
       hitboxSize: {x: 2, y: 2}
       projectilePrefab: {fileID: 0}
-    lungeDir: 0
-    lungeSpeed: 0
-    cooldownOverride: 0
     showGizmo: 0
   - id: atk3
-    weight: 0.8
-    minRange: 0
-    maxRange: 2
     hits:
     - delivery: 0
       red: 0
@@ -298,14 +282,8 @@ MonoBehaviour:
       hitboxOffset: {x: 1, y: -0.5}
       hitboxSize: {x: 2, y: 2}
       projectilePrefab: {fileID: 0}
-    lungeDir: 0
-    lungeSpeed: 0
-    cooldownOverride: 0
     showGizmo: 0
   - id: jumpattack
-    weight: 0.7
-    minRange: 1
-    maxRange: 6
     hits:
     - delivery: 0
       red: 0
@@ -315,10 +293,68 @@ MonoBehaviour:
       hitboxOffset: {x: 1, y: 0}
       hitboxSize: {x: 2, y: 4}
       projectilePrefab: {fileID: 0}
-    lungeDir: 1
-    lungeSpeed: 12
-    cooldownOverride: 0
     showGizmo: 0
+  combos:
+  - name: atk1
+    weight: 1
+    range: {x: 0, y: 1.8}
+    hpPercent: {x: 0, y: 1}
+    noRepeat: 0
+    cooldownAfter: 0
+    stepGap: 0
+    steps:
+    - attackId: atk1
+      preMove:
+        rid: -2
+      driver:
+        rid: -2
+      animSpeed: 0
+      gap: -1
+  - name: atk2
+    weight: 1
+    range: {x: 0, y: 1.8}
+    hpPercent: {x: 0, y: 1}
+    noRepeat: 0
+    cooldownAfter: 0
+    stepGap: 0
+    steps:
+    - attackId: atk2
+      preMove:
+        rid: -2
+      driver:
+        rid: -2
+      animSpeed: 0
+      gap: -1
+  - name: atk3
+    weight: 0.8
+    range: {x: 0, y: 2}
+    hpPercent: {x: 0, y: 1}
+    noRepeat: 0
+    cooldownAfter: 0
+    stepGap: 0
+    steps:
+    - attackId: atk3
+      preMove:
+        rid: -2
+      driver:
+        rid: -2
+      animSpeed: 0
+      gap: -1
+  - name: jumpattack
+    weight: 0.7
+    range: {x: 1, y: 6}
+    hpPercent: {x: 0, y: 1}
+    noRepeat: 0
+    cooldownAfter: 0
+    stepGap: 0
+    steps:
+    - attackId: jumpattack
+      preMove:
+        rid: -2
+      driver:
+        rid: 2219729727954092986
+      animSpeed: 0
+      gap: -1
   firePointOffset: {x: 0.7, y: 0.2}
   aimHeightOffset: 0
   patrolMoveSpeed: 2
@@ -339,6 +375,15 @@ MonoBehaviour:
   attackBuff: 1.2
   speedBuff: 1.3
   shoutFreeze: 0.7
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 2219729727954092986
+      type: {class: LungeForward, ns: , asm: Assembly-CSharp}
+      data:
+        speed: 12
 --- !u!1001 &2026212152910789530
 PrefabInstance:
   m_ObjectHideFlags: 0

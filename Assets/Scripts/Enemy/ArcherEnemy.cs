@@ -91,7 +91,7 @@ public class ArcherEnemy : GroundEnemy
         SpawnFootDust();
         // 远离玩家的方向(背对玩家)；保持面向玩家不翻身，像后跳
         int away = player != null ? (player.position.x > transform.position.x ? -1 : 1) : -FacingDir;
-        PlayClip("dash");
+        SetAnimBool("isDashing");   // 进 dash(纯 bool,Entry→dash(isDashing) / dash→Exit(!isDashing))
         if (backstepInvincible) Invincible = true;
 
         float t = 0f;
@@ -106,6 +106,7 @@ public class ArcherEnemy : GroundEnemy
         if (Rb != null) Rb.linearVelocity = new Vector2(0f, Rb.linearVelocity.y);
         Invincible = false;
         dashing    = false;
+        if (Anim != null) Anim.SetBool("isDashing", false);   // 退出 dash,让下一态(chase/idle)正常接管
         stateMachine.ChangeState(player != null ? (EnemyBaseState)chaseState : idleState);
     }
 

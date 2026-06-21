@@ -24,8 +24,8 @@ public class Boss_WaitState : BossBaseState
 
         float dist = boss.GetHorizontalDistToPlayer();
 
-        // 玩家跑出范围 → 重新决策
-        if (dist > boss.attackRange)
+        // 玩家跑出最远连段范围 → 重新决策
+        if (dist > boss.MaxComboRange())
         {
             stateMachine.ChangeState(boss.battleState);
             return;

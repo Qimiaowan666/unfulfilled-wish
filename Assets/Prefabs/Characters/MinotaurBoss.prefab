@@ -1,96 +1,5 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &563945158650028673
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1434262014869756615}
-  - component: {fileID: 875065677210392183}
-  m_Layer: 8
-  m_Name: BossAttackIndicator
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1434262014869756615
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 563945158650028673}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.017, y: 0.35, z: 0}
-  m_LocalScale: {x: 5, y: 5, z: 5}
-  m_ConstrainProportionsScale: 1
-  m_Children: []
-  m_Father: {fileID: 4428139849176560301}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!212 &875065677210392183
-SpriteRenderer:
-  serializedVersion: 2
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 563945158650028673}
-  m_Enabled: 1
-  m_CastShadows: 0
-  m_ReceiveShadows: 0
-  m_DynamicOccludee: 1
-  m_StaticShadowCaster: 0
-  m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
-  m_RayTracingMode: 0
-  m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
-  m_ForceMeshLod: -1
-  m_MeshLodSelectionBias: 0
-  m_RenderingLayerMask: 1
-  m_RendererPriority: 0
-  m_Materials:
-  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
-  m_StaticBatchInfo:
-    firstSubMesh: 0
-    subMeshCount: 0
-  m_StaticBatchRoot: {fileID: 0}
-  m_ProbeAnchor: {fileID: 0}
-  m_LightProbeVolumeOverride: {fileID: 0}
-  m_ScaleInLightmap: 1
-  m_ReceiveGI: 1
-  m_PreserveUVs: 0
-  m_IgnoreNormalsForChartDetection: 0
-  m_ImportantGI: 0
-  m_StitchLightmapSeams: 1
-  m_SelectedEditorRenderState: 0
-  m_MinimumChartSize: 4
-  m_AutoUVMaxDistance: 0.5
-  m_AutoUVMaxAngle: 89
-  m_LightmapParameters: {fileID: 0}
-  m_GlobalIlluminationMeshLod: 0
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 12
-  m_MaskInteraction: 0
-  m_Sprite: {fileID: 0}
-  m_Color: {r: 0.21960786, g: 0.21960786, b: 0.21960786, a: 1}
-  m_FlipX: 0
-  m_FlipY: 0
-  m_DrawMode: 0
-  m_Size: {x: 2.57, y: 2.56}
-  m_AdaptiveModeThreshold: 0.5
-  m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 0
-  m_SpriteSortPoint: 0
 --- !u!1 &4636001714618293406
 GameObject:
   m_ObjectHideFlags: 0
@@ -126,8 +35,7 @@ Transform:
   m_LocalPosition: {x: 51.34, y: -3.11, z: 0}
   m_LocalScale: {x: 5, y: 5, z: 5}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 1434262014869756615}
+  m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &3916268509889712908
@@ -313,22 +221,215 @@ MonoBehaviour:
   nextSceneOnDefeat: 
   profile: {fileID: 11400000, guid: 8e975c588650f8540ab562323ec9fa68, type: 2}
   combatEnabled: 1
-  maxHP: 5000
-  attack: 2
+  maxHP: 4000
+  attack: 5
   goldDrop: 100
-  attackRange: 4
   playerLayer:
     serializedVersion: 2
     m_Bits: 512
-  attackCooldown: 1.5
-  specialHitStunDuration: 0.6
+  attackCooldown: 1.4
+  specialHitStunDuration: 1.2
   specialHitKnockback: 8
   specialAttackWarningDuration: 0.5
   executePromptHeight: 2
+  attacks:
+  - id: atk1
+    hits:
+    - delivery: 0
+      red: 0
+      damageMultiplier: 1
+      knockback: 5
+      hitStun: 0
+      hitboxOffset: {x: 3, y: -1}
+      hitboxSize: {x: 6, y: 6}
+      projectilePrefab: {fileID: 0}
+    showGizmo: 1
+  - id: atk2
+    hits:
+    - delivery: 0
+      red: 0
+      damageMultiplier: 1
+      knockback: 5
+      hitStun: 0
+      hitboxOffset: {x: 3, y: -1}
+      hitboxSize: {x: 6, y: 6}
+      projectilePrefab: {fileID: 0}
+    showGizmo: 1
+  - id: atk3
+    hits:
+    - delivery: 0
+      red: 0
+      damageMultiplier: 1
+      knockback: 5
+      hitStun: 0
+      hitboxOffset: {x: 3, y: -1}
+      hitboxSize: {x: 6, y: 6}
+      projectilePrefab: {fileID: 0}
+    showGizmo: 1
+  - id: spatk
+    hits:
+    - delivery: 0
+      red: 1
+      damageMultiplier: 2.5
+      knockback: 8
+      hitStun: 1.2
+      hitboxOffset: {x: 0, y: -1}
+      hitboxSize: {x: 9, y: 6}
+      projectilePrefab: {fileID: 0}
+    showGizmo: 1
+  combos:
+  - name: "\u8DF3\u5288\u63A5\u5927\u62DB"
+    weight: 3
+    range: {x: 0, y: 30}
+    hpPercent: {x: 0, y: 1}
+    noRepeat: 1
+    cooldownAfter: 0
+    stepGap: 0
+    steps:
+    - attackId: atk2
+      preMove:
+        rid: -2
+      driver:
+        rid: 2219729727954093007
+      animSpeed: 0
+      gap: -1
+    - attackId: spatk
+      preMove:
+        rid: -2
+      driver:
+        rid: -2
+      animSpeed: 0
+      gap: -1
+  - name: "\u6325\u98DE\u63A5\u5927\u62DB"
+    weight: 3
+    range: {x: 0, y: 4}
+    hpPercent: {x: 0, y: 1}
+    noRepeat: 1
+    cooldownAfter: 0
+    stepGap: 0
+    steps:
+    - attackId: atk3
+      preMove:
+        rid: -2
+      driver:
+        rid: 2219729727954092501
+      animSpeed: 1
+      gap: -1
+    - attackId: spatk
+      preMove:
+        rid: -2
+      driver:
+        rid: -2
+      animSpeed: 0
+      gap: -1
+  - name: "\u95EA\u8EAB\u65A9"
+    weight: 3
+    range: {x: 0, y: 30}
+    hpPercent: {x: 0, y: 1}
+    noRepeat: 1
+    cooldownAfter: 0
+    stepGap: 0
+    steps:
+    - attackId: atk1
+      preMove:
+        rid: 2219729727954092899
+      driver:
+        rid: -2
+      animSpeed: 0
+      gap: -1
+    - attackId: atk1
+      preMove:
+        rid: 2219729727954092900
+      driver:
+        rid: -2
+      animSpeed: 0
+      gap: -1
+    - attackId: atk1
+      preMove:
+        rid: 2219729727954092901
+      driver:
+        rid: -2
+      animSpeed: 0
+      gap: -1
+  - name: "\u4E09\u6BB5\u5168\u8FDE"
+    weight: 3
+    range: {x: 0, y: 4}
+    hpPercent: {x: 0, y: 1}
+    noRepeat: 1
+    cooldownAfter: 0
+    stepGap: 0
+    steps:
+    - attackId: atk1
+      preMove:
+        rid: -2
+      driver:
+        rid: -2
+      animSpeed: 0
+      gap: -1
+    - attackId: atk2
+      preMove:
+        rid: -2
+      driver:
+        rid: -2
+      animSpeed: 0
+      gap: -1
+    - attackId: spatk
+      preMove:
+        rid: -2
+      driver:
+        rid: -2
+      animSpeed: 0
+      gap: -1
+  - name: "\u77AC\u79FB\u5927\u62DB"
+    weight: 3
+    range: {x: 0, y: 30}
+    hpPercent: {x: 0, y: 1}
+    noRepeat: 1
+    cooldownAfter: 0
+    stepGap: 0
+    steps:
+    - attackId: atk1
+      preMove:
+        rid: 2219729727954092902
+      driver:
+        rid: -2
+      animSpeed: 0
+      gap: -1
+    - attackId: spatk
+      preMove:
+        rid: 2219729727954092903
+      driver:
+        rid: -2
+      animSpeed: 0
+      gap: -1
+  - name: "\u4E8C\u9636\u6BB5\u5F00\u573A"
+    weight: 0
+    range: {x: 0, y: 30}
+    hpPercent: {x: 0, y: 1}
+    noRepeat: 0
+    cooldownAfter: 0
+    stepGap: 0
+    steps:
+    - attackId: atk3
+      preMove:
+        rid: 2219729727954092904
+      driver:
+        rid: 2219729727954092502
+      animSpeed: 1
+      gap: -1
+    - attackId: spatk
+      preMove:
+        rid: -2
+      driver:
+        rid: -2
+      animSpeed: 0
+      gap: -1
+  firePointOffset: {x: 0.7, y: 0.2}
+  aimHeightOffset: 0
   moveSpeed: 2.2
   phase2SpeedBonus: 1.2
   phase2HPThreshold: 0.5
-  phase2AttackMultiplier: 1.5
+  phase2AttackMultiplier: 1.2
   phase2FreezeBeat: 0.6
   phase2RoarHold: 3
   phase2RageTint: {r: 1, g: 0.42, b: 0.4, a: 1}
@@ -336,123 +437,103 @@ MonoBehaviour:
   phase2RoarKnockback: 20
   phase2RoarKnockTime: 0.55
   phase2RoarHitstop: 0.12
-  staggerDuration: 0.6
-  comboPatterns:
-  - patternName: "\u5355\u6BB5\u666E\u653B"
-    steps:
-    - attack: 0
-      preMove: 0
-    weight: 0
-    phase2Only: 0
-  - patternName: "\u5927\u62DB\u72EC\u7ACB"
-    steps:
-    - attack: 2
-      preMove: 0
-    weight: 0
-    phase2Only: 0
-  - patternName: "\u4E8C\u6BB5\u8DF3\u5288"
-    steps:
-    - attack: 3
-      preMove: 0
-    weight: 0
-    phase2Only: 0
-  - patternName: "\u8DF3\u5288\u63A5\u5927\u62DB"
-    steps:
-    - attack: 3
-      preMove: 0
-    - attack: 2
-      preMove: 0
-    weight: 3
-    phase2Only: 0
-  - patternName: "\u6325\u98DE\u63A5\u5927\u62DB"
-    steps:
-    - attack: 4
-      preMove: 0
-    - attack: 2
-      preMove: 0
-    weight: 4
-    phase2Only: 0
-  - patternName: "\u95EA\u8EAB\u65A9"
-    steps:
-    - attack: 0
-      preMove: 1
-    - attack: 0
-      preMove: 2
-    - attack: 0
-      preMove: 2
-    weight: 3
-    phase2Only: 0
-  - patternName: "\u4E09\u6BB5\u5168\u8FDE"
-    steps:
-    - attack: 0
-      preMove: 0
-    - attack: 1
-      preMove: 0
-    - attack: 2
-      preMove: 0
-    weight: 3
-    phase2Only: 0
-  - patternName: "\u77AC\u79FB\u5927\u62DB"
-    steps:
-    - attack: 0
-      preMove: 3
-    - attack: 2
-      preMove: 1
-    weight: 3
-    phase2Only: 0
-  - patternName: "\u4E8C\u9636\u6BB5\u5F00\u573A"
-    steps:
-    - attack: 4
-      preMove: 3
-    - attack: 2
-      preMove: 0
-    weight: 0
-    phase2Only: 0
-  teleportDuration: 0.35
-  teleportOffset: 4
-  landingRecovery: 0.12
-  teleportWallLayer:
-    serializedVersion: 2
-    m_Bits: 0
-  teleportClearance: 0.6
-  jumpHeight: 3
-  jumpAirborneTime: 0.75
-  jumpSlashStandoff: 2
-  atk3RiseHeight: 4
-  atk3LaunchTime: 0.4
-  atk3BossJumpDelay: 0.25
-  atk3SlamTime: 0.25
-  atk3AnimSpeed: 1
-  atk3HoldDistance: 3
-  atk3SlamMultiplier: 2
-  hitboxes:
-  - offset: {x: 3, y: -1}
-    size: {x: 6, y: 6}
-    gizmoColor: {r: 1, g: 0.3, b: 0, a: 0.4}
-    showGizmo: 0
-    key: 0
-  - offset: {x: 3, y: -1}
-    size: {x: 6, y: 6}
-    gizmoColor: {r: 1, g: 0.6, b: 0, a: 0.4}
-    showGizmo: 0
-    key: 1
-  - offset: {x: 3, y: -1}
-    size: {x: 6, y: 6}
-    gizmoColor: {r: 0.227451, g: 0.47058827, b: 0.73333335, a: 0.4}
-    showGizmo: 0
-    key: 3
-  - offset: {x: 0, y: -1}
-    size: {x: 9, y: 6}
-    gizmoColor: {r: 0.8, g: 0.2, b: 0.8, a: 0.4}
-    showGizmo: 0
-    key: 2
-  showAttackIndicator: 1
-  indicatorRenderer: {fileID: 0}
-  indicatorSize: {x: 2, y: 1.5}
-  indicatorOffset: {x: 2, y: 0}
-  indicatorWarningColor: {r: 1, g: 0.2, b: 0.2, a: 0.35}
-  indicatorImpactColor: {r: 1, g: 0.7, b: 0.2, a: 0.85}
+  staggerDuration: 2
   executeStunDuration: 1
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 2219729727954092501
+      type: {class: LaunchDriver, ns: , asm: Assembly-CSharp}
+      data:
+        riseHeight: 4
+        launchTime: 0.4
+        bossJumpDelay: 0.25
+        slamTime: 0.25
+        slamMult: 2
+        holdDistance: 3
+    - rid: 2219729727954092502
+      type: {class: LaunchDriver, ns: , asm: Assembly-CSharp}
+      data:
+        riseHeight: 4
+        launchTime: 0.4
+        bossJumpDelay: 0.25
+        slamTime: 0.25
+        slamMult: 2
+        holdDistance: 3
+    - rid: 2219729727954092899
+      type: {class: TeleportMover, ns: , asm: Assembly-CSharp}
+      data:
+        side: 0
+        offset: 4
+        duration: 0.35
+        clearance: 0.6
+        landing: 0.12
+        wallLayer:
+          serializedVersion: 2
+          m_Bits: 0
+    - rid: 2219729727954092900
+      type: {class: TeleportMover, ns: , asm: Assembly-CSharp}
+      data:
+        side: 2
+        offset: 4
+        duration: 0.35
+        clearance: 0.6
+        landing: 0.12
+        wallLayer:
+          serializedVersion: 2
+          m_Bits: 0
+    - rid: 2219729727954092901
+      type: {class: TeleportMover, ns: , asm: Assembly-CSharp}
+      data:
+        side: 2
+        offset: 4
+        duration: 0.35
+        clearance: 0.6
+        landing: 0.12
+        wallLayer:
+          serializedVersion: 2
+          m_Bits: 0
+    - rid: 2219729727954092902
+      type: {class: TeleportMover, ns: , asm: Assembly-CSharp}
+      data:
+        side: 1
+        offset: 4
+        duration: 0.35
+        clearance: 0.6
+        landing: 0.12
+        wallLayer:
+          serializedVersion: 2
+          m_Bits: 0
+    - rid: 2219729727954092903
+      type: {class: TeleportMover, ns: , asm: Assembly-CSharp}
+      data:
+        side: 0
+        offset: 4
+        duration: 0.35
+        clearance: 0.6
+        landing: 0.12
+        wallLayer:
+          serializedVersion: 2
+          m_Bits: 0
+    - rid: 2219729727954092904
+      type: {class: TeleportMover, ns: , asm: Assembly-CSharp}
+      data:
+        side: 1
+        offset: 4
+        duration: 0.35
+        clearance: 0.6
+        landing: 0.12
+        wallLayer:
+          serializedVersion: 2
+          m_Bits: 0
+    - rid: 2219729727954093007
+      type: {class: JumpDriver, ns: , asm: Assembly-CSharp}
+      data:
+        height: 3
+        time: 0.75
+        standoff: 2
 --- !u!114 &6123051498341902235
 MonoBehaviour:
   m_ObjectHideFlags: 0

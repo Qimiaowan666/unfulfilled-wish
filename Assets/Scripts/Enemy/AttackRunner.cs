@@ -1,32 +1,21 @@
 using UnityEngine;
 
 // 统一攻击运行器:执行一招 / 一套连段。小怪与 boss 共用(EnemyBase 持有一个)。
-// 流程：(段前位移 Approach/Retreat/Teleport) → 出招(挥砍 or 驱动) → 段后停顿 → 推进连段 → 完。
-// 命中：普通挥砍走 Fire(i)(立即) 或 AnimHitOpen/Close 窗口(每帧判);驱动招把命中事件转给 driver。
-// 退出：动画事件 AnimationTrigger / AnimFinish 或超时。被打断调 Cancel()。
+// 流程:段前位移(step.preMove:逼近/后撤/瞬移/跳)→ 出招(挥砍 + step.driver 编排)→ 段后停顿 → 推进连段 → 完。
+// 命中:普通挥砍走 Fire(i)(立即) 或 AnimHitOpen/Close 窗口(每帧判);驱动招把命中事件转给 driver。
+// 退出:动画事件 AnimationTrigger / AnimFinish 或超时。被打断调 Cancel()。
 public class AttackRunner
 {
     readonly EnemyBase e;
     public AttackRunner(EnemyBase e) { this.e = e; }
 
-    enum Phase { Idle, Move, Teleport, Jump, Swing, Gap }
+    enum Phase { Idle, PreMove, Swing, Gap }
     Phase phase = Phase.Idle;
     float timer;
     bool  animEnded;
 
-    // 挥砍命中窗口(boss 风格:无 driver 时用 hits[windowIndex])
-    bool  inSwingWindow;
-    bool  hitThisWindow;
-    int   windowIndex;
-
-    AttackDriverBase driver;
-
-    // 瞬移子状态
-    float tpElapsed; bool tpLanded; Vector2 tpTarget; RigidbodyType2D tpBody;
-    // 跳跃子状态
-    float jElapsed; Vector2 jStart, jApex, jGround; RigidbodyType2D jBody;
-
-    const float MaxMoveTime = 0.8f;
+    AttackDriverBase driver;   // 出招时编排(前冲/挑飞,step.driver)
+    StepMover        mover;    // 出招前位移(逼近/后撤/瞬移/跳,step.preMove)
 
     public bool Active => phase != Phase.Idle;
 
@@ -36,39 +25,27 @@ public class AttackRunner
     void StartStep()
     {
         var step = e.CurrentStep;
-        if (step != null && IsTeleport(step.move)) { StartTeleport(step.move); return; }
-        if (step != null && step.move == StepMove.Jump) { StartJump(); return; }
-        if (step != null && (step.move == StepMove.Approach || step.move == StepMove.Retreat) && e.player != null)
-        {
-            phase = Phase.Move; timer = MaxMoveTime; e.PlayMove(); return;
-        }
+        mover = step != null ? step.preMove : null;   // 段前位移驱动(可插拔,留空=不动)
+        if (mover != null) { mover.Begin(e); phase = Phase.PreMove; return; }
         StartSwing();
     }
-
-    static bool IsTeleport(StepMove m) =>
-        m == StepMove.TeleportBehind || m == StepMove.TeleportFront || m == StepMove.TeleportOtherSide;
 
     void StartSwing()
     {
         var atk = e.CurrentAttack;
         e.Rb.linearVelocity = new Vector2(0f, e.Rb.linearVelocity.y);
-        animEnded = false; inSwingWindow = false; hitThisWindow = false; windowIndex = 0;
+        animEnded = false;
         e.ResetAttackSwings();
 
-        if (e.Anim != null) e.Anim.speed = (atk != null && atk.animSpeed > 0f) ? atk.animSpeed : 1f;
-        // boss:每招设自己的 animator bool(isAttacking/2/3/isSpecialAttacking),保持对应攻击态;小怪 animBool 空 → 跳过,走扁平 Anim.Play
-        if (atk != null && !string.IsNullOrEmpty(atk.animBool)) e.SetAnimBool(atk.animBool);
+        var step = e.CurrentStep;
+        // animSpeed / driver 全在 step 上(招只管打击数据)
+        if (e.Anim != null) e.Anim.speed = (step != null && step.animSpeed > 0f) ? step.animSpeed : 1f;
+        // 攻击统一点亮 isAttacking(摁住攻击态);出招由下面 PlayCurrentAttack 强播
+        e.SetAnimBool("isAttacking");
         e.PlayCurrentAttack();
 
-        // 预警
-        if (atk != null && atk.telegraph != AttackTelegraph.None)
-        {
-            e.GetComponent<DamageFeedback>()?.FlashWarning(atk.telegraphDuration);
-            if (atk.telegraph == AttackTelegraph.Indicator) e.ShowAttackIndicator(atk.telegraphDuration);
-        }
-
-        // 驱动(编排招):atk3 等招自带的 driver
-        driver = atk != null ? atk.driver : null;
+        // 出招时驱动(前冲/挑飞,step)
+        driver = step != null ? step.driver : null;
         if (driver != null) driver.Begin(e, atk);
 
         // 超时兜底:动画时长(+余量)或固定 1.5s(正常靠 AnimFinish/AnimationTrigger 退出)
@@ -81,139 +58,24 @@ public class AttackRunner
     {
         switch (phase)
         {
-            case Phase.Move:     TickMove();     break;
-            case Phase.Teleport: TickTeleport(); break;
-            case Phase.Jump:     TickJump();     break;
-            case Phase.Swing:    TickSwing();    break;
-            case Phase.Gap:      TickGap();      break;
+            case Phase.PreMove: TickPreMove(); break;
+            case Phase.Swing:   TickSwing();   break;
+            case Phase.Gap:     TickGap();     break;
         }
     }
 
-    // ── 段前逼近 / 后撤 ──
-    void TickMove()
+    // ── 段前位移:交给 step.preMove(逼近/后撤/瞬移/跳),到位即出招 ──
+    void TickPreMove()
     {
-        timer -= Time.deltaTime;
-        if (e.player == null || e.CurrentStep == null) { FacePlayer(); StartSwing(); return; }
-        float dir  = e.DirToward(e.player.position);
-        float dist = e.GetHorizontalDistToPlayer();
-        bool  done = timer <= 0f; float vx = 0f;
-
-        if (e.CurrentStep.move == StepMove.Approach)
-        {
-            float reach = e.CurrentAttack != null ? e.CurrentAttack.maxRange : 1f;
-            if (dist <= reach || e.LedgeAhead(dir)) done = true; else vx = dir * e.AttackMoveSpeed;
-        }
-        else // Retreat
-        {
-            float back = -dir;
-            if (e.LedgeAhead(back)) done = true; else vx = back * e.AttackMoveSpeed;
-        }
-        e.Rb.linearVelocity = new Vector2(done ? 0f : vx, e.Rb.linearVelocity.y);
-        if (done) { FacePlayer(); StartSwing(); }
-    }
-
-    // ── 瞬移(由 Boss_RepositionState 移植)──
-    void StartTeleport(StepMove move)
-    {
-        tpTarget  = e.GetTeleportTarget(move);
-        tpElapsed = 0f; tpLanded = false;
-        AudioManager.Instance?.PlayBossTeleport();
-        e.Invincible = true;
-        tpBody = e.Rb.bodyType;
-        e.Rb.bodyType = RigidbodyType2D.Kinematic;
-        e.Rb.linearVelocity = Vector2.zero;
-        phase = Phase.Teleport;
-    }
-    void TickTeleport()
-    {
-        tpElapsed += Time.deltaTime;
-        float dur = e.teleportDuration;
-        if (!tpLanded)
-        {
-            float t = dur > 0f ? Mathf.Clamp01(tpElapsed / dur) : 1f;
-            if (t < 0.5f) e.SetSpriteAlpha(1f - t / 0.5f);
-            else { e.transform.position = tpTarget; e.SetSpriteAlpha((t - 0.5f) / 0.5f); }
-            if (t >= 1f)
-            {
-                tpLanded = true;
-                e.transform.position = tpTarget; e.SetSpriteVisible(true); e.SetSpriteAlpha(1f);
-                e.Invincible = false;
-                if (e.Rb.bodyType == RigidbodyType2D.Kinematic) e.Rb.bodyType = tpBody;
-                FacePlayer();
-            }
-            return;
-        }
-        if (tpElapsed >= dur + e.teleportLanding) { FacePlayer(); StartSwing(); }
-    }
-
-    // ── 跳劈接近(StepMove.Jump):抛物线跳到玩家身位,落地接出招;飞行中无敌。──
-    void StartJump()
-    {
-        jStart = e.transform.position;
-        float groundY = jStart.y;
-        float pX  = e.player != null ? e.player.position.x : jStart.x;
-        float dir = Mathf.Sign(pX - jStart.x); if (dir == 0f) dir = e.FacingDir;
-        float targetX = pX - dir * e.jumpMoveStandoff;   // 落点比玩家靠后一个身位
-        jGround = new Vector2(targetX, groundY);
-        jApex   = new Vector2(targetX, groundY + e.jumpMoveHeight);
-        jElapsed = 0f;
-        e.Invincible = true;
-        jBody = e.Rb.bodyType;
-        e.Rb.bodyType = RigidbodyType2D.Kinematic;
-        e.Rb.linearVelocity = Vector2.zero;
-        phase = Phase.Jump;
-    }
-    void TickJump()
-    {
-        jElapsed += Time.deltaTime;
-        float air  = e.jumpMoveTime;
-        float rise = air * 0.55f;   // 上升前 55%,下落后 45%
-        if (jElapsed < air)
-        {
-            if (jElapsed <= rise)
-            {
-                float a = rise > 0f ? jElapsed / rise : 1f;
-                a = 1f - (1f - a) * (1f - a);                 // ease-out 上升
-                e.transform.position = Vector2.Lerp(jStart, jApex, a);
-            }
-            else
-            {
-                float d = (jElapsed - rise) / (air - rise);
-                d *= d;                                       // ease-in 下落
-                e.transform.position = Vector2.Lerp(jApex, jGround, d);
-            }
-            return;
-        }
-        // 落地 → 解无敌 / 恢复物理 → 接出招
-        e.transform.position = jGround;
-        e.Invincible = false;
-        if (e.Rb.bodyType == RigidbodyType2D.Kinematic) e.Rb.bodyType = jBody;
-        FacePlayer();
-        StartSwing();
+        if (mover == null || mover.Tick(e)) { mover = null; FacePlayer(); StartSwing(); }
     }
 
     // ── 出招中 ──
     void TickSwing()
     {
         timer -= Time.deltaTime;
-        var atk = e.CurrentAttack;
-        if (driver != null) driver.Tick(e, atk);
-        else
-        {
-            if (inSwingWindow) SwingWindowHit();   // boss 风格窗口:每帧判一次
-            ApplyLunge(atk);
-        }
+        if (driver != null) driver.Tick(e, e.CurrentAttack);   // 前冲/挑飞;普通挥砍无驱动=不位移
         if (animEnded || timer < 0f) EndSwing();
-    }
-
-    void ApplyLunge(EnemyBase.EnemyAttack atk)
-    {
-        if (atk == null || atk.lungeDir == LungeDir.None || atk.lungeSpeed <= 0f) return;
-        float vx = 0f;
-        if (atk.lungeDir == LungeDir.Forward)
-            vx = e.GetHorizontalDistToPlayer() > 1.5f ? e.FacingDir * atk.lungeSpeed : 0f;
-        else { float d = -e.FacingDir; vx = e.LedgeAhead(d) ? 0f : d * atk.lungeSpeed; }
-        e.Rb.linearVelocity = new Vector2(vx, e.Rb.linearVelocity.y);
     }
 
     void EndSwing()
@@ -243,8 +105,7 @@ public class AttackRunner
 
     void Finish(EnemyBase.EnemyAttack atk, EnemyBase.EnemyCombo combo)
     {
-        float cd = (combo != null && combo.cooldownAfter > 0f) ? combo.cooldownAfter
-                 : (atk != null && atk.cooldownOverride > 0f ? atk.cooldownOverride : e.attackCooldown);
+        float cd = (combo != null && combo.cooldownAfter > 0f) ? combo.cooldownAfter : e.attackCooldown;
         e.StartAttackCooldown(cd);
         phase = Phase.Idle;
     }
@@ -252,36 +113,18 @@ public class AttackRunner
     // ── 动画事件(由 EnemyBase 转来)──
     public void OnAnimEnd() { if (phase == Phase.Swing) animEnded = true; }
 
-    public void OnHitOpen()
+    // Fire(i):有驱动(挑飞)→ 驱动按下标协调(0=横劈/1=砸);否则实打 hits[i]
+    public void OnFire(int i)
     {
-        if (phase != Phase.Swing) return;
-        if (driver != null) { driver.OnHitOpen(e, e.CurrentAttack); return; }
-        inSwingWindow = true; hitThisWindow = false; SwingWindowHit();
-    }
-    public void OnHitClose()
-    {
-        if (phase != Phase.Swing) return;
-        if (driver != null) { driver.OnHitClose(e, e.CurrentAttack); return; }
-        SwingWindowHit(); inSwingWindow = false; windowIndex++;
+        if (phase == Phase.Swing && driver != null) { driver.OnFire(e, e.CurrentAttack, i); return; }
+        e.DoFireHit(i);
     }
 
-    // boss 风格挥砍命中:用 hits[windowIndex]
-    void SwingWindowHit()
-    {
-        if (hitThisWindow) return;
-        var atk = e.CurrentAttack;
-        if (atk == null || atk.hits == null || windowIndex >= atk.hits.Length || atk.hits[windowIndex] == null) return;
-        var h = atk.hits[windowIndex];
-        float dmg = e.attack * e.DamageMultiplier * h.damageMultiplier;
-        if (e.PerformAttack(dmg, h.hitboxOffset, h.hitboxSize, h.red, h.knockback, h.hitStun)) hitThisWindow = true;
-    }
-
-    // 被打断(破韧 / 死亡 / 识破):恢复驱动/动画/连段
+    // 被打断(破韧 / 死亡 / 识破):恢复驱动/位移/动画/连段
     public void Cancel()
     {
-        // 在跳 / 瞬移飞行中被打断:恢复物理 + 无敌 + 可见,别卡住
-        if (phase == Phase.Jump)     { e.Invincible = false; if (e.Rb.bodyType == RigidbodyType2D.Kinematic) e.Rb.bodyType = jBody; }
-        if (phase == Phase.Teleport) { e.Invincible = false; if (e.Rb.bodyType == RigidbodyType2D.Kinematic) e.Rb.bodyType = tpBody; e.SetSpriteVisible(true); e.SetSpriteAlpha(1f); }
+        // 段前位移(跳/瞬移)中被打断:让 mover 恢复物理 + 无敌 + 可见,别卡住
+        if (mover  != null) { mover.Cancel(e); mover = null; }
         if (driver != null) { driver.End(e, e.CurrentAttack); driver = null; }
         if (e.Anim != null) e.Anim.speed = 1f;
         e.GetComponent<DamageFeedback>()?.ClearWarning();

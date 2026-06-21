@@ -27,8 +27,8 @@ public class Boss_BattleState : BossBaseState
             return;
         }
 
-        // 没抽中 / 冷却中：远了去追，近了站等
-        if (dist > boss.attackRange) stateMachine.ChangeState(boss.chaseState);
-        else                         stateMachine.ChangeState(boss.waitState);
+        // 没抽中 / 冷却中：超出最远连段距离就去追，在范围内就站等
+        if (dist > boss.MaxComboRange()) stateMachine.ChangeState(boss.chaseState);
+        else                             stateMachine.ChangeState(boss.waitState);
     }
 }

@@ -1,8 +1,6 @@
 using UnityEngine;
 
 public enum AttackDelivery { Melee, Ranged }              // 招的出伤方式：近战命中盒 / 远程发射箭矢
-public enum LungeDir       { None, Forward, Backward }    // 出招时移动：不动 / 朝玩家前冲 / 背对后撤
-public enum StepMove       { None, Approach, Retreat, TeleportBehind, TeleportFront, TeleportOtherSide, Jump }   // 连段段前位移(Jump=跳劈接近)
 
 // 地面型小怪共享基类：状态机(Idle/Move/Chase/Attack/Stunned/Dead) + 巡逻/探测/位移。
 // 攻击池/连段/命中/动画 已上移到 EnemyBase(小怪与 boss 共用)。
@@ -189,17 +187,4 @@ public abstract class GroundEnemy : EnemyBase
         // 不画 attackRange 红框：小怪不用它，真实射程看每招 Min/Max Range（橙色命中盒另由 OnDrawGizmos 画）
     }
 
-    protected override void OnDrawGizmos()
-    {
-        base.OnDrawGizmos();
-        if (attacks == null) return;
-        int dir = FacingDir;
-        Gizmos.color = new Color(1f, 0.3f, 0f, 0.9f);
-        foreach (var a in attacks)
-            if (a != null && a.showGizmo && a.hits != null)
-                foreach (var h in a.hits)
-                    if (h != null && h.delivery == AttackDelivery.Melee)
-                        Gizmos.DrawWireCube(transform.position + new Vector3(h.hitboxOffset.x * dir, h.hitboxOffset.y, 0f),
-                                            new Vector3(h.hitboxSize.x, h.hitboxSize.y, 0.1f));
-    }
 }

@@ -324,7 +324,7 @@ MonoBehaviour:
   counterPoiseDamage: 60
   executeDamageMultiplier: 20
   executeDuration: 0.8
-  executeRange: 1.5
+  executeRange: 2
 --- !u!1 &7077950619054027648
 GameObject:
   m_ObjectHideFlags: 0

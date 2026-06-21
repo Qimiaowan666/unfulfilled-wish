@@ -42,6 +42,7 @@ public class DemonSamuraiEnemy : GroundEnemy
         yield return new WaitForSeconds(Mathf.Max(shoutFreeze, ClipLength("shout")));   // 等 shout 整段播完
 
         transformed      = true;                             // 之后所有动作走火焰版
+        if (Anim != null) Anim.SetBool("isFlame", true);     // Animator 切火焰变体(idle_flame/run_flame/hurt_flame),不被 SetAnimBool 清
         attack          *= attackBuff;
         patrolMoveSpeed *= speedBuff;
         battleMoveSpeed *= speedBuff;
@@ -72,5 +73,6 @@ public class DemonSamuraiEnemy : GroundEnemy
         }
         transformed  = false;
         transforming = false;
+        if (Anim != null) Anim.SetBool("isFlame", false);    // 退回基础形态
     }
 }

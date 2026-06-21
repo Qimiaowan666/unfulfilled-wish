@@ -225,7 +225,6 @@ MonoBehaviour:
   maxHP: 300
   attack: 5
   goldDrop: 10
-  attackRange: 1.8
   playerLayer:
     serializedVersion: 2
     m_Bits: 0
@@ -236,9 +235,6 @@ MonoBehaviour:
   executePromptHeight: 1.2
   attacks:
   - id: attack
-    weight: 1
-    minRange: 0
-    maxRange: 2
     hits:
     - delivery: 0
       red: 0
@@ -248,12 +244,38 @@ MonoBehaviour:
       hitboxOffset: {x: 1, y: 0}
       hitboxSize: {x: 2, y: 2}
       projectilePrefab: {fileID: 0}
-    lungeDir: 0
-    lungeSpeed: 0
-    cooldownOverride: 0
     showGizmo: 1
+  combos:
+  - name: attack
+    weight: 1
+    range: {x: 0, y: 2}
+    hpPercent: {x: 0, y: 1}
+    noRepeat: 0
+    cooldownAfter: 0
+    stepGap: 0
+    steps:
+    - attackId: attack
+      preMove:
+        rid: -2
+      driver:
+        rid: -2
+      animSpeed: 0
+      move: 0
+      lungeDir: 0
+      lungeSpeed: 0
+      gap: -1
   firePointOffset: {x: 0.7, y: 0.2}
   aimHeightOffset: 0
+  teleportOffset: 0.8
+  teleportDuration: 0.35
+  teleportClearance: 0.6
+  teleportLanding: 0.12
+  teleportWallLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  jumpMoveHeight: 3
+  jumpMoveTime: 0.75
+  jumpMoveStandoff: 2
   patrolMoveSpeed: 2
   battleMoveSpeed: 3.5
   patrolDistance: 5
@@ -268,6 +290,11 @@ MonoBehaviour:
   attackVerticalTolerance: 1.2
   wallCheckDistance: 0.35
   ledgeCheckDistance: 0.9
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
 --- !u!114 &8692198690921598270
 MonoBehaviour:
   m_ObjectHideFlags: 0
