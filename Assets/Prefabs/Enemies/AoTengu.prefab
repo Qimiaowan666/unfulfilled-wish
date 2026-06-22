@@ -211,8 +211,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cc7d0d49fb566b547b4de2636dcaf48a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AoTenguEnemy
-  groundCheck: {fileID: 0}
-  groundCheckRadius: 0.1
   groundLayer:
     serializedVersion: 2
     m_Bits: 0
@@ -224,7 +222,7 @@ MonoBehaviour:
   combatEnabled: 1
   maxHP: 300
   attack: 5
-  goldDrop: 10
+  goldDrop: 15
   playerLayer:
     serializedVersion: 2
     m_Bits: 0
@@ -260,22 +258,9 @@ MonoBehaviour:
       driver:
         rid: -2
       animSpeed: 0
-      move: 0
-      lungeDir: 0
-      lungeSpeed: 0
       gap: -1
   firePointOffset: {x: 0.7, y: 0.2}
   aimHeightOffset: 0
-  teleportOffset: 0.8
-  teleportDuration: 0.35
-  teleportClearance: 0.6
-  teleportLanding: 0.12
-  teleportWallLayer:
-    serializedVersion: 2
-    m_Bits: 0
-  jumpMoveHeight: 3
-  jumpMoveTime: 0.75
-  jumpMoveStandoff: 2
   patrolMoveSpeed: 2
   battleMoveSpeed: 3.5
   patrolDistance: 5

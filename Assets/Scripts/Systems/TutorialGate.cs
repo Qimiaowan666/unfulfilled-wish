@@ -23,6 +23,11 @@ public class TutorialGate : MonoBehaviour
 
     public event System.Action Opened;   // 门打开那一刻触发(TutorialEnemy 订阅来消失等)
 
+    [Tooltip("存档标识(留空=用物体名);手动存档里开过的门,读档恢复成开")]
+    public string saveID;
+    public string SaveID => SaveIdUtility.WithScene(this, string.IsNullOrEmpty(saveID) ? gameObject.name : saveID);
+    public bool IsOpen => opened;
+
     bool           opened;
     SpriteRenderer backRenderer;   // 背景层主门图(门物体自身的 SpriteRenderer),升闸动画驱动它
 
@@ -39,6 +44,7 @@ public class TutorialGate : MonoBehaviour
     {
         if (opened) return;
         opened = true;
+        SaveSystem.Instance?.MarkDoorOpened(SaveID);                       // 手动存档持久化:读档恢复成开
         if (blockingCollider != null) blockingCollider.enabled = false;   // 立刻放行
         Opened?.Invoke();                                                 // 通知订阅者(如练习敌人消失)
         AudioManager.Instance?.PlayDoorOpen();
@@ -47,6 +53,32 @@ public class TutorialGate : MonoBehaviour
             StartCoroutine(PlayOpenFrames());   // 播升闸动画(停在全开帧)
         else
             HideDoor();                         // 没动画 / 组件未激活 → 直接隐藏门图
+    }
+
+    // 读档恢复:【双向】——开过的门置开(停在全开帧),没开的置关(回闭合帧 + 挡路)。
+    // 教程目前恒整场景重载(门每次重建为关),所以关方向暂用不上;此处双向是防御性自洽,
+    // 万一以后教程走原地读档 / 门被用到别处,不会出现"读旧档门关不回来"的泄漏。对齐 LockedDoor.LoadOpened。
+    public void LoadOpened(bool isOpen)
+    {
+        if (isOpen == opened) return;   // 状态没变,免重复
+        opened = isOpen;
+        StopAllCoroutines();                                              // 掐掉可能在播的升闸
+        if (blockingCollider != null) blockingCollider.enabled = !isOpen; // 开→放行,关→挡路
+
+        if (openFrames != null && openFrames.Length > 0)
+        {
+            int idx = isOpen ? openFrames.Length - 1 : 0;                 // 开→全开帧,关→闭合帧(第0帧)
+            if (backRenderer != null && openFrames[idx] != null) { backRenderer.sprite = openFrames[idx]; backRenderer.enabled = true; }
+            if (frontRenderer != null && frontFrames != null && idx < frontFrames.Length && frontFrames[idx] != null)
+            { frontRenderer.sprite = frontFrames[idx]; frontRenderer.enabled = true; }
+        }
+        else
+        {
+            if (backRenderer  != null) backRenderer.enabled  = !isOpen;   // 没动画:开→隐藏,关→显示
+            if (frontRenderer != null) frontRenderer.enabled = !isOpen;
+        }
+
+        if (isOpen) Opened?.Invoke();   // 只在开门时通知订阅者(练习敌人消失 / TutorialSequence 清击败目标)
     }
 
     void HideDoor()

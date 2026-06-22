@@ -1,30 +1,30 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 // 通关门：boss 击破演出结束后由 LevelManager 调 Appear() 出现。
-// 玩家靠近显示提示，按 F → 通关画面(VictoryUI)。默认隐藏。
-// 读档时按“场上有没有存活 boss”自动收起/出现：门只放在 boss 场景，
-//   · 读到未击破档(boss 复活) → Hide（修门残留、避免不打 boss 通关）
-//   · 读到已击破档(boss 已死)   → Appear（修死 boss 无门导致卡死）
-public class VictoryGate : MonoBehaviour
+// 继承 InteractTrigger（和传送门/火堆/拾取一套木框）：玩家进触发区 → 头顶木框 “F 通关”，按 F → 通关画面(VictoryUI)。默认隐藏。
+// 读档时按“场上有没有存活 boss”自动收起/出现：
+//   · 读到未击破档(boss 复活) → Hide（避免不打 boss 直接通关）
+//   · 读到已击破档(boss 已死)   → Appear（避免死 boss 无门卡死）
+public class VictoryGate : InteractTrigger
 {
     [Tooltip("门的视觉根（默认隐藏，Appear 时显示）")]
     public GameObject visual;
-    [Tooltip("交互提示根（靠近时显示，可空）")]
-    public GameObject prompt;
-    public float interactRange = 2.8f;
 
     bool active;
-    Transform player;
+
+    protected override void Reset() { base.Reset(); prompt = "通关"; }
 
     void Awake()
     {
         if (visual != null) visual.SetActive(false);
-        if (prompt != null) prompt.SetActive(false);
     }
 
-    void OnEnable()  { SaveSystem.AfterApply += OnSaveApplied; }
-    void OnDisable() { SaveSystem.AfterApply -= OnSaveApplied; }
+    void OnEnable() { SaveSystem.AfterApply += OnSaveApplied; }
+    protected override void OnDisable()
+    {
+        base.OnDisable();
+        SaveSystem.AfterApply -= OnSaveApplied;
+    }
 
     // 读档/重生 apply 后：有存活 boss → 收起门；没有(已击破) → 出现门
     void OnSaveApplied()
@@ -51,30 +51,19 @@ public class VictoryGate : MonoBehaviour
     {
         active = false;
         if (visual != null) visual.SetActive(false);
-        if (prompt != null) prompt.SetActive(false);
+        InteractPromptUI.Hide(this);
     }
 
-    void Update()
+    // 门没有精灵锚点，提示直接挂 transform 上方（同传送门）
+    protected override Vector3 PromptPoint() => transform.position + Vector3.up * promptHeightOffset;
+
+    // 只有门已出现 + 通关界面没开 才显示提示 / 可交互
+    protected override bool ShowPrompt => active && !VictoryUI.IsOpen && base.ShowPrompt;
+
+    protected override void Interact()
     {
-        if (!active) return;
-
-        if (player == null)
-        {
-            var p = GameObject.FindGameObjectWithTag(Tags.Player);
-            if (p == null) return;
-            player = p.transform;
-        }
-
-        bool inRange = Mathf.Abs(player.position.x - transform.position.x) <= interactRange &&
-                       Mathf.Abs(player.position.y - transform.position.y) <= interactRange + 1.5f;
-        if (prompt != null) prompt.SetActive(inRange);
-
-        if (inRange && !VictoryUI.IsOpen &&
-            Keyboard.current != null && Keyboard.current.fKey.wasPressedThisFrame)
-        {
-            active = false;
-            if (prompt != null) prompt.SetActive(false);
-            VictoryUI.Instance?.Show();
-        }
+        active = false;
+        InteractPromptUI.Hide(this);
+        VictoryUI.Instance?.Show();
     }
 }

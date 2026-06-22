@@ -6,7 +6,6 @@ public class LevelKeyManager : MonoBehaviour
     public static LevelKeyManager Instance { get; private set; }
 
     public int requiredKeys = 2;
-    public bool showHud = true;
 
     public int CollectedKeys { get; private set; }
     public event Action<int, int> OnKeysChanged;
@@ -45,18 +44,4 @@ public class LevelKeyManager : MonoBehaviour
         OnKeysChanged?.Invoke(CollectedKeys, requiredKeys);
     }
 
-    void OnGUI()
-    {
-        if (!showHud) return;
-        if (CharacterPanelUI.IsOpen || Time.timeScale <= 0f) return;
-
-        var style = new GUIStyle(GUI.skin.label)
-        {
-            fontSize = 22,
-            fontStyle = FontStyle.Bold,
-            alignment = TextAnchor.UpperLeft
-        };
-        style.normal.textColor = new Color(1f, 0.86f, 0.18f, 1f);
-        GUI.Label(new Rect(24f, 88f, 240f, 40f), $"Keys {CollectedKeys}/{requiredKeys}", style);
-    }
 }

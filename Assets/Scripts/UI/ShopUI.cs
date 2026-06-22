@@ -259,7 +259,10 @@ public class ShopUI : MonoBehaviour
     void ResumeGameTime()
     {
         if (!pausedByShop) return;
-        Time.timeScale = GameManager.Instance != null && GameManager.Instance.IsPaused ? 0f : previousTimeScale;
+        // 复原值钳到 >0,防止在别处已把 timeScale 置 0 时开店、关店又还原回 0 锁死游戏。
+        Time.timeScale = GameManager.Instance != null && GameManager.Instance.IsPaused
+            ? 0f
+            : (previousTimeScale > 0f ? previousTimeScale : 1f);
         pausedByShop = false;
     }
 }

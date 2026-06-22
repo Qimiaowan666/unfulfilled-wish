@@ -19,7 +19,7 @@ public class ChestInteract : InteractTrigger
 
     [Tooltip("存档唯一 ID(留空 = 用物体名);命名 Chest_<场景>_<编号>")]
     public string saveID;
-    public string SaveID => string.IsNullOrWhiteSpace(saveID) ? gameObject.name : saveID;
+    public string SaveID => SaveIdUtility.WithScene(this, string.IsNullOrWhiteSpace(saveID) ? gameObject.name : saveID);
 
     bool opened;
     SpriteRenderer sr;
@@ -81,6 +81,7 @@ public class ChestInteract : InteractTrigger
     // 读档恢复:已开 → 显示空箱(没空箱图则用全开末帧);未开 → 关图。由 SaveSystem.ApplyDoorStates 调
     public void LoadOpened(bool isOpened)
     {
+        StopAllCoroutines();   // 掐掉可能在播的开箱协程,避免读档后续播覆盖 sprite + 重复弹奖励(对齐 LockedDoor)
         opened = isOpened;
         if (sr == null) sr = GetComponentInChildren<SpriteRenderer>();
         SetSprite(isOpened ? RestSprite : closedSprite);

@@ -91,6 +91,12 @@ public class LevelManager : MonoBehaviour
             return;
         }
 
+        // 最终 boss 已击破 → 存一次完整自动档:把"boss 已死 + 背包/装备/金币/当前状态"原子写进 save_auto,
+        // 让死亡/继续都拿到自洽快照(杜绝"boss 死了但掉落没了"的 desync),并让通关前的进度持久。
+        // (有 nextSceneOnDefeat 的 boss 上面已 return,不在这存——那种要等切到下一场景后再存,
+        //  否则继续会落回已清空、无法再触发切场景的 boss 场景。)
+        SaveSystem.Instance?.AutoSaveAtPlayer();
+
         // 最终 boss → 九日式击破演出 → 出现通关门(玩家走近按 F 才通关)
         if (BossFinishUI.Instance != null && currentBoss != null)
             BossFinishUI.Instance.Play(currentBoss, ShowEnding);

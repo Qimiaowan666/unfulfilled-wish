@@ -93,7 +93,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5c5020c450e520a43b3ea376c5a2269e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CheckpointTrigger
-  prompt: "\u6309 F \u5B58\u6863\u5E76\u6062\u590D"
+  prompt: "\u5B58\u6863\u5E76\u6062\u590D"
   promptHeightOffset: 2
   checkpointID: 
   displayName: 

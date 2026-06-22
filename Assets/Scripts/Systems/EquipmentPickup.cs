@@ -24,4 +24,13 @@ public class EquipmentPickup : InteractTrigger
         PickedUp?.Invoke();
         gameObject.SetActive(false);
     }
+
+    // 读档后由 SaveSystem 调(含 inactive):已拥有这件装备=已捡(隐藏),没有=未捡(重新显示在地上)。
+    // 双向 → 读"捡之前的档"地上装备会重新出现,不会凭空消失(对齐 ItemPickup.SyncToInventory)。
+    public void SyncToEquipment()
+    {
+        bool owned = equipment != null && EquipmentSystem.Instance != null && EquipmentSystem.Instance.HasEquipment(equipment);
+        taken = owned;
+        gameObject.SetActive(!owned);
+    }
 }

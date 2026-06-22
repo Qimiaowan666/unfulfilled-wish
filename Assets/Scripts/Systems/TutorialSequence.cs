@@ -49,6 +49,7 @@ public class TutorialSequence : MonoBehaviour
     void OnTriggerEnter2D(Collider2D other)
     {
         if (!other.CompareTag(Tags.Player)) return;
+        if (gate != null && gate.IsOpen) { finished = true; return; }   // 门已开(手动档读回)→ 这站已完成,别再提示
         if (IsInfoOnly) { TutorialPromptUI.Show(steps[0].title, steps[0].body); return; }   // 纯 info:软提示
         if (finished) return;
         if (running) { ReshowCurrent(); return; }   // 离开又回来 → 恢复当前步提示(被别的站/出区域清掉后)
@@ -133,8 +134,13 @@ public class TutorialSequence : MonoBehaviour
     bool IsSatisfied(int i)
     {
         if (steps == null || i < 0 || i >= steps.Length) return true;
-        if (steps[i].completeOn == Kind.EquipWeapon)
-            return EquipmentSystem.Instance != null && steps[i].equipTarget != null && EquipmentSystem.Instance.weapon == steps[i].equipTarget;
+        var s = steps[i];
+        if (s.completeOn == Kind.EquipWeapon)
+            return EquipmentSystem.Instance != null && s.equipTarget != null && EquipmentSystem.Instance.weapon == s.equipTarget;
+        // 捡取:已拥有这件装备(读档后地上 pickup 已被隐藏)→ 视为已捡,跳过 → 不会卡在"捡不到的捡取步"
+        if (s.completeOn == Kind.Pickup)
+            return s.pickup != null && s.pickup.equipment != null
+                && EquipmentSystem.Instance != null && EquipmentSystem.Instance.HasEquipment(s.pickup.equipment);
         return false;   // 其它类靠事件推进
     }
 

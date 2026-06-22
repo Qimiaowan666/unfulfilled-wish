@@ -10,6 +10,7 @@ public class Player_DashStrikeState : PlayerBaseState
     SpriteRenderer cachedPlayerSr;
     int afterimagesSpawned;
     GameObject dashVfx;   // 能量收拢 VFX 句柄（每帧驱动位置随冲刺前进，Exit 回收）
+    static readonly RaycastHit2D[] s_wallHits = new RaycastHit2D[8];   // 撞墙检测复用缓冲，避免每次冲刺分配
 
     // 能量 VFX 的目标位置：玩家前方一点、与月牙同高
     Vector3 DashVfxPos() => player.transform.position + new Vector3(player.FacingDir * 1.8f, 0.3f, 0f);
@@ -36,10 +37,19 @@ public class Player_DashStrikeState : PlayerBaseState
         {
             Vector2 boxSize = col.bounds.size * 0.9f;   // 略缩，避免边缘擦碰误判
             Vector2 dir     = new Vector2(player.FacingDir, 0f);
-            var wallHit = Physics2D.BoxCast(startPos, boxSize, 0f, dir, skill.Distance, player.groundLayer);
-            if (wallHit.collider != null)
+            // 撞墙检测只认实心墙：用 ContactFilter2D.useTriggers=false 按调用作用域排除触发体，
+            // 否则会撞到"已开门"残留的交互触发碰撞体（isTrigger 且在 Ground 层，开门只关了实心 blockingCollider）→ 冲刺卡门口。
+            // 比临时改全局 Physics2D.queriesHitTriggers 干净：不污染全局状态、过滤随调用走。
+            var filter = new ContactFilter2D();
+            filter.useTriggers = false;
+            filter.SetLayerMask(player.groundLayer);
+            int n = Physics2D.BoxCast(startPos, boxSize, 0f, dir, filter, s_wallHits, skill.Distance);
+            float nearest = float.MaxValue;
+            for (int i = 0; i < n; i++)
+                if (s_wallHits[i].distance < nearest) nearest = s_wallHits[i].distance;   // 取最近实心墙(不依赖缓冲是否按距离排序)
+            if (nearest < float.MaxValue)
             {
-                float stopDist = Mathf.Max(0f, wallHit.distance - 0.05f);
+                float stopDist = Mathf.Max(0f, nearest - 0.05f);
                 endPos = startPos + dir * stopDist;
             }
         }

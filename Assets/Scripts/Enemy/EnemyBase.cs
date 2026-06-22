@@ -629,10 +629,6 @@ public class EnemyBase : Entity
 #endif
     }
 
-    // boss 不用感知(开战后靠 tag 锁定玩家、永不脱战)，只画攻击距离；GroundEnemy 覆盖为横向探测框
-    protected virtual void DrawDetectionGizmo()
-    {
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, MaxComboRange());   // 最远连段距离(出手/追击边界)
-    }
+    // 默认不画探测 gizmo(boss 那个 MaxComboRange 红圈太大、没必要显示);GroundEnemy 覆盖为横向探测框
+    protected virtual void DrawDetectionGizmo() { }
 }

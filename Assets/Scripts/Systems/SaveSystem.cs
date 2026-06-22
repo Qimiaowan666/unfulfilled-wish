@@ -115,6 +115,8 @@ public class SaveSystem : MonoBehaviour
         StartCoroutine(ApplyAfterFrame());
     }
 
+    bool newGamePending;   // 新游戏:进第一个游戏场景后自动存一次档(让"继续"立刻可用、退出不丢新局)
+
     IEnumerator ApplyAfterFrame()
     {
         yield return null;   // 等玩家/敌人 Awake 完再 apply，确保 FindAnyObjectByType 能拿到玩家
@@ -122,11 +124,27 @@ public class SaveSystem : MonoBehaviour
             ApplyOnSceneLoaded();
         nextLoadIsRespawn = false;   // 兜底清标志，避免“没档可读”时残留导致下次读档落点出错
         globalStateLoaded = true;    // 本场景玩家状态已确立(全新/读档)；之后过门不再用存档覆盖常驻玩家，只有继续/重生(RequestFullReload/PrepareRespawn)才会
+
+        if (newGamePending)          // 新游戏首存:落点=出生点,让档立刻存在(继续可用、退出不丢)
+        {
+            newGamePending = false;
+            AutoSaveAtPlayer();
+        }
     }
 
     public void Save(PlayerStats stats, Vector3 respawnPosition, CheckpointManager checkpoints)
     {
         WriteSlot(AutoSlot, BuildSaveData(stats, respawnPosition, respawnPosition, checkpoints));   // 检查点：落点=复活点=火堆
+    }
+
+    // 在玩家当前位置存一次自动档(落点 = 当前位置)。新游戏首存用。
+    public void AutoSaveAtPlayer()
+    {
+        var player = FindAnyObjectByType<PlayerController>();
+        var stats  = player != null ? player.Stats : FindAnyObjectByType<PlayerStats>();
+        if (stats == null) return;
+        Vector3 pos = player != null ? player.transform.position : stats.transform.position;
+        Save(stats, pos, FindAnyObjectByType<CheckpointManager>());
     }
 
     void WriteSlot(int slot, SaveData data)
@@ -205,7 +223,7 @@ public class SaveSystem : MonoBehaviour
     {
         if (data == null) return false;
         ApplyGlobalState(data);
-        ApplySceneState(data);
+        ApplySceneState(data, true);   // 显式读档 / 重生:真读档,从存档重建已开门集合
         globalStateLoaded = true;
         Debug.Log($"Loaded save from {SavePath}");
         return true;
@@ -218,12 +236,15 @@ public class SaveSystem : MonoBehaviour
         var data = Load();
         if (data == null) return false;
 
-        if (!globalStateLoaded)
+        // 真读档(继续 / 重生 / 手动读档后切场景)= globalStateLoaded 尚未确立;普通过门切场景则已确立。
+        // 同一判据:真读档才重建"已开门集合"(和全局态一起回到存档);普通过场景保留内存(内存连续,和背包一致)。
+        bool realLoad = !globalStateLoaded;
+        if (realLoad)
         {
             ApplyGlobalState(data);
             globalStateLoaded = true;
         }
-        ApplySceneState(data);
+        ApplySceneState(data, realLoad);
         return true;
     }
 
@@ -296,7 +317,7 @@ public class SaveSystem : MonoBehaviour
     }
 
     // 场景态：钥匙、敌人、门、商店、检查点（每个场景的对象，每次进场景都恢复）
-    void ApplySceneState(SaveData data)
+    void ApplySceneState(SaveData data, bool realLoad)
     {
         if (data == null) return;
 
@@ -311,7 +332,7 @@ public class SaveSystem : MonoBehaviour
 
         RefreshRespawnableEnemies();
         ApplyEnemyStates(data.enemyStates);
-        ApplyDoorStates(data.doorStates);
+        ApplyDoorStates(data.doorStates, realLoad);
         ApplyShopStates(data.shopStates);
 
         if (checkpoints != null)
@@ -347,6 +368,7 @@ public class SaveSystem : MonoBehaviour
         DeleteSave();
         globalStateLoaded = false;
         nextLoadIsRespawn = false;
+        newGamePending = true;       // 进第一个游戏场景后自动存一次,让新局立刻有档
         EquipmentSystem.Instance?.LoadEquipment(null, null, null, null, null);
         InventorySystem.Instance?.LoadItems(null);
         SkillSystem.Instance?.LoadSkills(null);
@@ -399,9 +421,13 @@ public class SaveSystem : MonoBehaviour
         RequestFullReload();
         WriteSlot(AutoSlot, data);   // 让重生点 = 这次读的档
         string active = SceneManager.GetActiveScene().name;
-        if (!string.IsNullOrEmpty(data.sceneName) && data.sceneName != active)
-            GameManager.Instance?.LoadScene(data.sceneName);   // 切场景，加载后自动 apply auto 档（含 BGM）
-        else
+        string target = string.IsNullOrEmpty(data.sceneName) ? active : data.sceneName;
+        // 跨场景，或在教程里读档：都走整场景重载。
+        // 教程即便同场景也必须重载——门/练习靶/TutorialSequence 的内存态(opened/finished/idx)原地 apply 不会复位，
+        // 否则读"通关前的档"门仍开着、序列仍 finished → 状态泄漏 + 卡死。重载后由 ApplyOnSceneLoaded 干净恢复。
+        if (target != active || target == SceneNames.Tutorial)
+            GameManager.Instance?.LoadScene(target);    // 切/重载场景，加载后自动 apply auto 档（含 BGM）
+        else 
         {
             AudioManager.Instance?.RefreshSceneBGM();   // 先回到场景默认曲(区域曲)——同场景读档没有 sceneLoaded
             ApplySave(data);                            // 再 apply → AfterApply → LevelManager 视战斗状态切 boss 曲（最终定）
@@ -665,14 +691,24 @@ public class SaveSystem : MonoBehaviour
         return result;
     }
 
+    // 从 Resources/Data 全量加载的资产缓存(发布版可用;静态持有引用 → 资产常驻内存,不被 UnloadUnusedAssets 卸掉)
+    static readonly Dictionary<System.Type, ScriptableObject[]> _resourcePools = new Dictionary<System.Type, ScriptableObject[]>();
+
     static T ResolveAsset<T>(string id) where T : ScriptableObject
     {
         if (string.IsNullOrWhiteSpace(id)) return null;
 
-        foreach (var asset in Resources.FindObjectsOfTypeAll<T>())
+        // 主路径:从 Resources/Data 全量加载(含子文件夹),发布版也能用——
+        // 不像 FindObjectsOfTypeAll 只命中"当前已加载场景引用到"的资产,会漏掉跨场景拿的道具。
+        if (!_resourcePools.TryGetValue(typeof(T), out var pool))
+        {
+            pool = Resources.LoadAll<T>("Data");
+            _resourcePools[typeof(T)] = pool;
+        }
+        foreach (var asset in pool)
         {
             if (SaveIdUtility.MatchesAssetID(asset, id))
-                return asset;
+                return (T)asset;   // pool 是 ScriptableObject[],但元素来自 LoadAll<T>,必是 T
         }
 
 #if UNITY_EDITOR
@@ -724,32 +760,37 @@ public class SaveSystem : MonoBehaviour
         }
     }
 
-    void ApplyDoorStates(DoorSaveData[] doorStates)
+    // realLoad=true(继续 / 重生 / 手动读档):清空并从存档 doorStates 重建"已开集合"→ 门/箱/教程门回到存档状态。
+    // realLoad=false(普通过门切场景):【保留】内存里的 runtimeOpenedDoorIDs —— 和背包一样内存连续:
+    //   开过的门/箱/教程门过场景不丢、回来不重置(堵死宝箱重复刷);唯有死亡/读档(真读档)才按存档回滚。
+    void ApplyDoorStates(DoorSaveData[] doorStates, bool realLoad)
     {
-        runtimeOpenedDoorIDs.Clear();
-        if (doorStates == null) return;
-
-        var states = new Dictionary<string, DoorSaveData>();
-        foreach (var state in doorStates)
+        if (realLoad)
         {
-            if (state == null || string.IsNullOrWhiteSpace(state.id)) continue;
-            states[state.id] = state;
-            if (state.opened)
-                runtimeOpenedDoorIDs.Add(state.id);
+            runtimeOpenedDoorIDs.Clear();
+            if (doorStates != null)
+                foreach (var state in doorStates)
+                    if (state != null && state.opened && !string.IsNullOrWhiteSpace(state.id))
+                        runtimeOpenedDoorIDs.Add(state.id);
         }
 
-        var doors = FindObjectsByType<LockedDoor>(FindObjectsInactive.Include);
-        foreach (var door in doors)
-        {
-            if (door == null) continue;
-            if (states.TryGetValue(door.SaveID, out var state))
-                door.LoadOpened(state.opened);
-        }
+        // 三类门统一按"已开集合"恢复(之前 LockedDoor 走存档字典、箱/教程门走集合 → 不一致;
+        // 现统一读 runtimeOpenedDoorIDs,普通过场景才能整体内存连续)。LoadOpened 均为双向(开/关都处理)。
+        foreach (var door in FindObjectsByType<LockedDoor>(FindObjectsInactive.Include))
+            if (door != null) door.LoadOpened(runtimeOpenedDoorIDs.Contains(door.SaveID));
 
-        // 宝箱复用同一套"已开"持久化(开过的 id 在 runtimeOpenedDoorIDs 里)
-        var chests = FindObjectsByType<ChestInteract>(FindObjectsInactive.Include);
-        foreach (var chest in chests)
+        foreach (var chest in FindObjectsByType<ChestInteract>(FindObjectsInactive.Include))
             if (chest != null) chest.LoadOpened(runtimeOpenedDoorIDs.Contains(chest.SaveID));
+
+        // 教程门:此处在 ApplyEnemyStates 之后,门的 Opened 事件会让 TutorialSequence 清掉已击败练习怪,不被怪态恢复覆盖。
+        foreach (var g in FindObjectsByType<TutorialGate>(FindObjectsInactive.Include))
+            if (g != null) g.LoadOpened(runtimeOpenedDoorIDs.Contains(g.SaveID));
+
+        // 拾取物(装备 / 道具如钥匙):按背包【双向】同步(含 inactive)——本就内存连续,不依赖门集合,故无条件同步。
+        foreach (var p in FindObjectsByType<EquipmentPickup>(FindObjectsInactive.Include))
+            if (p != null) p.SyncToEquipment();
+        foreach (var p in FindObjectsByType<ItemPickup>(FindObjectsInactive.Include))
+            if (p != null) p.SyncToInventory();
     }
 
     void ApplyShopStates(ShopSaveData[] shopStates)

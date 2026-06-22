@@ -75,7 +75,9 @@ public class CharacterPanelUI : MonoBehaviour
             return;
         }
 
-        if (!isOpen && ShopUI.IsOpen) return;
+        // 商店 / boss 登场演出 / 对话期间禁止开面板:这些阶段 timeScale 已被置 0,
+        // 在其上开面板会捕获到 0,关面板时又把 0 还原回去 → 时间永久锁死、游戏卡住。
+        if (!isOpen && (ShopUI.IsOpen || BossIntroTrigger.Sequencing || DialogueUI.IsPlaying)) return;
         if (kb.cKey.wasPressedThisFrame) SetOpen(!isOpen);
         if (!isOpen) return;
         if (kb.digit1Key.wasPressedThisFrame) SetTab(0);
@@ -88,7 +90,7 @@ public class CharacterPanelUI : MonoBehaviour
 
     void SetOpen(bool value)
     {
-        if (value && ShopUI.IsOpen) return;
+        if (value && (ShopUI.IsOpen || BossIntroTrigger.Sequencing || DialogueUI.IsPlaying)) return;
         if (value) AudioManager.Instance?.PlayUIOpen(); else AudioManager.Instance?.PlayUIClick();   // 开=开启声 / 关=点击声
         isOpen = value; IsOpen = value;
         PlayerInputBuffer.ClearAll();
@@ -203,7 +205,10 @@ public class CharacterPanelUI : MonoBehaviour
     void ResumeTime()
     {
         if (!pausedByPanel) return;
-        Time.timeScale = GameManager.Instance != null && GameManager.Instance.IsPaused ? 0f : previousTimeScale;
+        // 暂停菜单仍开 → 保持冻结;否则复原。复原值钳到 >0,防止把(对话/演出期间捕获的)0 还原回去锁死游戏。
+        Time.timeScale = GameManager.Instance != null && GameManager.Instance.IsPaused
+            ? 0f
+            : (previousTimeScale > 0f ? previousTimeScale : 1f);
         pausedByPanel = false;
     }
 

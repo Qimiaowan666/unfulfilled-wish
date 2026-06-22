@@ -227,8 +227,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: edd61165903a1df48b3baecf81f059af, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ArcherEnemy
-  groundCheck: {fileID: 0}
-  groundCheckRadius: 0.1
   groundLayer:
     serializedVersion: 2
     m_Bits: 64
@@ -240,7 +238,7 @@ MonoBehaviour:
   combatEnabled: 1
   maxHP: 250
   attack: 8
-  goldDrop: 10
+  goldDrop: 25
   playerLayer:
     serializedVersion: 2
     m_Bits: 0
@@ -295,9 +293,6 @@ MonoBehaviour:
       driver:
         rid: -2
       animSpeed: 0
-      move: 0
-      lungeDir: 0
-      lungeSpeed: 0
       gap: -1
   - name: special_attack
     weight: 1
@@ -313,22 +308,9 @@ MonoBehaviour:
       driver:
         rid: -2
       animSpeed: 0
-      move: 0
-      lungeDir: 0
-      lungeSpeed: 0
       gap: -1
   firePointOffset: {x: 0.7, y: 0.2}
   aimHeightOffset: 0
-  teleportOffset: 0.8
-  teleportDuration: 0.35
-  teleportClearance: 0.6
-  teleportLanding: 0.12
-  teleportWallLayer:
-    serializedVersion: 2
-    m_Bits: 0
-  jumpMoveHeight: 3
-  jumpMoveTime: 0.75
-  jumpMoveStandoff: 2
   patrolMoveSpeed: 1.5
   battleMoveSpeed: 2.5
   patrolDistance: 4

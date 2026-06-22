@@ -20,20 +20,31 @@ public static class SaveIdUtility
         return GetAssetID(asset) == id || asset.name == id;
     }
 
+    // 给场景物体 ID 加「场景名:」前缀,避免不同场景里同名/同路径物体撞 ID(跨场景污染:
+    // A 场景开过的门/杀过的怪,进 B 场景时同 ID 物体被误判恢复)。资产 ID(GetAssetID)是全局的,不加前缀。
+    public static string WithScene(GameObject go, string baseId)
+    {
+        string scene = go != null ? go.scene.name : null;
+        return string.IsNullOrEmpty(scene) ? baseId : scene + ":" + baseId;
+    }
+
+    public static string WithScene(Component component, string baseId)
+        => WithScene(component != null ? component.gameObject : null, baseId);
+
     public static string GetSceneObjectID(Component component, string explicitID)
     {
-        if (!string.IsNullOrWhiteSpace(explicitID))
-            return explicitID;
-
-        return component != null ? GetHierarchyPath(component.transform) : string.Empty;
+        string baseId = !string.IsNullOrWhiteSpace(explicitID)
+            ? explicitID
+            : (component != null ? GetHierarchyPath(component.transform) : string.Empty);
+        return WithScene(component, baseId);
     }
 
     public static string GetSceneObjectID(GameObject gameObject, string explicitID)
     {
-        if (!string.IsNullOrWhiteSpace(explicitID))
-            return explicitID;
-
-        return gameObject != null ? GetHierarchyPath(gameObject.transform) : string.Empty;
+        string baseId = !string.IsNullOrWhiteSpace(explicitID)
+            ? explicitID
+            : (gameObject != null ? GetHierarchyPath(gameObject.transform) : string.Empty);
+        return WithScene(gameObject, baseId);
     }
 
     static string GetHierarchyPath(Transform transform)

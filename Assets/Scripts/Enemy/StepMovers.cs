@@ -14,10 +14,19 @@ public abstract class StepMover
 [System.Serializable]
 public class ApproachMover : StepMover
 {
-    public float reach   = 1.2f;   // 走到离玩家这么近就停(= 命中距离;别用连段的选取范围 range.y)
-    public float maxTime = 0.8f;   // 最长逼近时间,超时即停(防卡)
+    [Tooltip("走到离玩家这么近就停、开始挥砍(= 命中距离;太大→还没贴近就挥、打空,太小→贴脸才挥。配套那招的 hitboxOffset/Size)")]
+    public float reach   = 1.2f;
+    [Tooltip("逼近移动速度(米/秒);<=0 = 用这只怪的 battleMoveSpeed(战斗移速)")]
+    public float speed   = 0f;
+    [Tooltip("最长逼近时间(秒),走够了还没到也停下挥砍 → 防卡(玩家跑远/隔墙时不至于无限追)")]
+    public float maxTime = 0.8f;
     float timer;
-    public override void Begin(EnemyBase e) { timer = maxTime; e.PlayMove(); }
+    public override void Begin(EnemyBase e)
+    {
+        timer = maxTime;
+        // 已在 reach 内就不播 run(下一帧 Tick 直接转挥砍)→ 贴脸起手不闪走路
+        if (e.player == null || e.GetHorizontalDistToPlayer() > reach) { e.SetAnimBool("isMoving"); e.PlayMove(); }
+    }
     public override bool Tick(EnemyBase e)
     {
         timer -= Time.deltaTime;
@@ -25,7 +34,8 @@ public class ApproachMover : StepMover
         float dir  = e.DirToward(e.player.position);
         float dist = e.GetHorizontalDistToPlayer();
         if (timer <= 0f || dist <= reach || e.LedgeAhead(dir)) { e.Rb.linearVelocity = new Vector2(0f, e.Rb.linearVelocity.y); return true; }
-        e.Rb.linearVelocity = new Vector2(dir * e.AttackMoveSpeed, e.Rb.linearVelocity.y);
+        float spd = speed > 0f ? speed : e.AttackMoveSpeed;   // speed 留 0 = 用战斗移速
+        e.Rb.linearVelocity = new Vector2(dir * spd, e.Rb.linearVelocity.y);
         return false;
     }
 }
@@ -36,7 +46,7 @@ public class RetreatMover : StepMover
 {
     public float maxTime = 0.8f;
     float timer;
-    public override void Begin(EnemyBase e) { timer = maxTime; e.PlayMove(); }
+    public override void Begin(EnemyBase e) { timer = maxTime; e.SetAnimBool("isMoving"); e.PlayMove(); }
     public override bool Tick(EnemyBase e)
     {
         timer -= Time.deltaTime;

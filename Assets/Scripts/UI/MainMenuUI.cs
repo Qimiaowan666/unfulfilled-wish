@@ -39,6 +39,16 @@ public class MainMenuUI : MonoBehaviour
 
     public void NewGame()
     {
+        // 已有自动存档 → 先确认(避免手滑覆盖进度)；没有就直接开
+        bool hasSave = SaveSystem.Instance != null && SaveSystem.Instance.HasSave();
+        if (hasSave)
+            ConfirmDialog.Show(StartNewGame);   // 文字在场景 ConfirmDialog/Message 上写
+        else
+            StartNewGame();
+    }
+
+    void StartNewGame()
+    {
         SaveSystem.Instance?.ResetForNewGame();     // 清档 + 清空常驻装备/背包/技能，真正从头开始
         LoadScene(firstGameplayScene);
     }
