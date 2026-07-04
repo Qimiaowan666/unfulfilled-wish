@@ -1,0 +1,135 @@
+using System.Collections;
+using UnityEngine;
+
+// 弓箭手(远程小怪)：复用 GroundEnemy 状态机/攻击池，命中事件 Fire(i) 走远程 hit 发射箭矢。
+// 不做持续风筝，但玩家贴到 retreatDistance(1 米)内且攻击在冷却时会小幅后撤一步；另在生命首次跌破一半时，往后闪一次(dash 闪避带无敌)。
+public class ArcherEnemy : GroundEnemy
+{
+    // 出箭点/瞄准/普通箭都在 EnemyBase(firePointOffset/aimHeightOffset + delivery=Ranged 的招,小怪与 boss 共用)
+    [Header("尘土特效")]
+    public GameObject dustPrefab;               // 脚下尘土(SpriteOneShot 预制)，起跳/后撤步时生成
+    public float      dustYOffset = 0.3f;       // 尘土高度微调(碰撞体底部之上；气太低就调大)
+
+    [Header("大招悬空 (弦一郎式)")]
+    public float specialLeapVelocity  = 7f;     // 起跳上冲速度
+    public float specialRiseTime      = 0.22f;  // 上冲时长(× 速度 ≈ 悬空高度)，之后悬停到大招结束
+    public float specialLeapBackward  = 0f;     // 起跳横向后撤(背对玩家；>0 当心跳下平台)
+
+    [Header("半血后撤步 (一次性)")]
+    [Range(0f, 1f)] public float backstepHpThreshold = 0.5f;   // 生命跌破此比例触发
+    public float backstepSpeed      = 12f;                      // 后撤速度
+    public float backstepDuration   = 0.3f;                     // 后撤时长(× speed ≈ 距离)
+    public bool  backstepInvincible = true;                     // 后撤期间无敌(真·闪避)
+
+    bool dashedBack;   // 只闪一次
+    bool dashing;
+    bool  inSpecialAir;   // 大招悬空中(全程零重力)
+    float baseGravity;    // 缓存原始重力，结束后恢复
+
+    public override string MoveClip => "run";
+
+    protected override void Awake()
+    {
+        base.Awake();
+        if (Rb != null) baseGravity = Rb.gravityScale;
+    }
+
+    // 轻箭/红重箭都由基类 Fire(i) 走对应 hit(delivery=Ranged)自动发射，这里不再覆盖。
+
+    // scene 里画尘土生成点(黄色小圈)，方便对齐 dustYOffset（运行时尘土本身才可见）
+    protected override void OnDrawGizmos()
+    {
+        base.OnDrawGizmos();
+        var col = GetComponent<Collider2D>();
+        float footY = (col != null ? col.bounds.min.y : transform.position.y) + dustYOffset;
+        Vector3 p = new Vector3(transform.position.x, footY, 0f);
+        Gizmos.color = new Color(1f, 0.85f, 0.4f, 0.9f);
+        Gizmos.DrawWireSphere(p, 0.12f);
+        Gizmos.DrawLine(p + Vector3.left * 0.35f, p + Vector3.right * 0.35f);
+    }
+
+    // 脚下生成尘土(起跳/后撤步)
+    void SpawnFootDust()
+    {
+        if (dustPrefab == null) return;
+        var col = GetComponent<Collider2D>();
+        float footY = (col != null ? col.bounds.min.y : transform.position.y) + dustYOffset;
+        Instantiate(dustPrefab, new Vector3(transform.position.x, footY, 0f), Quaternion.identity);
+    }
+
+    // 射手大招起跳并悬空(special_attack 开头) — 升到位后零重力悬停，全程在空中放箭。由 EnemyAnimationEvents.SpecialLeap 转入。
+    public void DoSpecialLeap()
+    {
+        if (Rb == null) return;
+        SpawnFootDust();
+        inSpecialAir = true;
+        Rb.gravityScale = 0f;
+        StartCoroutine(RiseThenHover());
+    }
+
+    IEnumerator RiseThenHover()
+    {
+        Rb.linearVelocity = new Vector2(-FacingDir * specialLeapBackward, specialLeapVelocity);
+        yield return new WaitForSeconds(specialRiseTime);
+        if (inSpecialAir && Rb != null) Rb.linearVelocity = Vector2.zero;   // 升到位 → 悬停
+    }
+
+    // 生命首次跌破一半 → 触发一次后撤步
+    public override void TakeDamage(float damage, float poiseDamage)
+    {
+        base.TakeDamage(damage, poiseDamage);
+        if (!dashedBack && !dashing && CurrentHP > 0f && CurrentHP <= maxHP * backstepHpThreshold)
+            StartCoroutine(BackstepRoutine());
+    }
+
+    IEnumerator BackstepRoutine()
+    {
+        if (inSpecialAir) { inSpecialAir = false; if (Rb != null) Rb.gravityScale = baseGravity; }   // 悬空中被打断先恢复重力
+        dashing    = true;
+        dashedBack = true;
+        SpawnFootDust();
+        // 远离玩家的方向(背对玩家)；保持面向玩家不翻身，像后跳
+        int away = playerTransform != null ? (playerTransform.position.x > transform.position.x ? -1 : 1) : -FacingDir;
+        SetOnlyAnimBool("isDashing");   // 进 dash(纯 bool,Entry→dash(isDashing) / dash→Exit(!isDashing))
+        if (backstepInvincible) Invincible = true;
+
+        float t = 0f;
+        while (t < backstepDuration)
+        {
+            if (LedgeAhead(away)) break;   // 别闪下平台掉进岩浆
+            if (Rb != null) Rb.linearVelocity = new Vector2(away * backstepSpeed, Rb.linearVelocity.y);
+            t += Time.deltaTime;
+            yield return null;
+        }
+
+        if (Rb != null) Rb.linearVelocity = new Vector2(0f, Rb.linearVelocity.y);
+        Invincible = false;
+        dashing    = false;
+        if (Anim != null) Anim.SetBool("isDashing", false);   // 退出 dash,让下一态(chase/idle)正常接管
+        stateMachine.ChangeState(playerTransform != null ? (EnemyBaseState)chaseState : idleState);
+    }
+
+    protected override void Update()
+    {
+        if (dashing) return;   // 闪避位移由协程接管，不跑状态机
+        // 大招悬空结束(正常结束或被打断切走攻击态) → 恢复重力落地
+        if (inSpecialAir && stateMachine.currentState != attackState)
+        {
+            inSpecialAir = false;
+            if (Rb != null) Rb.gravityScale = baseGravity;
+        }
+        // 攻击中持续面向玩家：远程要追着玩家射，玩家绕到另一边也转身(否则朝反方向放箭)
+        if (playerTransform != null && stateMachine.currentState == attackState)
+            FaceToward(playerTransform.position);
+        base.Update();
+    }
+
+    // 复活/读档：重置后撤步 + 悬空状态
+    protected override void ResetForm()
+    {
+        dashedBack = false;
+        dashing    = false;
+        if (inSpecialAir && Rb != null) Rb.gravityScale = baseGravity;
+        inSpecialAir = false;
+    }
+}

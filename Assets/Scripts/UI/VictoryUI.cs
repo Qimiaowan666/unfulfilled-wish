@@ -42,7 +42,6 @@ public class VictoryUI : MonoBehaviour
     {
         if (panelRoot == null) return;
         AudioManager.Instance?.PlayVictory();   // 通关音（AudioSource 不受 timeScale 影响，下面置 0 也能响）
-        PlayerInputBuffer.ClearAll();
         Time.timeScale = 0f;
         panelRoot.SetActive(true);
         IsOpen = true;

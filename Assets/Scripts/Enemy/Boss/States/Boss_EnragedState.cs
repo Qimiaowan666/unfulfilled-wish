@@ -4,7 +4,7 @@ using UnityEngine;
 // 演出/定身期间原地不动；退出(切回 battleState)由 MinotaurBoss 的过渡协程驱动。
 public class Boss_EnragedState : BossBaseState
 {
-    public Boss_EnragedState(MinotaurBoss b, BossStateMachine sm) : base(b, sm, "isIdle") {}
+    public Boss_EnragedState(MinotaurBoss b, StateMachine sm) : base(b, sm, "isIdle") {}
 
     public override void Enter()
     {

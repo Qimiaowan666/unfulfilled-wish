@@ -97,7 +97,6 @@ public class PauseMenu : MonoBehaviour
         if (kb == null || !kb.escapeKey.wasPressedThisFrame)
             return;
 
-        PlayerInputBuffer.ClearAll();
 
         if (IsOpen)
         {
@@ -145,7 +144,7 @@ public class PauseMenu : MonoBehaviour
     {
         if (button == null) return;
         button.onClick.RemoveAllListeners();
-        button.onClick.AddListener(() => { AudioManager.Instance?.PlayUIClick(); PlayerInputBuffer.ClearAll(); action?.Invoke(); });
+        button.onClick.AddListener(() => { AudioManager.Instance?.PlayUIClick(); action?.Invoke(); });
     }
 
     // ─────────────────────────────────────────────────────
@@ -180,7 +179,6 @@ public class PauseMenu : MonoBehaviour
 
     public void Resume()
     {
-        PlayerInputBuffer.ClearAll();
         if (GameManager.Instance != null && GameManager.Instance.IsPaused)
             GameManager.Instance.TogglePause();
     }
@@ -437,14 +435,6 @@ public class PauseMenu : MonoBehaviour
         if (confirmPanel != null) confirmPanel.SetActive(true);
     }
 
-
-    void ShowMessage(string title, string body)
-    {
-        pendingConfirm = null;
-        if (confirmText != null) confirmText.text = $"<b>{title}</b>\n{body}";
-        if (confirmCancelButton != null) confirmCancelButton.gameObject.SetActive(false);
-        if (confirmPanel != null) confirmPanel.SetActive(true);
-    }
 
     void HideConfirm()
     {

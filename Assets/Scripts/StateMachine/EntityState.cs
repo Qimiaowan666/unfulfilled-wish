@@ -11,7 +11,6 @@ public abstract class EntityState
     protected Animator     anim;     // 子类构造时从各自 owner 赋值
     protected Rigidbody2D  rb;
     protected float        stateTimer;
-    protected bool         triggerCalled;
 
     protected EntityState(StateMachine stateMachine, string animBoolName)
     {
@@ -21,15 +20,12 @@ public abstract class EntityState
 
     public virtual void Enter()
     {
-        triggerCalled = false;
         SetAnimBool(true);
     }
 
     public virtual void Update() => stateTimer -= Time.deltaTime;
 
     public virtual void Exit() => SetAnimBool(false);
-
-    public void AnimationTrigger() => triggerCalled = true;
 
     // animBoolName 留空(如小怪非攻击态)→ 什么都不做,纯靠 Anim.Play
     void SetAnimBool(bool value)

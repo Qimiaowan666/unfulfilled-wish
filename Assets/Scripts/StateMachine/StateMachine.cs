@@ -1,5 +1,4 @@
-// 通用状态机:主角 / 小怪 / boss 共用这一份(对标参考项目)。持有公共基类 EntityState。
-// 三个命名子类(PlayerStateMachine/EnemyStateMachine/BossStateMachine)只是起个名,逻辑全在这。
+// 通用状态机:主角 / 小怪 / boss 直接共用这一份(无命名子类)。持有公共基类 EntityState。
 public class StateMachine
 {
     public EntityState currentState { get; private set; }

@@ -93,7 +93,6 @@ public class CharacterPanelUI : MonoBehaviour
         if (value && (ShopUI.IsOpen || BossIntroTrigger.Sequencing || DialogueUI.IsPlaying)) return;
         if (value) AudioManager.Instance?.PlayUIOpen(); else AudioManager.Instance?.PlayUIClick();   // 开=开启声 / 关=点击声
         isOpen = value; IsOpen = value;
-        PlayerInputBuffer.ClearAll();
         if (panelRoot != null) panelRoot.SetActive(isOpen);
 
         if (isOpen) { Resubscribe(); HideHud(); PauseTime(); Refresh(); }

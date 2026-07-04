@@ -96,7 +96,7 @@ AnimationClip:
     intParameter: 0
     messageOptions: 0
   - time: 0.5
-    functionName: AnimationTrigger
+    functionName: AnimFinish
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0

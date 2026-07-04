@@ -2,14 +2,14 @@ using UnityEngine;
 
 // 统一攻击运行器:执行一招 / 一套连段。小怪与 boss 共用(EnemyBase 持有一个)。
 // 流程:段前位移(step.preMove:逼近/后撤/瞬移/跳)→ 出招(挥砍 + step.driver 编排)→ 段后停顿 → 推进连段 → 完。
-// 命中:普通挥砍走 Fire(i)(立即) 或 AnimHitOpen/Close 窗口(每帧判);驱动招把命中事件转给 driver。
-// 退出:动画事件 AnimationTrigger / AnimFinish 或超时。被打断调 Cancel()。
+// 命中:普通挥砍走 Fire(i)(动画事件,立即判);驱动招(挑飞/前冲等)把 Fire(i) 转给 driver 协调。
+// 退出:动画事件 AnimFinish 或超时兜底。被打断调 Cancel()。
 public class AttackRunner
 {
     readonly EnemyBase e;
     public AttackRunner(EnemyBase e) { this.e = e; }
 
-    enum Phase { Idle, PreMove, Swing, Gap }
+    enum Phase { Idle, PreMove, Swing, Gap } //swing 出招中位移
     Phase phase = Phase.Idle;
     float timer;
     bool  animEnded;
@@ -41,7 +41,7 @@ public class AttackRunner
         // animSpeed / driver 全在 step 上(招只管打击数据)
         if (e.Anim != null) e.Anim.speed = (step != null && step.animSpeed > 0f) ? step.animSpeed : 1f;
         // 攻击统一点亮 isAttacking(摁住攻击态);出招由下面 PlayCurrentAttack 强播
-        e.SetAnimBool("isAttacking");
+        e.SetOnlyAnimBool("isAttacking");
         e.PlayCurrentAttack();
 
         // 出招时驱动(前冲/挑飞,step)
@@ -90,7 +90,9 @@ public class AttackRunner
         if (e.AdvanceCombo())   // 还有下一段
         {
             float gap = (step != null && step.gap >= 0f) ? step.gap : (combo != null ? combo.stepGap : 0f);
-            if (gap > 0f) { phase = Phase.Gap; timer = gap; e.PlayIdle(); return; }
+            // gap 里要停住 idle:必须点亮 isIdle(Entry/Exit 控制器靠 bool 撑住状态);
+            // 只 PlayIdle 不设 isIdle → idle 因 isIdle==false 立刻退出 → Entry 无 isAttacking 路由 → 回默认 idle 死循环第0帧(冻帧)。
+            if (gap > 0f) { phase = Phase.Gap; timer = gap; e.SetOnlyAnimBool("isIdle"); e.PlayIdle(); return; }
             FacePlayer(); StartStep(); return;
         }
         Finish(atk, combo);   // 连段打完 / 单招
@@ -105,7 +107,7 @@ public class AttackRunner
 
     void Finish(EnemyBase.EnemyAttack atk, EnemyBase.EnemyCombo combo)
     {
-        float cd = (combo != null && combo.cooldownAfter > 0f) ? combo.cooldownAfter : e.attackCooldown;
+        float cd = (combo != null && combo.cooldownAfter > 0f) ? combo.cooldownAfter : e.defaultAttackCooldown;
         e.StartAttackCooldown(cd);
         phase = Phase.Idle;
     }
@@ -132,5 +134,5 @@ public class AttackRunner
         phase = Phase.Idle;
     }
 
-    void FacePlayer() { if (e.player != null) e.SetFacing(e.DirToward(e.player.position)); }
+    void FacePlayer() { if (e.playerTransform != null) e.SetFacing(e.DirToward(e.playerTransform.position)); }
 }

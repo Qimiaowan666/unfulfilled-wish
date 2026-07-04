@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class Boss_DeadState : BossBaseState
 {
-    public Boss_DeadState(MinotaurBoss b, BossStateMachine sm) : base(b, sm, "isDead") {}
+    public Boss_DeadState(MinotaurBoss b, StateMachine sm) : base(b, sm, "isDead") {}
 
     public override void Enter()
     {

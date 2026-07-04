@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 5911315250799022115}
   - component: {fileID: 7554187700326714717}
   - component: {fileID: 1667738334882946402}
+  - component: {fileID: 3538641152422487859}
   m_Layer: 8
   m_Name: Archer
   m_TagString: Untagged
@@ -215,6 +216,7 @@ MonoBehaviour:
   flashDuration: 0.08
   flashMaterial: {fileID: 2100000, guid: 6e20bf32e09be244d89d5ec3700faba1, type: 2}
   knockbackDuration: 0.1
+  immuneToKnockback: 0
 --- !u!114 &1667738334882946402
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -245,7 +247,6 @@ MonoBehaviour:
   attackCooldown: 1.6
   specialHitStunDuration: 0.6
   specialHitKnockback: 8
-  specialAttackWarningDuration: 0.5
   executePromptHeight: 1.2
   attacks:
   - id: attack
@@ -339,6 +340,18 @@ MonoBehaviour:
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
+--- !u!114 &3538641152422487859
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4585860486613630296}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 70c937e498be8734fa55d90f1c4287d0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyAnimationEvents
 --- !u!1001 &1369433200508033973
 PrefabInstance:
   m_ObjectHideFlags: 0

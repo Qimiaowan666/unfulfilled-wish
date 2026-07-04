@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class Boss_WaitState : BossBaseState
 {
-    public Boss_WaitState(MinotaurBoss b, BossStateMachine sm) : base(b, sm, "isIdle") {}
+    public Boss_WaitState(MinotaurBoss b, StateMachine sm) : base(b, sm, "isIdle") {}
 
     public override void Enter()
     {
@@ -20,7 +20,7 @@ public class Boss_WaitState : BossBaseState
             return;
         }
 
-        boss.FaceToward(boss.player.position);
+        boss.FaceToward(boss.playerTransform.position);
 
         float dist = boss.GetHorizontalDistToPlayer();
 

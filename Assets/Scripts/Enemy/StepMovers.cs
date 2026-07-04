@@ -1,6 +1,6 @@
 using UnityEngine;
 
-// 段前位移驱动(出招【前】把敌人挪到位):可插拔,挂在 ComboStep.preMove([SerializeReference] 多态)。
+// 段前位移驱动(出招【前】把敌人挪到位
 // 任何敌人都能用,参数随实例走。和 AttackDriverBase(出招【中】编排)并列,各管一个相位。
 [System.Serializable]
 public abstract class StepMover
@@ -8,13 +8,18 @@ public abstract class StepMover
     public abstract void Begin(EnemyBase e);   // 进入段前位移:setup
     public abstract bool Tick(EnemyBase e);    // 每帧;return true = 到位,可挥砍
     public virtual void Cancel(EnemyBase e) {} // 被打断:恢复物理/无敌/可见
+
+    // 抛物线缓动:EaseOut=减速(上升)/ EaseIn=加速(下降),跳类子类共用
+    protected static float EaseOut(float t) => 1f - (1f - t) * (1f - t);
+    protected static float EaseIn(float t)  => t * t;
 }
 
 // 逼近:朝玩家走到 reach(命中距离)内就停(或遇崖/超时停)
 [System.Serializable]
+[TypeLabel("逼近 (走近)")]
 public class ApproachMover : StepMover
 {
-    [Tooltip("走到离玩家这么近就停、开始挥砍(= 命中距离;太大→还没贴近就挥、打空,太小→贴脸才挥。配套那招的 hitboxOffset/Size)")]
+    [Tooltip("走到离玩家这么近就停、开始挥砍(= 命中距离")]
     public float reach   = 1.2f;
     [Tooltip("逼近移动速度(米/秒);<=0 = 用这只怪的 battleMoveSpeed(战斗移速)")]
     public float speed   = 0f;
@@ -25,13 +30,13 @@ public class ApproachMover : StepMover
     {
         timer = maxTime;
         // 已在 reach 内就不播 run(下一帧 Tick 直接转挥砍)→ 贴脸起手不闪走路
-        if (e.player == null || e.GetHorizontalDistToPlayer() > reach) { e.SetAnimBool("isMoving"); e.PlayMove(); }
+        if (e.playerTransform == null || e.GetHorizontalDistToPlayer() > reach) { e.SetOnlyAnimBool("isMoving"); e.PlayMove(); }
     }
     public override bool Tick(EnemyBase e)
     {
         timer -= Time.deltaTime;
-        if (e.player == null) return true;
-        float dir  = e.DirToward(e.player.position);
+        if (e.playerTransform == null) return true;
+        float dir  = e.DirToward(e.playerTransform.position);
         float dist = e.GetHorizontalDistToPlayer();
         if (timer <= 0f || dist <= reach || e.LedgeAhead(dir)) { e.Rb.linearVelocity = new Vector2(0f, e.Rb.linearVelocity.y); return true; }
         float spd = speed > 0f ? speed : e.AttackMoveSpeed;   // speed 留 0 = 用战斗移速
@@ -42,24 +47,29 @@ public class ApproachMover : StepMover
 
 // 后撤:背对玩家走,遇崖/超时停
 [System.Serializable]
+[TypeLabel("后撤 (走开)")]
 public class RetreatMover : StepMover
 {
+    [Tooltip("后撤速度(米/秒);<=0 = 用这只怪的 battleMoveSpeed(战斗移速)")]
+    public float speed   = 0f;
     public float maxTime = 0.8f;
     float timer;
-    public override void Begin(EnemyBase e) { timer = maxTime; e.SetAnimBool("isMoving"); e.PlayMove(); }
+    public override void Begin(EnemyBase e) { timer = maxTime; e.SetOnlyAnimBool("isMoving"); e.PlayMove(); }
     public override bool Tick(EnemyBase e)
     {
         timer -= Time.deltaTime;
-        if (e.player == null) return true;
-        float back = -e.DirToward(e.player.position);
+        if (e.playerTransform == null) return true;
+        float back = -e.DirToward(e.playerTransform.position);
         if (timer <= 0f || e.LedgeAhead(back)) { e.Rb.linearVelocity = new Vector2(0f, e.Rb.linearVelocity.y); return true; }
-        e.Rb.linearVelocity = new Vector2(back * e.AttackMoveSpeed, e.Rb.linearVelocity.y);
+        float spd = speed > 0f ? speed : e.AttackMoveSpeed;   // speed 留 0 = 用战斗移速
+        e.Rb.linearVelocity = new Vector2(back * spd, e.Rb.linearVelocity.y);
         return false;
     }
 }
 
 // 瞬移(闪身):淡出 → 现身玩家身后/身前/另一侧(带贴墙修正)→ 淡入 → 硬直。飞行中无敌。
 [System.Serializable]
+[TypeLabel("瞬移 (闪身)")]
 public class TeleportMover : StepMover
 {
     public enum Side { Behind, Front, OtherSide }
@@ -90,10 +100,10 @@ public class TeleportMover : StepMover
             if (t >= 1f)
             {
                 landed = true;
-                e.transform.position = target; e.SetSpriteVisible(true); e.SetSpriteAlpha(1f);
+                e.transform.position = target; e.SetSpriteAlpha(1f);
                 e.Invincible = false;
                 if (e.Rb.bodyType == RigidbodyType2D.Kinematic) e.Rb.bodyType = body;
-                if (e.player != null) e.SetFacing(e.DirToward(e.player.position));
+                if (e.playerTransform != null) e.SetFacing(e.DirToward(e.playerTransform.position));
             }
             return false;
         }
@@ -103,30 +113,34 @@ public class TeleportMover : StepMover
     {
         e.Invincible = false;
         if (e.Rb.bodyType == RigidbodyType2D.Kinematic) e.Rb.bodyType = body;
-        e.SetSpriteVisible(true); e.SetSpriteAlpha(1f);
+        e.SetSpriteAlpha(1f);
     }
 
     Vector2 ComputeTarget(EnemyBase e)
     {
-        if (e.player == null) return e.transform.position;
+        if (e.playerTransform == null) return e.transform.position;
         float y = e.transform.position.y;
         if (side == Side.Behind || side == Side.Front)
         {
-            int pf = 1; var pc = e.player.GetComponent<PlayerController>(); if (pc != null) pf = pc.FacingDir;
+            int pf = 1; var pc = e.playerTransform.GetComponent<PlayerController>(); if (pc != null) pf = pc.FacingDir;
             float sign = side == Side.Behind ? -pf : pf;
-            return Clamp(e, new Vector2(e.player.position.x + sign * offset, y));
+            return Clamp(e, new Vector2(e.playerTransform.position.x + sign * offset, y));
         }
-        float s = Mathf.Sign(e.transform.position.x - e.player.position.x); if (s == 0f) s = 1f;
-        return Clamp(e, new Vector2(e.player.position.x - s * offset, y));
+
+        //otherside
+        float s = Mathf.Sign(e.transform.position.x - e.playerTransform.position.x); if (s == 0f) s = 1f;
+        return Clamp(e, new Vector2(e.playerTransform.position.x - s * offset, y));
     }
+
+    //把瞬移落点夹到不插进墙里
     Vector2 Clamp(EnemyBase e, Vector2 desired)
     {
-        if (e.player == null) return desired;
+        if (e.playerTransform == null) return desired;
         LayerMask mask = wallLayer.value != 0 ? wallLayer : LayerMask.GetMask(Layers.Ground);
         if (mask.value == 0) return desired;
         var col = e.GetComponent<Collider2D>();
         float halfW = (col != null ? col.bounds.extents.x : 0.5f) + clearance;
-        Vector2 origin = new Vector2(e.player.position.x, desired.y);
+        Vector2 origin = new Vector2(e.playerTransform.position.x, desired.y);
         float dx = desired.x - origin.x; float dist = Mathf.Abs(dx);
         if (dist < 0.01f) return desired;
         float sign = Mathf.Sign(dx);
@@ -140,6 +154,7 @@ public class TeleportMover : StepMover
 
 // 跳劈接近:抛物线跳到玩家身位(落点靠后一个身位)。飞行中无敌。
 [System.Serializable]
+[TypeLabel("跳接近")]
 public class JumpMover : StepMover
 {
     public float height   = 3f;     // 跳跃顶点高度
@@ -152,7 +167,7 @@ public class JumpMover : StepMover
     {
         start = e.transform.position;
         float groundY = start.y;
-        float pX  = e.player != null ? e.player.position.x : start.x;
+        float pX  = e.playerTransform != null ? e.playerTransform.position.x : start.x;
         float dir = Mathf.Sign(pX - start.x); if (dir == 0f) dir = e.FacingDir;
         float targetX = pX - dir * standoff;
         ground = new Vector2(targetX, groundY);
@@ -166,8 +181,18 @@ public class JumpMover : StepMover
         float air = time, rise = air * 0.55f;
         if (elapsed < air)
         {
-            if (elapsed <= rise) { float a = rise > 0f ? elapsed / rise : 1f; a = 1f - (1f - a) * (1f - a); e.transform.position = Vector2.Lerp(start, apex, a); }
-            else { float d = (elapsed - rise) / (air - rise); d *= d; e.transform.position = Vector2.Lerp(apex, ground, d); }
+            if (elapsed <= rise)   // 上升:start → apex,减速
+            {
+                float t = rise > 0f ? elapsed / rise : 1f;
+
+                //Lerp(A, B, t) = A + (B - A) * t
+                e.transform.position = Vector2.Lerp(start, apex, EaseOut(t));
+            }
+            else                   // 下降:apex → ground,加速
+            {
+                float t = (elapsed - rise) / (air - rise);
+                e.transform.position = Vector2.Lerp(apex, ground, EaseIn(t));
+            }
             return false;
         }
         e.transform.position = ground;

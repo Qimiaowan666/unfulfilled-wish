@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 5321676551469220069}
   - component: {fileID: 8734399613253280555}
   - component: {fileID: 8692198690921598270}
+  - component: {fileID: 1672340784583868106}
   m_Layer: 8
   m_Name: AoTengu
   m_TagString: Untagged
@@ -229,7 +230,6 @@ MonoBehaviour:
   attackCooldown: 1.5
   specialHitStunDuration: 0.6
   specialHitKnockback: 8
-  specialAttackWarningDuration: 0.5
   executePromptHeight: 1.2
   attacks:
   - id: attack
@@ -296,6 +296,19 @@ MonoBehaviour:
   flashDuration: 0.08
   flashMaterial: {fileID: 2100000, guid: 6e20bf32e09be244d89d5ec3700faba1, type: 2}
   knockbackDuration: 0.1
+  immuneToKnockback: 0
+--- !u!114 &1672340784583868106
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2600347881496172697}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 70c937e498be8734fa55d90f1c4287d0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyAnimationEvents
 --- !u!1001 &6025724465489044588
 PrefabInstance:
   m_ObjectHideFlags: 0

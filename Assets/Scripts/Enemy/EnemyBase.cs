@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Serialization;
 using System;
 
 [RequireComponent(typeof(PoiseMeter))]
@@ -30,54 +31,23 @@ public class EnemyBase : Entity
     public float attack   = 8f;
     public int   goldDrop = 10;
 
-    // 命中判定层;运行时 Awake 自动设为 Player 层,不在 Inspector 显示
+    // 命中判定层;运行时 Awake 自动设为 Pla yer 层,不在 Inspector 显示
     [HideInInspector] public LayerMask playerLayer;
 
     [Header("Attack")]
-    public float   attackCooldown        = 1.5f;
-
-    [Header("Special Attack Hit Reaction")]
-    public float   specialHitStunDuration = 0.6f;   // 玩家被特殊攻击命中后的硬直时长
-    public float   specialHitKnockback    = 8f;     // 击退强度（普通攻击是 5f）
-
-    [System.Serializable]
-    public class AttackHitbox
-    {
-        public Vector2 offset     = new Vector2(0.5f, 0f);
-        public Vector2 size       = new Vector2(0.8f, 0.6f);
-        public Color   gizmoColor = new Color(1f, 0.3f, 0f, 0.4f);
-        public bool    showGizmo  = true;
-    }
-
-    public virtual AttackHitbox GetHitbox(string id) => null;
-    public AttackHitbox GetHitbox(System.Enum key) => GetHitbox(key.ToString());
-
-    protected void DrawHitboxGizmo(AttackHitbox hb)
-    {
-        if (hb == null || !hb.showGizmo) return;
-        int dir = FacingDir;
-        Vector3 center   = transform.position + new Vector3(hb.offset.x * dir, hb.offset.y, 0f);
-        Vector3 cubeSize = new Vector3(hb.size.x, hb.size.y, 0.1f);
-
-        Gizmos.color = hb.gizmoColor;
-        Gizmos.DrawCube(center, cubeSize);
-
-        var c = hb.gizmoColor;
-        Gizmos.color = new Color(c.r, c.g, c.b, 1f);
-        Gizmos.DrawWireCube(center, cubeSize);
-    }
-
-    [Header("Special Attack")]
-    public float specialAttackWarningDuration = 0.5f;
+    [Tooltip("默认攻击冷却(秒):连段没配 cooldownAfter 时,整套打完休息这么久")]
+    [FormerlySerializedAs("attackCooldown")]
+    public float   defaultAttackCooldown = 1.5f;
 
     // ── Runtime State ────────────────────────────────────────────────
     public float     CurrentHP            { get; protected set; }
     public bool      Invincible           { get; set; }   // 位移帧（瞬移/跳跃）期间不可被伤
-    public Transform player               { get; protected set; }
+    public Transform playerTransform              { get; protected set; }
     public float     attackCooldownTimer  { get; protected set; }
+    public StateMachine stateMachine      { get; protected set; }   // 通用状态机(子类 Awake 里 new 并装状态)
 
     public bool IsDefeated          => CurrentHP <= 0f;
-    public bool SavesPermanentDeath => permanentDeath || GetComponent<MinotaurBoss>() != null;
+    public bool SavesPermanentDeath => permanentDeath;
     public bool RespawnsAtCheckpoint => !SavesPermanentDeath;
     public bool IsExecutable        => GetComponent<PoiseMeter>().IsBroken && CurrentHP > 0f;
 
@@ -89,7 +59,6 @@ public class EnemyBase : Entity
     // ── Events ───────────────────────────────────────────────────────
     public event Action<float, float> OnHPChanged;
     public event Action OnDied;
-    public event Action OnHit;
 
     // 是否已经初始化过（Awake 跑过）。预留的 inactive 敌人从未 Awake → false，
     // 存档刷新时跳过它们，避免被 Respawn 到未记录的 initialPosition(0,0,0) 飞出去。
@@ -115,25 +84,23 @@ public class EnemyBase : Entity
         poiseMeter      = GetComponent<PoiseMeter>();
         poiseMeter.OnPoiseBroken += OnPoiseBroken;
 
-        int playerLayerIndex = LayerMask.NameToLayer(Layers.Player);
-        if (playerLayerIndex >= 0 && (playerLayer.value & (1 << playerLayerIndex)) == 0)
-            playerLayer = 1 << playerLayerIndex;
+        playerLayer = LayerMask.GetMask(Layers.Player);   // 命中判定层固定为 Player
     }
 
     // ── AI Utilities (used by enemy states) ──────────────────────────
     // 感知玩家由 GroundEnemy.DetectPlayer 实现(横向矩形)；boss 不感知，靠 tag 锁定。
 
-    public void LoseTarget() => player = null;
+    public void LoseTarget() => playerTransform = null;
 
     // 一旦开战(combatEnabled)就锁定玩家、永不脱战；玩家真不在场(死亡/不在)才返回 false
     public bool EnsurePlayer()
     {
-        if (player == null)
+        if (playerTransform == null)
         {
             var p = GameObject.FindGameObjectWithTag(Tags.Player);
-            if (p != null) player = p.transform;
+            if (p != null) playerTransform = p.transform;
         }
-        return player != null;
+        return playerTransform != null;
     }
 
     // 是否继续交战(boss 用)：靠 tag 锁定玩家，开战后永不脱战
@@ -141,15 +108,9 @@ public class EnemyBase : Entity
 
     public float GetHorizontalDistToPlayer()
     {
-        if (player == null) return Mathf.Infinity;
-        return Mathf.Abs(player.position.x - transform.position.x);
+        if (playerTransform == null) return Mathf.Infinity;
+        return Mathf.Abs(playerTransform.position.x - transform.position.x);
     }
-
-    // boss / 简单调用：isSpecial 决定击退/硬直(普通 5/0；特殊用 specialHit*)
-    public bool PerformAttack(float damage, Vector2 offset, Vector2 size, bool isSpecialAttack = false)
-        => PerformAttack(damage, offset, size, isSpecialAttack,
-                         isSpecialAttack ? specialHitKnockback : 5f,
-                         isSpecialAttack ? specialHitStunDuration : 0f);
 
     // 地面怪逐招：显式 unblockable + 击退 + 硬直
     public bool PerformAttack(float damage, Vector2 offset, Vector2 size, bool unblockable, float knockback, float hitStun)
@@ -162,13 +123,6 @@ public class EnemyBase : Entity
     }
 
     // ── 通用按权重选招（所有敌人共用）─────────────────────────────────
-    // 基类只含 weight，各敌人继承加自己的 enum id 和扩展字段
-    [System.Serializable]
-    public class AttackWeight
-    {
-        public float weight = 1f;
-    }
-
     // options：候选攻击列表；getWeight：每个攻击的权重（不可用返回 0）
     // 返回中签的 option，全部为 0 时返回 null
     public T PickAttack<T>(T[] options, System.Func<T, float> getWeight) where T : class
@@ -185,6 +139,9 @@ public class EnemyBase : Entity
     //  统一攻击系统(小怪与 boss 共用):数据化招池 + 连段 + 命中 + 动画。
     //  招 = id(clip)+ hits[](每下命中)+ 位移/节奏;连段 = 按 id 串招。
     // ══════════════════════════════════════════════════════════════════
+
+    // 招的出伤方式:近战命中盒 / 远程发射箭矢(顶层枚举,小怪与 boss 共用)
+    public enum AttackDelivery { Melee, Ranged }
 
     // 一「下」命中:自包含。一招(EnemyAttack)挂一串 hits,动画事件 Fire(i) 引用第 i 下。
     [System.Serializable]
@@ -222,7 +179,7 @@ public class EnemyBase : Entity
         [SerializeReference, SubclassSelector] public StepMover preMove;        // 段前位移:逼近/后撤/瞬移/跳(下拉选)
         [Header("出招时(这一下怎么打;留空=普通挥砍)")]
         [SerializeReference, SubclassSelector] public AttackDriverBase driver;  // 段级编排:前冲/挑飞(下拉选)
-        [Tooltip("动画播放速度;<=0 = 用招的/1")]
+        [Tooltip("动画播放速度;<=0 = 1(原速)")]
         public float           animSpeed  = 0f;
         [Tooltip("本段打完后的停顿(秒);<0 = 用连段的 stepGap")]
         public float    gap      = -1f;
@@ -240,7 +197,7 @@ public class EnemyBase : Entity
         [MinMaxSlider(0f, 1f)]  public Vector2 hpPercent = new Vector2(0f, 1f); // x=min, y=max
         [Tooltip("勾上 = 不连续抽到同一套(增加变化)")]
         public bool        noRepeat = false;
-        [Tooltip("整套打完的冷却(秒);<=0 = 用敌人默认 attackCooldown")]
+        [Tooltip("整套打完的冷却(秒);<=0 = 用敌人默认 defaultAttackCooldown")]
         public float       cooldownAfter = 0f;
         [Tooltip("段间默认停顿(秒),0 = 无缝;每段可用自己的 gap 覆盖")]
         public float       stepGap  = 0.08f;
@@ -286,6 +243,8 @@ public class EnemyBase : Entity
     {
         if (combos == null || combos.Length == 0) return false;
 
+
+        //检查强制连招
         EnemyCombo c = null;
         if (!string.IsNullOrEmpty(forcedComboName))
         {
@@ -305,7 +264,7 @@ public class EnemyBase : Entity
                 return Mathf.Max(0f, x.weight);
             }
             c = PickAttack(combos, x => Weight(x, true));
-            // noRepeat 是"软偏好":排除上一套后无招可放 → 放开,允许重复,避免唯一可用时卡住不出招
+            // 当开启不重复出招 但是池子里只有唯一一招时 可以用同一招
             if (c == null) c = PickAttack(combos, x => Weight(x, false));
         }
         if (c == null) return false;
@@ -345,21 +304,21 @@ public class EnemyBase : Entity
     // ── 命中:攻击 clip 上的动画事件 Fire(i) 调用(可多帧多次,i=hits 下标) ──
     int attackSwing;
     public void ResetAttackSwings() => attackSwing = 0;
-    // 动画事件 Fire(i):统一转给运行器(有驱动→驱动 OnFire,否则实打 hits[i])。小怪与 boss 一套。
-    public virtual void Fire(int i) => Attack.OnFire(i);
-    // 实打第 i 下(运行器无驱动时调):近战命中盒 / 远程发射
+    // 实打第 i 下(运行器无驱动时调):近战命中盒 / 远程发射。动画事件 Fire(i) 现由 EnemyAnimationEvents 转入 Attack.OnFire(i)。
     public void DoFireHit(int i)
     {
         var a = CurrentAttack ?? (attacks != null && attacks.Length > 0 ? attacks[0] : null);
         if (a == null || a.hits == null || i < 0 || i >= a.hits.Length || a.hits[i] == null) return;
         var h = a.hits[i];
         float dmg = attack * DamageMultiplier * h.damageMultiplier;
+        //远程
         if (h.delivery == AttackDelivery.Ranged)
         {
             SpawnProjectile(h.projectilePrefab, dmg, h.red, h.knockback, h.hitStun,
                             h.red ? DangerTint : Color.white, h.red ? DangerScale : 1f);
             AudioManager.Instance?.PlayBow(h.red);
         }
+        //近战
         else
         {
             PerformAttack(dmg, h.hitboxOffset, h.hitboxSize, h.red, h.knockback, h.hitStun);
@@ -368,19 +327,15 @@ public class EnemyBase : Entity
         }
     }
 
-    // 红闪预警:成对事件 Warn/WarnEnd(时长由两事件在时间轴位置决定)。
-    public void Warn()    => GetComponent<DamageFeedback>()?.HoldWarning();
-    public void WarnEnd() => GetComponent<DamageFeedback>()?.ClearWarning();
-
     // 远程出箭(朝玩家瞄准带高低差)；Fire 的远程 hit 用
     protected void SpawnProjectile(Arrow prefab, float dmg, bool unblockable, float knockback, float hitStun, Color tint, float scale)
     {
         if (prefab == null) return;
         Vector3 spawn = transform.position + new Vector3(firePointOffset.x * FacingDir, firePointOffset.y, 0f);
         Vector2 aim = Vector2.right * FacingDir;
-        if (player != null)
+        if (playerTransform != null)
         {
-            aim = ((Vector2)player.position + Vector2.up * aimHeightOffset) - (Vector2)spawn;
+            aim = ((Vector2)playerTransform.position + Vector2.up * aimHeightOffset) - (Vector2)spawn;
             if (aim.sqrMagnitude < 0.01f) aim = Vector2.right * FacingDir;
         }
         var arrow = Instantiate(prefab, spawn, Quaternion.identity);
@@ -391,16 +346,14 @@ public class EnemyBase : Entity
     }
 
     // ── 动画 clip 名 + 播放(统一走 Anim.Play;子类可覆盖 clip 名 / ResolveClip 加后缀) ──
+    // 受击/死亡动画不在此列:它们由 isHit/isDead bool 经 Animator 过渡驱动,不走 Play 强播
     public virtual string IdleClip  => "idle";
     public virtual string MoveClip  => "walk";
-    public virtual string HurtClip  => "hit";
-    public virtual string DeathClip => "death";
+    public virtual string DeathClip => "death";   // 死亡 clip 名(GroundEnemy 用 ClipLength(DeathClip) 算尸体消失时长)
     protected virtual string ResolveClip(string baseName) => baseName;
     public void PlayClip(string baseName) { if (Anim != null && !string.IsNullOrEmpty(baseName)) Anim.Play(ResolveClip(baseName), 0, 0f); }
     public void PlayIdle()          => PlayClip(IdleClip);
     public void PlayMove()          => PlayClip(MoveClip);
-    public void PlayHurt()          => PlayClip(HurtClip);
-    public void PlayDeath()         => PlayClip(DeathClip);
     public void PlayCurrentAttack() => PlayClip(CurrentAttack != null ? CurrentAttack.id : "attack");
 
     // 取 animator 里某 clip 的时长(没有则 0)
@@ -419,10 +372,6 @@ public class EnemyBase : Entity
     AttackRunner attackRunner;
     public AttackRunner Attack => attackRunner != null ? attackRunner : (attackRunner = new AttackRunner(this));
 
-    // 动画事件入口(统一转给运行器)。命中走 Fire(i);招放完走 AnimFinish/AnimationTrigger。
-    public void AnimAttackEnd()    => Attack.OnAnimEnd();
-    public virtual void AnimFinish() => Attack.OnAnimEnd();   // 攻击 clip 末帧事件
-
     // 子类按需覆盖:伤害总倍率(boss 二阶段)/ 攻击移动速度 / 悬崖检测(小怪)
     public virtual float DamageMultiplier => 1f;
     public virtual float AttackMoveSpeed  => 3.5f;
@@ -430,7 +379,6 @@ public class EnemyBase : Entity
 
     SpriteRenderer mainSpriteCache;
     public SpriteRenderer MainSprite => mainSpriteCache != null ? mainSpriteCache : (mainSpriteCache = GetComponentInChildren<SpriteRenderer>());
-    public void SetSpriteVisible(bool v) { if (MainSprite != null) MainSprite.enabled = v; }
     public void SetSpriteAlpha(float a)  { if (MainSprite == null) return; var c = MainSprite.color; c.a = Mathf.Clamp01(a); MainSprite.color = c; }
 
     // public：近战 PerformAttack 与远程 Arrow 共用同一套命中处理(格挡/识破/击退)
@@ -473,8 +421,8 @@ public class EnemyBase : Entity
         feedback?.ApplyKnockback(transform.position, knockback);           // 再给击退速度
     }
 
-    public void StartAttackCooldown()           => attackCooldownTimer = attackCooldown;
-    public void StartAttackCooldown(float secs) => attackCooldownTimer = secs;   // 指定时长(per-招冷却用)
+
+    public void StartAttackCooldown(float secs) => attackCooldownTimer = secs;   // 开始攻击冷却(秒数由 AttackRunner.Finish 算好传入)
     public void ResetPoise()           => poiseMeter?.ResetPoise();
 
     // 只削韧性、不掉血（完美格挡反震用）：累计破韧 → OnPoiseBroken → 硬直
@@ -494,7 +442,6 @@ public class EnemyBase : Entity
         CurrentHP = Mathf.Max(CurrentHP - damage, 0f);
         Debug.Log($"{gameObject.name} 受到 {damage} 伤害，剩余 HP：{CurrentHP}/{maxHP}");
         OnHPChanged?.Invoke(CurrentHP, maxHP);
-        OnHit?.Invoke();
         AudioManager.Instance?.PlayEnemyHit();
         if (poiseDamage > 0f) poiseMeter.TakePoiseDamage(poiseDamage);
 
@@ -527,15 +474,12 @@ public class EnemyBase : Entity
         deathRoutine = StartCoroutine(DisableAfterDeath());
     }
 
-    // Override in subclasses to handle death animation via state machine
-    protected virtual void OnDeath() => SetAnimBool("isDead");
-
-    // Override in subclasses to reset state machine
-    protected virtual void OnRespawn() => SetAnimBool("isIdle");
-
+    // 死亡/复活/破韧钩子:基类给保底(点 bool),持有状态机的子类各自 override 切自己的状态。
+    protected virtual void OnDeath()   => SetOnlyAnimBool("isDead");
+    protected virtual void OnRespawn() => SetOnlyAnimBool("isIdle");
     protected virtual void OnPoiseBroken() { }
 
-    // 被玩家识破时调用（子类重写来打断当前攻击 / 进入硬直）
+    // 被玩家识破时调用。只有 boss 有踉跄态(staggerState);小怪被识破无反应是设计,基类留空
     public virtual void OnCountered() { }
 
     // 死亡后多久消失(子类按死亡动画时长覆盖，避免动画没播完就消失)
@@ -549,7 +493,8 @@ public class EnemyBase : Entity
     }
 
     // ── Save System ──────────────────────────────────────────────────
-    public virtual void LoadSaveState(float savedHP, bool defeated)
+    // 读档恢复:存档只记死没死
+    public virtual void LoadSaveState(bool defeated)
     {
         if (defeated)
         {
@@ -559,10 +504,11 @@ public class EnemyBase : Entity
             return;
         }
         gameObject.SetActive(true);
-        Respawn(savedHP > 0f ? Mathf.Clamp(savedHP, 1f, maxHP) : maxHP);
+        Respawn();
     }
 
-    public virtual void Respawn(float hp = -1f)
+    // 复活:回出生点、满血、清状态(魂类惯例:复活一律满血,不支持半血)
+    public virtual void Respawn()
     {
         if (deathRoutine != null)
         {
@@ -576,26 +522,28 @@ public class EnemyBase : Entity
         FacingRight          = initialFacingRight;   // 跟 localScale 一起复位，避免读档后朝向逻辑与视觉脱节、攻击打反方向
         gameObject.SetActive(true);
 
-        CurrentHP = hp > 0f ? Mathf.Clamp(hp, 1f, maxHP) : maxHP;
+        CurrentHP = maxHP;
         poiseMeter = poiseMeter != null ? poiseMeter : GetComponent<PoiseMeter>();
         poiseMeter?.ResetPoise();
 
         Rb.linearVelocity    = Vector2.zero;
         attackCooldownTimer  = 0f;
-        player               = null;
+        playerTransform              = null;
 
         OnHPChanged?.Invoke(CurrentHP, maxHP);
         OnRespawn();
     }
 
     // ── Animation Bool Helper (used by BossAI) ───────────────────────
-    public virtual void SetAnimBool(string boolName)
+    public virtual void SetOnlyAnimBool(string boolName)
     {
         if (Anim == null || Anim.runtimeAnimatorController == null) return;
+        // 遍历 animator 里所有 bool 参数，只有名字匹配的设为 true，其余设为 false
         foreach (var param in Anim.parameters)
         {
-            // isFlame 是 DemonSamurai 变身的持久标志,不参与"一次只亮一个"清除
+            // 检查是bool的参数
             if (param.type == AnimatorControllerParameterType.Bool && param.name != "isFlame")
+                //Anim.SetBool(名字, 值) —— Unity 方法:把叫"名字"的 bool 参数设成"值"(true/false);
                 Anim.SetBool(param.name, param.name == boolName);
         }
     }
@@ -629,6 +577,6 @@ public class EnemyBase : Entity
 #endif
     }
 
-    // 默认不画探测 gizmo(boss 那个 MaxComboRange 红圈太大、没必要显示);GroundEnemy 覆盖为横向探测框
+    // 横向探测框
     protected virtual void DrawDetectionGizmo() { }
 }

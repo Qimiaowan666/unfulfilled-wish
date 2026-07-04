@@ -11,7 +11,7 @@ public class PlayerController : Entity
     Coroutine queuedAttackCo;
 
     // ── State Machine ────────────────────────────────────────────────
-    public PlayerStateMachine  stateMachine  { get; private set; }
+    public StateMachine  stateMachine  { get; private set; }
     public Player_IdleState    idleState     { get; private set; }
     public Player_MoveState    moveState     { get; private set; }
     public Player_JumpState    jumpState     { get; private set; }
@@ -22,7 +22,6 @@ public class PlayerController : Entity
     public Player_CounterState counterState  { get; private set; }
     public Player_ExecuteState executeState  { get; private set; }
     public Player_StunnedState stunnedState  { get; private set; }
-    public Player_KnockedState knockedState  { get; private set; }
     public Player_DashStrikeState dashStrikeState { get; private set; }
     public Player_HealState    healState     { get; private set; }
     public Player_DeadState    deadState     { get; private set; }
@@ -32,7 +31,6 @@ public class PlayerController : Entity
 
     // ── Player-specific Components ───────────────────────────────────
     public PlayerStats         Stats        { get; private set; }
-    public PlayerInputBuffer   InputBuffer  { get; private set; }
     public PlayerInput         Input        { get; private set; }
     public Player_SkillManager SkillManager { get; private set; }   // 子节点 "Skills" 上挂
 
@@ -57,7 +55,6 @@ public class PlayerController : Entity
     [Header("Attack")]
     public int   maxComboStep   = 3;
     public float comboResetTime = 0.8f;
-    public float[] attackDurations         = { 0.3f, 0.3f, 0.4f };
     public float[] attackDamageMultipliers = { 1f,   1f,   1.2f };
     public float[] attackPoiseDamage       = { 8f,   10f,  14f  };
     public Vector2  hitboxOffset = new Vector2(0.6f, 0f);
@@ -74,7 +71,6 @@ public class PlayerController : Entity
     [Header("Counter")]
     public float counterWindow      = 0.3f;
     public float counterCooldown    = 0.5f;
-    public float counterPoiseDamage = 60f;
 
     [Header("Execute")]
     public float executeDamageMultiplier = 5f;
@@ -84,7 +80,6 @@ public class PlayerController : Entity
     // ── External Queries ─────────────────────────────────────────────
     public bool IsBlocking           => stateMachine.currentState == blockState;
     public bool IsCountering         => stateMachine.currentState == counterState;
-    public bool InPerfectBlockWindow => IsBlocking && blockState.InPerfectWindow;
 
     public bool TryCounter(EnemyBase enemy)   => counterState.TryCounter(enemy);
     public void ReceiveBlockHit(float damage, EnemyBase attacker) { if (IsBlocking) blockState.ReceiveAttack(damage, attacker); }
@@ -117,12 +112,10 @@ public class PlayerController : Entity
 
         base.Awake();
         Stats       = GetComponent<PlayerStats>();
-        InputBuffer = GetComponent<PlayerInputBuffer>();
-        if (InputBuffer == null) InputBuffer = gameObject.AddComponent<PlayerInputBuffer>();
         Input = GetComponent<PlayerInput>();
         if (Input == null) Input = gameObject.AddComponent<PlayerInput>();
 
-        stateMachine  = new PlayerStateMachine();
+        stateMachine  = new StateMachine();
         idleState     = new Player_IdleState(this, stateMachine);
         moveState     = new Player_MoveState(this, stateMachine);
         jumpState     = new Player_JumpState(this, stateMachine);
@@ -133,7 +126,6 @@ public class PlayerController : Entity
         counterState  = new Player_CounterState(this, stateMachine);
         executeState  = new Player_ExecuteState(this, stateMachine);
         stunnedState  = new Player_StunnedState(this, stateMachine);
-        knockedState  = new Player_KnockedState(this, stateMachine);
         dashStrikeState = new Player_DashStrikeState(this, stateMachine);
         healState     = new Player_HealState(this, stateMachine);
         deadState     = new Player_DeadState(this, stateMachine);
@@ -180,6 +172,7 @@ public class PlayerController : Entity
     public void StartDashCooldown()    => dashCooldownTimer    = dashCooldown;
     public void StartCounterCooldown() => counterCooldownTimer = counterCooldown;
 
+    // 同一件事可能被反复触发、只想保留最新一次
     public void EnterAttackStateWithDelay()
     {
         if (queuedAttackCo != null) StopCoroutine(queuedAttackCo);
@@ -189,7 +182,11 @@ public class PlayerController : Entity
     IEnumerator EnterAttackStateWithDelayCo()
     {
         yield return new WaitForEndOfFrame();
-        stateMachine.ChangeState(attackState);
+        // 上一段攻击完后 停在攻击态才会接下一段连;
+        // 否则(已被击飞/硬直/死亡等接管)就放弃,别把人无条件拽回攻击。
+        // 小概率事件 只有正好两段攻击间的一帧被击飞/硬直/死亡 才会触发 影响不大。
+        if (stateMachine.currentState == attackState)
+            stateMachine.ChangeState(attackState);
         queuedAttackCo = null;
     }
 

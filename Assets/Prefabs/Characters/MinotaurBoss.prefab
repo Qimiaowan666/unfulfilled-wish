@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 7293599587016235512}
   - component: {fileID: 241873818932848535}
   - component: {fileID: 6123051498341902235}
+  - component: {fileID: 2144987906651280904}
   m_Layer: 8
   m_Name: MinotaurBoss
   m_TagString: Untagged
@@ -210,8 +211,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0a766efa9e839fc4a836f2c22c8de890, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MinotaurBoss
-  groundCheck: {fileID: 0}
-  groundCheckRadius: 0.1
   groundLayer:
     serializedVersion: 2
     m_Bits: 0
@@ -230,7 +229,6 @@ MonoBehaviour:
   attackCooldown: 1.4
   specialHitStunDuration: 1.2
   specialHitKnockback: 8
-  specialAttackWarningDuration: 0.5
   executePromptHeight: 2
   attacks:
   - id: atk1
@@ -260,6 +258,14 @@ MonoBehaviour:
     - delivery: 0
       red: 0
       damageMultiplier: 1
+      knockback: 5
+      hitStun: 0
+      hitboxOffset: {x: 3, y: -1}
+      hitboxSize: {x: 6, y: 6}
+      projectilePrefab: {fileID: 0}
+    - delivery: 0
+      red: 0
+      damageMultiplier: 2
       knockback: 5
       hitStun: 0
       hitboxOffset: {x: 3, y: -1}
@@ -550,3 +556,16 @@ MonoBehaviour:
   flashDuration: 0.08
   flashMaterial: {fileID: 2100000, guid: 6e20bf32e09be244d89d5ec3700faba1, type: 2}
   knockbackDuration: 0.15
+  immuneToKnockback: 1
+--- !u!114 &2144987906651280904
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4636001714618293406}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 70c937e498be8734fa55d90f1c4287d0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyAnimationEvents

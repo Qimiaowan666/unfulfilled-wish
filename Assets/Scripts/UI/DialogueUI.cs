@@ -50,7 +50,6 @@ public class DialogueUI : MonoBehaviour
         index = 0;
         onDone = done;
         IsPlaying = true;
-        PlayerInputBuffer.ClearAll();
 
         previousTimeScale = Time.timeScale;
         Time.timeScale = 0f;
@@ -89,7 +88,6 @@ public class DialogueUI : MonoBehaviour
         IsPlaying = false;
         if (panelRoot != null) panelRoot.SetActive(false);
         Time.timeScale = previousTimeScale;
-        PlayerInputBuffer.ClearAll();
 
         var cb = onDone;
         onDone = null;

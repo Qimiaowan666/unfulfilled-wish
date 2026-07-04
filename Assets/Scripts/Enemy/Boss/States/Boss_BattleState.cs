@@ -4,7 +4,7 @@ using UnityEngine;
 // 连段选择走统一 TryPickCombo:按距离 gating(近距任意、远距只缩距招/瞬移开场)+ 强制开场。
 public class Boss_BattleState : BossBaseState
 {
-    public Boss_BattleState(MinotaurBoss b, BossStateMachine sm) : base(b, sm, "") {}
+    public Boss_BattleState(MinotaurBoss b, StateMachine sm) : base(b, sm, "") {}
 
     public override void Update()
     {
@@ -16,7 +16,7 @@ public class Boss_BattleState : BossBaseState
             return;
         }
 
-        boss.FaceToward(boss.player.position);
+        boss.FaceToward(boss.playerTransform.position);
 
         float dist = boss.GetHorizontalDistToPlayer();
 

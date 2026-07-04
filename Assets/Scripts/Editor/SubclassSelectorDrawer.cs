@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEditor;
 using System;
-using System.Collections.Generic;
+using System.Reflection;
 
 // [SerializeReference] + [SubclassSelector] 字段的绘制器:
 // 第一行 = label + 类型下拉(无 / 各子类);下面缩进展开选中类型的参数。
@@ -9,18 +9,8 @@ using System.Collections.Generic;
 [CustomPropertyDrawer(typeof(SubclassSelectorAttribute))]
 public class SubclassSelectorDrawer : PropertyDrawer
 {
-    // 类型名 → 中文友好名(下拉项 + 当前显示)。没列的回退用类名。
-    static readonly Dictionary<string, string> Nice = new Dictionary<string, string>
-    {
-        { "ApproachMover", "逼近 (走近)" },
-        { "RetreatMover",  "后撤 (走开)" },
-        { "TeleportMover", "瞬移 (闪身)" },
-        { "JumpMover",     "跳接近 (先跳后砍)" },
-        { "LaunchDriver",  "挑飞 (横劈→砸)" },
-        { "JumpDriver",    "跳劈 (边跳边砍)" },
-        { "LungeForward",  "前冲" },
-        { "LungeBackward", "后撤" },
-    };
+    // 类型 → 中文友好名:读类上的 [TypeLabel];没标则回退类名。
+    static string Label(Type t) => t.GetCustomAttribute<TypeLabelAttribute>()?.Label ?? t.Name;
 
     public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
     {
@@ -81,13 +71,8 @@ public class SubclassSelectorDrawer : PropertyDrawer
 
     string Display(SerializedProperty property)
     {
-        string full = property.managedReferenceFullTypename;
-        if (string.IsNullOrEmpty(full)) return "无 (None)";
-        int sp = full.LastIndexOf(' ');
-        string fn = sp >= 0 ? full.Substring(sp + 1) : full;
-        int dot = fn.LastIndexOf('.');
-        string sn = dot >= 0 ? fn.Substring(dot + 1) : fn;
-        return Nice.TryGetValue(sn, out var nice) ? nice : sn;
+        var obj = property.managedReferenceValue;
+        return obj == null ? "无 (None)" : Label(obj.GetType());
     }
 
     void ShowMenu(SerializedProperty property, Rect rect)
@@ -101,7 +86,7 @@ public class SubclassSelectorDrawer : PropertyDrawer
         foreach (var t in TypeCache.GetTypesDerivedFrom(baseType))
         {
             if (t.IsAbstract) continue;
-            string itemLabel = Nice.TryGetValue(t.Name, out var nice) ? nice : t.Name;
+            string itemLabel = Label(t);
             var tt = t;
             menu.AddItem(new GUIContent(itemLabel), false, () => Set(so, path, tt));
         }

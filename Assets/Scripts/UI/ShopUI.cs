@@ -77,7 +77,6 @@ public class ShopUI : MonoBehaviour
         stats = FindAnyObjectByType<PlayerStats>();
         IsOpen = true;
         AudioManager.Instance?.PlayUIOpen();   // 开商店
-        PlayerInputBuffer.ClearAll();
         if (panelRoot != null) panelRoot.SetActive(true);
         if (detailPopup != null) detailPopup.SetActive(true);
         ClearDetail();
@@ -87,7 +86,6 @@ public class ShopUI : MonoBehaviour
 
     public void Close()
     {
-        PlayerInputBuffer.ClearAll();
         IsOpen = false;
         if (panelRoot != null) panelRoot.SetActive(false);
         ResumeGameTime();

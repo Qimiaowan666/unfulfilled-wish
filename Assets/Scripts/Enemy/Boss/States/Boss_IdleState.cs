@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class Boss_IdleState : BossBaseState
 {
-    public Boss_IdleState(MinotaurBoss b, BossStateMachine sm) : base(b, sm, "isIdle") {}
+    public Boss_IdleState(MinotaurBoss b, StateMachine sm) : base(b, sm, "isIdle") {}
 
     public override void Enter()
     {

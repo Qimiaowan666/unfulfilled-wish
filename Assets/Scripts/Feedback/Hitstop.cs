@@ -30,7 +30,9 @@ public class Hitstop : MonoBehaviour
         float prev = Time.timeScale;
         Time.timeScale = scale;
         yield return new WaitForSecondsRealtime(Mathf.Max(0.02f, d));
-        if (Time.timeScale <= scale + 0.001f) Time.timeScale = prev;   // 期间没被别的(如暂停)改过才恢复
+        // 还原前确认 timeScale 还停在"我们的顿帧值附近(0.001~0.041)":被暂停成 0 或被别的系统改过都不碰，
+        // 避免顿帧期间开菜单(timeScale=0)被这里误还原成 prev=1 → 把暂停解掉。
+        if (Time.timeScale > 0.001f && Time.timeScale <= scale + 0.001f) Time.timeScale = prev;
         busy = false;
     }
 }

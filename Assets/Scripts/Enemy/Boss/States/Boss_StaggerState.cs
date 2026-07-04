@@ -3,7 +3,7 @@ using UnityEngine;
 // 识破成功后的短暂停顿（不破韧性，不可处决）
 public class Boss_StaggerState : BossBaseState
 {
-    public Boss_StaggerState(MinotaurBoss b, BossStateMachine sm) : base(b, sm, "isHit") {}
+    public Boss_StaggerState(MinotaurBoss b, StateMachine sm) : base(b, sm, "isHit") {}
 
     public override void Enter()
     {

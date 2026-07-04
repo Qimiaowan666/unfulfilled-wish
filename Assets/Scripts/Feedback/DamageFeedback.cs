@@ -56,14 +56,6 @@ public class DamageFeedback : MonoBehaviour
         flashRoutine = StartCoroutine(FlashRoutine(flashColor, flashDuration, true));
     }
 
-    // 预警红染：只改 color(tint 叠色，不换材质)
-    public void FlashWarning(float duration = 0.4f)
-    {
-        if (renderers.Length == 0) return;
-        if (flashRoutine != null) StopCoroutine(flashRoutine);
-        flashRoutine = StartCoroutine(FlashRoutine(Color.red, duration, false));
-    }
-
     // 持续红染：染红并保持，直到 ClearWarning()。给成对的 Warn / WarnEnd 动画事件用(时长由两事件位置决定)。
     public void HoldWarning()
     {
@@ -97,11 +89,13 @@ public class DamageFeedback : MonoBehaviour
 
     [Tooltip("击退滑行/最短 flinch 时长(秒)：命中后水平速度在这段时间内线性衰减到 0(摩擦滑停)；普攻没配 hitStun 时也是这段失控时长")]
     public float knockbackDuration = 0.1f;
+    [Tooltip("霸体:免疫击退位移(boss / 重型怪打不动)。只挡位移,受击闪白 / 扣血 / 削韧 / 破韧处决都照常")]
+    public bool immuneToKnockback;
     Coroutine knockbackRoutine;
 
     public void ApplyKnockback(Vector3 sourcePosition, float force)
     {
-        if (rb == null || force <= 0f) return;
+        if (immuneToKnockback || rb == null || force <= 0f) return;
         float direction = Mathf.Sign(transform.position.x - sourcePosition.x);
         if (Mathf.Approximately(direction, 0f)) direction = 1f;
         if (knockbackRoutine != null) StopCoroutine(knockbackRoutine);
@@ -109,7 +103,7 @@ public class DamageFeedback : MonoBehaviour
     }
 
     // 速度 + 衰减(摩擦)：初速度按剩余时间比例线性衰减到 0，读起来是「被推一下然后滑停」。
-    // 注意：要看到滑行，被击退者命中时必须进入「不清速度」的状态(玩家=StunnedState/KnockedState)，
+    // 注意：要看到滑行，被击退者命中时必须进入「不清速度」的状态(玩家=StunnedState)，
     // 否则其 idle/move 状态每帧重设速度会盖掉这里的滑行 → 看不出击退。
     IEnumerator KnockbackRoutine(float horizontalSpeed)
     {

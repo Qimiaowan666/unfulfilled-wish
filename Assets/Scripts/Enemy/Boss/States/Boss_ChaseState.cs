@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class Boss_ChaseState : BossBaseState
 {
-    public Boss_ChaseState(MinotaurBoss b, BossStateMachine sm) : base(b, sm, "isMoving") {}
+    public Boss_ChaseState(MinotaurBoss b, StateMachine sm) : base(b, sm, "isMoving") {}
 
     public override void Update()
     {
@@ -14,7 +14,7 @@ public class Boss_ChaseState : BossBaseState
             return;
         }
 
-        float dir  = boss.DirToward(boss.player.position);
+        float dir  = boss.DirToward(boss.playerTransform.position);
         boss.SetFacing(dir);
 
         float dist = boss.GetHorizontalDistToPlayer();

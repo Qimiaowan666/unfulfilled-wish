@@ -37,11 +37,6 @@ public class PlayerStats : MonoBehaviour
     public float CurrentGhostHP { get; private set; }
     public float CurrentStamina { get; private set; }
     public bool IsInvulnerable { get; private set; }
-    public bool IsDead => deathTriggered;
-    public float EquipmentAttackBonus => equipmentAttackBonus;
-    public float EquipmentDefenseBonus => equipmentDefenseBonus;
-    public float SkillAttackPercent => skillAttackPercent;
-    public float SkillDefensePercent => skillDefensePercent;
     public float SkillAttackBonus => baseAttack * skillAttackPercent / 100f;
     public float SkillDefenseBonus => baseDefense * skillDefensePercent / 100f;
 
@@ -211,11 +206,6 @@ public class PlayerStats : MonoBehaviour
         RecalculateCombatStats();
     }
 
-    public void ApplyStatMultiplier(float attackPercent, float defensePercent)
-    {
-        SetSkillBonusPercent(skillAttackPercent + attackPercent, skillDefensePercent + defensePercent);
-    }
-
     void RecalculateCombatStats(bool notify = true)
     {
         attack = baseAttack + equipmentAttackBonus + SkillAttackBonus;
@@ -237,27 +227,6 @@ public class PlayerStats : MonoBehaviour
         baseValue = baseDefense;
         equipmentBonus = equipmentDefenseBonus;
         skillBonus = SkillDefenseBonus;
-    }
-
-    public void RebuildSkillBonuses()
-    {
-        float attackPercent = 0f;
-        float defensePercent = 0f;
-        var skills = SkillSystem.Instance;
-        if (skills != null)
-        {
-            foreach (var skill in skills.learnedSkills)
-            {
-                if (skill == null || skill.type != SkillType.Passive) continue;
-                attackPercent += skill.attackPercent;
-                defensePercent += skill.defensePercent;
-            }
-        }
-
-        skillAttackPercent = attackPercent;
-        skillDefensePercent = defensePercent;
-        RecalculateCombatStats(false);
-        NotifyStatsChanged();
     }
 
     public void LoadBaseStats(float baseAttackValue, float baseDefenseValue, float baseMaxHPValue)
@@ -302,19 +271,6 @@ public class PlayerStats : MonoBehaviour
         CurrentHP = maxHP;
         CurrentGhostHP = 0f;
         NotifyStatsChanged();
-    }
-
-    public void Kill()
-    {
-        if (deathTriggered) return;
-
-        IsInvulnerable = false;
-        CurrentGhostHP = 0f;
-        CurrentHP = 0f;
-        NotifyGhostHPChanged();
-        OnHPChanged?.Invoke(CurrentHP, maxHP);
-        OnDamaged?.Invoke(maxHP);
-        Die();
     }
 
     void Heal(float amount)
