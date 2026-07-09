@@ -85,7 +85,7 @@ public class AttackRunner
         var step  = e.CurrentStep;
         if (driver != null) { driver.End(e, atk); driver = null; }
         if (e.Anim != null) e.Anim.speed = 1f;
-        e.GetComponent<DamageFeedback>()?.ClearWarning();
+        e.DamageFeedback?.ClearWarning();
 
         if (e.AdvanceCombo())   // 还有下一段
         {
@@ -115,7 +115,7 @@ public class AttackRunner
     // ── 动画事件(由 EnemyBase 转来)──
     public void OnAnimEnd() { if (phase == Phase.Swing) animEnded = true; }
 
-    // Fire(i):有驱动(挑飞)→ 驱动按下标协调(0=横劈/1=砸);否则实打 hits[i]
+    // hits[i]
     public void OnFire(int i)
     {
         if (phase == Phase.Swing && driver != null) { driver.OnFire(e, e.CurrentAttack, i); return; }
@@ -129,7 +129,7 @@ public class AttackRunner
         if (mover  != null) { mover.Cancel(e); mover = null; }
         if (driver != null) { driver.End(e, e.CurrentAttack); driver = null; }
         if (e.Anim != null) e.Anim.speed = 1f;
-        e.GetComponent<DamageFeedback>()?.ClearWarning();
+        e.DamageFeedback?.ClearWarning();
         e.ResetCombo();
         phase = Phase.Idle;
     }

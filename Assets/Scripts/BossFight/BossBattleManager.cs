@@ -2,13 +2,14 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-// 常驻关卡协调器：放在 Bootstrap，跨场景存活（DontDestroyOnLoad 单例）。
-// 每次场景加载后自动查找本场景的 boss（EnemyBase.isBoss），接管 boss BGM + 胜利检测，
-// 击败后按 boss 自带的 nextSceneOnDefeat 切场景。
-// → 不再需要每个战斗场景手动挂 LevelManager / 连 boss 引用。
-public class LevelManager : MonoBehaviour
+// 常驻 boss 战协调器：放在 Bootstrap，跨场景存活（DontDestroyOnLoad 单例）。
+// 只管 boss 战「收尾」——每次场景加载/读档后自动查找本场景的 boss（EnemyBase.isBoss），
+// 监测其死亡，击败后 autosave + 击破演出（BossFinishUI）→ 通关门 / 通关画面。
+// 登场/开打（BossIntroTrigger）与场景加载/切换（GameManager/SaveSystem）不归它管。
+// → 不再需要每个战斗场景手动挂 / 连 boss 引用。
+public class BossBattleManager : MonoBehaviour
 {
-    public static LevelManager Instance { get; private set; }
+    public static BossBattleManager Instance { get; private set; }
 
     [Header("Boss Battle")]
     public float victoryDelay = 2f;
@@ -84,20 +85,11 @@ public class LevelManager : MonoBehaviour
 
     void OnBossDefeated()
     {
-        string next = currentBoss != null ? currentBoss.nextSceneOnDefeat : null;
-        if (!string.IsNullOrEmpty(next))
-        {
-            StartCoroutine(DelayedLoad(next));                  // 有下一关 → 等一下切场景
-            return;
-        }
-
-        // 最终 boss 已击破 → 存一次完整自动档:把"boss 已死 + 背包/装备/金币/当前状态"原子写进 save_auto,
+        // boss 击破 → 存一次完整自动档:把"boss 已死 + 背包/装备/金币/当前状态"原子写进 save_auto,
         // 让死亡/继续都拿到自洽快照(杜绝"boss 死了但掉落没了"的 desync),并让通关前的进度持久。
-        // (有 nextSceneOnDefeat 的 boss 上面已 return,不在这存——那种要等切到下一场景后再存,
-        //  否则继续会落回已清空、无法再触发切场景的 boss 场景。)
         SaveSystem.Instance?.AutoSaveAtPlayer();
 
-        // 最终 boss → 九日式击破演出 → 出现通关门(玩家走近按 F 才通关)
+        // → 击破演出 → 出现通关门(玩家走近按 F 才通关)
         if (BossFinishUI.Instance != null && currentBoss != null)
             BossFinishUI.Instance.Play(currentBoss, ShowEnding);
         else
@@ -109,12 +101,6 @@ public class LevelManager : MonoBehaviour
         var gate = FindAnyObjectByType<VictoryGate>();
         if (gate != null) gate.Appear();         // 有通关门 → 出现，等玩家交互
         else VictoryUI.Instance?.Show();         // 没门兜底 → 直接通关画面
-    }
-
-    IEnumerator DelayedLoad(string next)
-    {
-        yield return new WaitForSeconds(victoryDelay);
-        GameManager.Instance?.LoadScene(next);
     }
 
     IEnumerator DelayedEnding()

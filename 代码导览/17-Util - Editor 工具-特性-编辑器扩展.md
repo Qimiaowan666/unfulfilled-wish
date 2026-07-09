@@ -14,7 +14,7 @@
 - `Editor/MinMaxSliderDrawer.cs:6` —— `[CustomPropertyDrawer(typeof(MinMaxSliderAttribute))]`,把 `Vector2` 画成"左数字框 | 双手柄滑块 | 右数字框";类型用错时退回默认绘制(`MinMaxSliderDrawer.cs:11`)。
 - `Editor/SubclassSelectorDrawer.cs:10` —— `[CustomPropertyDrawer(typeof(SubclassSelectorAttribute))]`,`[SerializeReference]` 字段的核心绘制器:第一行 label + 类型下拉,下面缩进展开选中类型的参数。下拉项靠 `TypeCache.GetTypesDerivedFrom` 自动列出所有非抽象子类(`SubclassSelectorDrawer.cs:101`),中文友好名在 `Nice` 字典(`SubclassSelectorDrawer.cs:13`)。
 - `Editor/SetPlayModeStartScene.cs:8` —— `[InitializeOnLoad]` 静态类:开编辑器即把 Play Mode Start Scene 锁成 `Bootstrap.unity`,并在 `ExitingEditMode` 时把当前场景名写进 `SessionState`(键 `Bootstrap_ReturnScene`)。
-- `Editor/CameraSetup.cs:8` —— 菜单 `Tools/Setup/Add Cinemachine Camera (Player Follow)`,一键搭 Cinemachine 相机(正交 + Nine Sols 风格阻尼:横快纵慢、关 Lookahead),自动绑场景里的 `PlayerController` 为 TrackingTarget。
+- `Editor/CameraSetup.cs:8` —— 菜单 `Tools/Setup/Add Cinemachine Camera (Player Follow)`,一键搭 Cinemachine 相机(正交 + 横版阻尼:横快纵慢、关 Lookahead),自动绑场景里的 `PlayerController` 为 TrackingTarget。
 - `Editor/AudioManagerSetup.cs:7` —— 菜单 `Tools/Audio/Setup AudioManager Clips` 和 `Tools/Audio/Validate Audio Setup`:用一张 `字段名→资产路径` 的字典(`AudioManagerSetup.cs:18`)批量把 wav/ogg/mp3 通过 `SerializedObject` 赋给 `AudioManager.prefab` 的各 clip 字段;Validate 检查必填 clip、场景里恰好 1 个 `AudioListener`、至少 1 个 `AudioManager`。
 
 **怎么工作**

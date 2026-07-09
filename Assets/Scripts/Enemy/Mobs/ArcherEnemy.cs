@@ -10,7 +10,7 @@ public class ArcherEnemy : GroundEnemy
     public GameObject dustPrefab;               // 脚下尘土(SpriteOneShot 预制)，起跳/后撤步时生成
     public float      dustYOffset = 0.3f;       // 尘土高度微调(碰撞体底部之上；气太低就调大)
 
-    [Header("大招悬空 (弦一郎式)")]
+    [Header("大招悬空 (浮空箭雨)")]
     public float specialLeapVelocity  = 7f;     // 起跳上冲速度
     public float specialRiseTime      = 0.22f;  // 上冲时长(× 速度 ≈ 悬空高度)，之后悬停到大招结束
     public float specialLeapBackward  = 0f;     // 起跳横向后撤(背对玩家；>0 当心跳下平台)
@@ -106,7 +106,7 @@ public class ArcherEnemy : GroundEnemy
         Invincible = false;
         dashing    = false;
         if (Anim != null) Anim.SetBool("isDashing", false);   // 退出 dash,让下一态(chase/idle)正常接管
-        stateMachine.ChangeState(playerTransform != null ? (EnemyBaseState)chaseState : idleState);
+        stateMachine.ChangeState(playerTransform != null ? (EnemyBaseState)chaseState : patrolState);
     }
 
     protected override void Update()
@@ -129,6 +129,7 @@ public class ArcherEnemy : GroundEnemy
     {
         dashedBack = false;
         dashing    = false;
+        if (Anim != null) Anim.SetBool("isDashing", false);   // 后撤中途被掐断时残留的 dash 态
         if (inSpecialAir && Rb != null) Rb.gravityScale = baseGravity;
         inSpecialAir = false;
     }

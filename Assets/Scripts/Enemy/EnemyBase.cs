@@ -11,8 +11,7 @@ public class EnemyBase : Entity
     public bool permanentDeath;
 
     [Header("Boss")]
-    public bool   isBoss;                // 标记为关卡 boss → 常驻 LevelManager 自动接管 BGM / 胜利检测；血条/名牌按此识别
-    public string nextSceneOnDefeat;     // 击败后切到的场景（留空 = 不切场景）
+    public bool   isBoss;                // 标记为关卡 boss → 常驻 BossBattleManager 自动接管胜利检测；血条/名牌按此识别
     public BossProfile profile;          // 名牌/血条展示数据（名字、罗马名、单字图、配色）
     [Tooltip("false = boss 沉睡，不主动进战；由 BossIntroTrigger 登场后 Activate() 唤醒。普通敌人保持 true")]
     public bool   combatEnabled = true;
@@ -49,7 +48,7 @@ public class EnemyBase : Entity
     public bool IsDefeated          => CurrentHP <= 0f;
     public bool SavesPermanentDeath => permanentDeath;
     public bool RespawnsAtCheckpoint => !SavesPermanentDeath;
-    public bool IsExecutable        => GetComponent<PoiseMeter>().IsBroken && CurrentHP > 0f;
+    public bool IsExecutable        => poiseMeter.IsBroken && CurrentHP > 0f;
 
     [Header("处决")]
     [Tooltip("处决提示浮在头顶的高度(世界单位,从敌人原点往上)。逐怪单独调,Scene 里黄线尖端就是它。")]
@@ -65,6 +64,8 @@ public class EnemyBase : Entity
     public bool Initialized { get; private set; }
 
     protected PoiseMeter poiseMeter;
+    protected DamageFeedback damageFeedback;
+    public DamageFeedback DamageFeedback => damageFeedback;
     Vector3    initialPosition;
     Quaternion initialRotation;
     Vector3    initialScale;
@@ -82,9 +83,20 @@ public class EnemyBase : Entity
         Initialized     = true;
         CurrentHP       = maxHP;
         poiseMeter      = GetComponent<PoiseMeter>();
+        damageFeedback  = GetComponent<DamageFeedback>();
         poiseMeter.OnPoiseBroken += OnPoiseBroken;
 
         playerLayer = LayerMask.GetMask(Layers.Player);   // 命中判定层固定为 Player
+    }
+
+    // 混合树驱动:把水平速度喂给 Speed,Animator 自动在 idle↔walk 间切。
+    // 子类在自己的 Update 末尾(stateMachine.Update 之后、速度已定)调它。
+    // 约定:每只 EnemyBase 的控制器都要配 Speed 参数 + Locomotion 混合树 → 这里无条件喂。
+    // 漏配的后果:每帧刷 "Parameter 'Speed' does not exist"(响亮报错,提醒你去补),且站桩不走 walk。
+    protected void FeedLocomotionSpeed()
+    {
+        if (Anim != null && Rb != null)
+            Anim.SetFloat("Speed", Mathf.Abs(Rb.linearVelocity.x));
     }
 
     // ── AI Utilities (used by enemy states) ──────────────────────────
@@ -445,8 +457,7 @@ public class EnemyBase : Entity
         AudioManager.Instance?.PlayEnemyHit();
         if (poiseDamage > 0f) poiseMeter.TakePoiseDamage(poiseDamage);
 
-        var feedback = GetComponent<DamageFeedback>();
-        if (feedback != null) feedback.Flash();
+        if (damageFeedback != null) damageFeedback.Flash();
 
         if (CurrentHP <= 0f) Die();
     }
@@ -464,7 +475,7 @@ public class EnemyBase : Entity
             SaveSystem.Instance?.MarkEnemyDefeated(SaveID);
 
         // 死亡音改由死亡动画"摔倒落地"帧的 AnimDeathFall 事件触发，避免和受击音同帧叠掉
-        var playerStats = FindAnyObjectByType<PlayerStats>();
+        var playerStats = PlayerController.Instance?.Stats;
         if (playerStats != null) playerStats.AddGold(goldDrop);
         OnDied?.Invoke();
 
@@ -534,7 +545,7 @@ public class EnemyBase : Entity
         OnRespawn();
     }
 
-    // ── Animation Bool Helper (used by BossAI) ───────────────────────
+    // ── Animation Bool Helper (states / AttackRunner / StepMovers 用) ───────────────────────
     public virtual void SetOnlyAnimBool(string boolName)
     {
         if (Anim == null || Anim.runtimeAnimatorController == null) return;

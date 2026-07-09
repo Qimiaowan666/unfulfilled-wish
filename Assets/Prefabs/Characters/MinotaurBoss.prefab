@@ -217,7 +217,6 @@ MonoBehaviour:
   saveID: boss_final
   permanentDeath: 1
   isBoss: 1
-  nextSceneOnDefeat: 
   profile: {fileID: 11400000, guid: 8e975c588650f8540ab562323ec9fa68, type: 2}
   combatEnabled: 1
   maxHP: 4000
@@ -226,9 +225,7 @@ MonoBehaviour:
   playerLayer:
     serializedVersion: 2
     m_Bits: 512
-  attackCooldown: 1.4
-  specialHitStunDuration: 1.2
-  specialHitKnockback: 8
+  defaultAttackCooldown: 1.4
   executePromptHeight: 2
   attacks:
   - id: atk1
@@ -438,7 +435,7 @@ MonoBehaviour:
   phase2AttackMultiplier: 1.2
   phase2FreezeBeat: 0.6
   phase2RoarHold: 3
-  phase2RageTint: {r: 1, g: 0.42, b: 0.4, a: 1}
+  phase2RageTint: {r: 1, g: 0.65, b: 0.62, a: 1}
   rageAuraScale: 1
   phase2RoarKnockback: 20
   phase2RoarKnockTime: 0.55
@@ -457,7 +454,6 @@ MonoBehaviour:
         launchTime: 0.4
         bossJumpDelay: 0.25
         slamTime: 0.25
-        slamMult: 2
         holdDistance: 3
     - rid: 2219729727954092502
       type: {class: LaunchDriver, ns: , asm: Assembly-CSharp}
@@ -466,7 +462,6 @@ MonoBehaviour:
         launchTime: 0.4
         bossJumpDelay: 0.25
         slamTime: 0.25
-        slamMult: 2
         holdDistance: 3
     - rid: 2219729727954092899
       type: {class: TeleportMover, ns: , asm: Assembly-CSharp}
@@ -554,7 +549,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DamageFeedback
   flashColor: {r: 1, g: 1, b: 1, a: 1}
   flashDuration: 0.08
-  flashMaterial: {fileID: 2100000, guid: 6e20bf32e09be244d89d5ec3700faba1, type: 2}
+  warnColor: {r: 1, g: 0, b: 0, a: 1}
+  hitFlashMaterial: {fileID: 2100000, guid: 5d8f13000b46abb43976f9054a937bd3, type: 2}
   knockbackDuration: 0.15
   immuneToKnockback: 1
 --- !u!114 &2144987906651280904

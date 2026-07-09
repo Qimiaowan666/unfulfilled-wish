@@ -1,7 +1,7 @@
 Shader "Custom/SpriteSolidColor"
 {
     // 把 sprite 渲染成纯色剪影：只取 sprite 的透明形状，颜色全部用 _Color。
-    // 九日式击破：把 boss / 玩家的材质临时换成这个（白色），即得白色剪影。
+    // 击破演出：把 boss / 玩家的材质临时换成这个（白色），即得白色剪影。
     Properties
     {
         [PerRendererData] _MainTex ("Sprite Texture", 2D) = "white" {}

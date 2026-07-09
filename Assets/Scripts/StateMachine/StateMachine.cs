@@ -2,7 +2,7 @@
 public class StateMachine
 {
     public EntityState currentState { get; private set; }
-    public bool canChangeState = true;   // 主角某些招式播放中会 Lock();小怪/boss 用不到(恒 true)
+    public bool canChangeState = true;   // 主角死亡时会 Lock()(Player_DeadState 锁、Revive 解锁);小怪/boss 用不到(恒 true)
 
     public void Initialize(EntityState startState)
     {

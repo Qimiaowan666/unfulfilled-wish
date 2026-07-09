@@ -22,7 +22,7 @@ public class ShopUI : MonoBehaviour
     [Header("按钮")]
     public Button exitButton;
 
-    [Header("详情确认弹窗")]
+    [Header("详情确认")]
     public GameObject detailPopup;     // 弹窗根（默认隐藏）
     public Image      detailIcon;
     public TMP_Text   detailName;
@@ -171,7 +171,7 @@ public class ShopUI : MonoBehaviour
         return lines.Count > 0 ? string.Join("\n", lines) : "无属性加成";
     }
 
-    // 点一行 → 不直接买，弹出详情确认框
+    // 点一行 → 不直接买，把详情填进常驻的右侧详情面板（含购买确认按钮）
     void AddRow(string label, string details, int price, int quantity, Sprite icon, System.Func<bool> buyAction)
     {
         int index = rowSelectActions.Count;

@@ -34,6 +34,10 @@ public class PlayerController : Entity
     public PlayerInput         Input        { get; private set; }
     public Player_SkillManager SkillManager { get; private set; }   // 子节点 "Skills" 上挂
 
+    // 主精灵(受击闪白/特效 tint 取色用)。懒缓存,免得各状态每次 GetComponentInChildren 走层级。
+    SpriteRenderer mainSpriteCache;
+    public SpriteRenderer MainSprite => mainSpriteCache != null ? mainSpriteCache : (mainSpriteCache = GetComponentInChildren<SpriteRenderer>());
+
     // ── Cooldown Timers ──────────────────────────────────────────────
     public float dashCooldownTimer    { get; private set; }
     public float counterCooldownTimer { get; private set; }

@@ -1,26 +1,24 @@
 using System.Collections;
 using UnityEngine;
 
-// 顿帧:命中瞬间把时间压到极慢一小会儿(realtime 计时),增强打击感。懒加载常驻单例。
+// 顿帧:命中瞬间把时间压到极慢一小会儿(realtime 计时),增强打击感。常驻单例(摆在 Bootstrap 的 FxSystems)。
 // 用法:Hitstop.Do();  或 Hitstop.Do(0.12f, 0.04f);
 public class Hitstop : MonoBehaviour
 {
     static Hitstop inst;
     static bool busy;
 
-    static Hitstop Inst
+    void Awake()
     {
-        get
-        {
-            if (inst == null) { var go = new GameObject("Hitstop"); inst = go.AddComponent<Hitstop>(); DontDestroyOnLoad(go); }
-            return inst;
-        }
+        if (inst != null && inst != this) { Destroy(gameObject); return; }
+        inst = this;
+        DontDestroyOnLoad(gameObject);
     }
 
     public static void Do(float duration = 0.1f, float scale = 0.04f)
     {
-        if (busy) return;
-        Inst.StartCoroutine(Inst.Run(duration, scale));
+        if (busy || inst == null) return;
+        inst.StartCoroutine(inst.Run(duration, scale));
     }
 
     IEnumerator Run(float d, float scale)

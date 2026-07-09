@@ -284,20 +284,22 @@ public class PauseMenu : MonoBehaviour
 
         for (int i = 0; i < n; i++)
         {
-            bool has = save != null && save.HasSlot(i);
-            var meta = has ? save.GetSlotMeta(i) : null;
+            bool has   = save != null && save.HasSlot(i);
+            var  meta  = has ? save.GetSlotMeta(i) : null;
+            bool valid = meta != null;   // 文件存在 ≠ 能读:空/损坏档 has=true 但 meta=null,直接读 meta.xxx 会 NRE
 
-            UpdateThumb(i, has && save != null ? save.LoadThumbnail(i) : null);
+            UpdateThumb(i, valid ? save.LoadThumbnail(i) : null);
 
             if (slotInfos != null && i < slotInfos.Length && slotInfos[i] != null)
-                slotInfos[i].text = has
+                slotInfos[i].text = valid
                     ? $"<b>槽 {i + 1}</b>\n{SceneStr(meta.sceneName)}\n{TimeStr(meta.savedAtUtc)}   金币 {meta.gold}"
-                    : $"<b>槽 {i + 1}</b>\n<color=#7c766a>空档位</color>";
+                    : has ? $"<b>槽 {i + 1}</b>\n<color=#b0413e>损坏存档</color>"
+                          : $"<b>槽 {i + 1}</b>\n<color=#7c766a>空档位</color>";
 
             if (slotCards[i] != null)
-                slotCards[i].interactable = page == Page.Save || has;
+                slotCards[i].interactable = page == Page.Save || valid;   // 读档页:损坏档不可选(存档页任意槽可覆盖)
             if (slotDeletes != null && i < slotDeletes.Length && slotDeletes[i] != null)
-                slotDeletes[i].gameObject.SetActive(has);
+                slotDeletes[i].gameObject.SetActive(has);                 // 有文件就能删(含损坏档,方便清掉)
         }
     }
 

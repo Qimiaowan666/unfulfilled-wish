@@ -31,7 +31,7 @@ public class SkillSystem : MonoBehaviour
         SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
-    // 常驻系统：切场景后玩家重建，重新把被动加成应用到新玩家
+    // 常驻系统：玩家是 DontDestroyOnLoad 单例，gameplay 间切场景不重建；但经非游戏场景(主菜单)往返会重建。每次场景加载后兜底把被动加成重同步到当前玩家 Stats。
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         ReapplyPassives();
@@ -95,7 +95,7 @@ public class SkillSystem : MonoBehaviour
 
     void ReapplyPassives()
     {
-        var stats = FindAnyObjectByType<PlayerStats>();
+        var stats = PlayerController.Instance?.Stats;
         if (stats == null) return;
 
         GetPassiveBonusPercents(out float attackPercent, out float defensePercent);

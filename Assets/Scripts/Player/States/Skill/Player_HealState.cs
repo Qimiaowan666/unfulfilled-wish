@@ -1,7 +1,7 @@
 using UnityEngine;
 
 // 治疗状态：持续施法 castDuration 秒。期间锁住玩家水平移动 + 不接收任何全局过渡（不能放别的技能 / dash / counter）
-// 期间播 rest 动画（通过 isHealing bool + anim.Play 强切）+ 武侠绿气 sprite 帧动画
+// 期间播 rest 动画（纯 isHealing bool 驱动（Entry→rest / rest→Exit））+ 武侠绿气 sprite 帧动画
 // 中途受击 → 打断不回血；完成 → 调 PlayerStats.TakeDamage(-amount) 回血
 public class Player_HealState : PlayerBaseState
 {
@@ -25,7 +25,7 @@ public class Player_HealState : PlayerBaseState
 
         if (skill.VfxEnabled)
             activeVfx = VfxManager.PlayLoop("Vfx/HealAura", player.transform, (Vector3)skill.VfxLocalOffset, 1f,
-                                            skill.VfxTint, player.GetComponentInChildren<SpriteRenderer>());
+                                            skill.VfxTint, player.MainSprite);
         AudioManager.Instance?.PlayHeal();
 
         player.Stats.OnDamaged += OnDamagedDuringCast;

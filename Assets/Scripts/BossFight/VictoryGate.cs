@@ -1,6 +1,6 @@
 using UnityEngine;
 
-// 通关门：boss 击破演出结束后由 LevelManager 调 Appear() 出现。
+// 通关门：boss 击破演出结束后由 BossBattleManager 调 Appear() 出现。
 // 继承 InteractTrigger（和传送门/火堆/拾取一套木框）：玩家进触发区 → 头顶木框 “F 通关”，按 F → 通关画面(VictoryUI)。默认隐藏。
 // 读档时按“场上有没有存活 boss”自动收起/出现：
 //   · 读到未击破档(boss 复活) → Hide（避免不打 boss 直接通关）

@@ -27,7 +27,7 @@ public abstract class EntityState
 
     public virtual void Exit() => SetAnimBool(false);
 
-    // animBoolName 留空(如小怪非攻击态)→ 什么都不做,纯靠 Anim.Play
+    // animBoolName 留空(如小怪攻击态)→ 什么都不做,纯靠 Anim.Play
     void SetAnimBool(bool value)
     {
         if (!string.IsNullOrEmpty(animBoolName) && anim != null && anim.runtimeAnimatorController != null)

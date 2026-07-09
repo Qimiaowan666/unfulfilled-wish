@@ -270,8 +270,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DamageFeedback
   flashColor: {r: 1, g: 1, b: 1, a: 1}
   flashDuration: 0.08
-  flashMaterial: {fileID: 2100000, guid: 6e20bf32e09be244d89d5ec3700faba1, type: 2}
+  warnColor: {r: 1, g: 0, b: 0, a: 1}
+  hitFlashMaterial: {fileID: 2100000, guid: 5d8f13000b46abb43976f9054a937bd3, type: 2}
   knockbackDuration: 0.1
+  immuneToKnockback: 0
 --- !u!114 &1183578778618374012
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -295,10 +297,6 @@ MonoBehaviour:
   dashCooldown: 1
   maxComboStep: 3
   comboResetTime: 0.8
-  attackDurations:
-  - 0.3
-  - 0.3
-  - 0.4
   attackDamageMultipliers:
   - 1
   - 1
@@ -319,7 +317,6 @@ MonoBehaviour:
   perfectBlockPenaltyResetTime: 0.5
   counterWindow: 0.3
   counterCooldown: 0.5
-  counterPoiseDamage: 60
   executeDamageMultiplier: 20
   executeDuration: 0.8
   executeRange: 2
@@ -395,17 +392,6 @@ MonoBehaviour:
   showHitbox: 0
   animStateName: attack2
   animSpeedScale: 1
-  slashEnabled: 1
-  slashColor: {r: 1, g: 1, b: 1, a: 0.8}
-  slashWidth: 0.4
-  slashDuration: 0.25
-  slashOffset: 0.4
-  slashHeight: 2
-  slashBulge: 0.6
-  afterimageEnabled: 1
-  afterimageCount: 3
-  afterimageTint: {r: 0.6, g: 0.8, b: 1, a: 0.55}
-  afterimageDuration: 0.3
 --- !u!114 &1204039863639461142
 MonoBehaviour:
   m_ObjectHideFlags: 0

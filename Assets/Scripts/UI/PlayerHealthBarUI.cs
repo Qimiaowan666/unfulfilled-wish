@@ -30,7 +30,7 @@ public class PlayerHealthBarUI : MonoBehaviour
     Vector2 shakeOrigin;
     Color hpOriginalColor;
     bool cached;
-    LiquidBar hpLiquid, ghostLiquid, staminaLiquid;   // 液体条驱动（暗黑4式波浪），无则回退 fillAmount
+    LiquidBar hpLiquid, ghostLiquid, staminaLiquid;   // 液体条驱动（液体波浪），无则回退 fillAmount
     bool firstFill = true;             // 首次填充瞬间到位，之后才晃
     bool firstStamina = true;
     Coroutine shakeRoutine;

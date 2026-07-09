@@ -16,7 +16,7 @@ public class Enemy_AttackState : EnemyBaseState
     {
         enemy.Attack.Tick();
         if (!enemy.Attack.Active)   // 连段打完 → 回追击/待命
-            stateMachine.ChangeState(enemy.playerTransform != null ? (EnemyBaseState)enemy.chaseState : enemy.idleState);
+            stateMachine.ChangeState(enemy.playerTransform != null ? (EnemyBaseState)enemy.chaseState : enemy.patrolState);
     }
 
     public override void Exit()

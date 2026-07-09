@@ -14,8 +14,8 @@ public class Player_IdleState : Player_GroundedState
     public override void Update()
     {
         base.Update();
+        if (stateMachine.currentState != this) return;   // base.Update 可能已把状态切走 → 先判断,别再擦掉新态这一帧的速度
         rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
-        if (stateMachine.currentState != this) return;
 
         if (input.MoveInput.x != 0f)
             stateMachine.ChangeState(player.moveState);

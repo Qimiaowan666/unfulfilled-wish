@@ -1,6 +1,6 @@
 using UnityEngine;
 
-// 地面型小怪共享基类：状态机(Idle/Move/Chase/Attack/Stunned/Dead) + 巡逻/探测/位移。
+// 地面型小怪共享基类：状态机(Patrol/Chase/Attack/Stunned/Dead) + 巡逻/探测/位移。
 // 攻击池/连段/命中/动画 已上移到 EnemyBase(小怪与 boss 共用)。
 // AoTengu(最基础，1 招)与 DemonSamurai(多招 + 变身)都继承它。
 public abstract class GroundEnemy : EnemyBase
@@ -73,8 +73,7 @@ public abstract class GroundEnemy : EnemyBase
     }
 
     // ── 状态机(stateMachine 本体在 EnemyBase,这里只声明各状态)──
-    public Enemy_IdleState    idleState    { get; private set; }
-    public Enemy_MoveState    moveState    { get; private set; }
+    public Enemy_PatrolState  patrolState  { get; private set; }   // 待机+巡逻合一(旧 idle/move 合并)
     public Enemy_ChaseState   chaseState   { get; private set; }
     public Enemy_AttackState  attackState  { get; private set; }
     public Enemy_StunnedState stunnedState { get; private set; }
@@ -85,13 +84,12 @@ public abstract class GroundEnemy : EnemyBase
         base.Awake();
         PatrolOrigin = transform.position;
         stateMachine = new StateMachine();
-        idleState    = new Enemy_IdleState(this, stateMachine);
-        moveState    = new Enemy_MoveState(this, stateMachine);
+        patrolState  = new Enemy_PatrolState(this, stateMachine);
         chaseState   = new Enemy_ChaseState(this, stateMachine);
         attackState  = new Enemy_AttackState(this, stateMachine);
         stunnedState = new Enemy_StunnedState(this, stateMachine);
         deadState    = new Enemy_DeadState(this, stateMachine);
-        stateMachine.Initialize(idleState);
+        stateMachine.Initialize(patrolState);
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         ValidateAttacks();
 #endif
@@ -136,6 +134,7 @@ public abstract class GroundEnemy : EnemyBase
         if (CurrentHP <= 0f) return;
         if (attackCooldownTimer > 0f) attackCooldownTimer -= Time.deltaTime;
         stateMachine.Update();
+        FeedLocomotionSpeed();   // 混合树驱动 idle↔walk(基类统一;仅有 Speed 参数的怪生效)
     }
 
     protected override void OnPoiseBroken()
@@ -145,7 +144,16 @@ public abstract class GroundEnemy : EnemyBase
         stateMachine.ChangeState(stunnedState);
     }
     protected override void OnDeath()   => stateMachine.ChangeState(deadState);
-    protected override void OnRespawn() { ResetForm(); stateMachine.ChangeState(idleState); }
+    protected override void OnRespawn()
+    {
+        // 停掉直接 StartCoroutine 起的变身/后撤/悬空协程:它们跑在状态机外,ChangeState 停不掉,
+        // 读档/复活后会从挂起点恢复运行 → 重复叠 buff(永久烈焰)/ 把 Invincible 卡在 true。参照 MinotaurBoss.OnRespawn。
+        StopAllCoroutines();
+        Attack.Cancel();       // 清进行中的连段/驱动(恢复无敌·物理·动画速度)
+        Invincible = false;    // 兜底:变身/后撤中途被掐断,Invincible 可能停在 true(变身/后撤各自直接设的,Attack.Cancel 管不到)
+        ResetForm();
+        stateMachine.ChangeState(patrolState);
+    }
 
     // 死亡后等死亡动画播完再消失
     protected override float DeathDisableDelay

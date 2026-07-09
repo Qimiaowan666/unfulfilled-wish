@@ -15,12 +15,12 @@ public class ShopNPCTrigger : InteractTrigger
     // 显示条件 ShowPrompt 仍用基类默认(店一开就隐藏提示,让位给商店 UI)
     protected override bool WantsInteract => ShopUI.IsOpen || Time.timeScale > 0f;
 
-    protected override void OnPlayerEnter() { shopUI = FindAnyObjectByType<ShopUI>(); }
-    protected override void OnPlayerExit()  { FindAnyObjectByType<ShopUI>()?.Close(); }
+    protected override void OnPlayerEnter() { shopUI = ShopUI.Instance; }
+    protected override void OnPlayerExit()  { ShopUI.Instance?.Close(); }
 
     protected override void Interact()
     {
-        shopUI = shopUI != null ? shopUI : FindAnyObjectByType<ShopUI>();
+        shopUI = ShopUI.Instance;
         if (shopUI == null) return;
 
         if (ShopUI.IsOpen) shopUI.Close();

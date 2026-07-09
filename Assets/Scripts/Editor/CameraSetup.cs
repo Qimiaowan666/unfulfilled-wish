@@ -3,7 +3,7 @@ using UnityEditor;
 using UnityEngine;
 using Unity.Cinemachine;
 
-// 一键搭建 Cinemachine 相机，配置照 Nine Sols 风格（横向灵敏、纵向迟钝、关 Lookahead）
+// 一键搭建 Cinemachine 相机（横版跟随手感：横向灵敏、纵向迟钝、关 Lookahead）
 // 用法：Tools > Setup > Add Cinemachine Camera (Player Follow)
 public static class CameraSetup
 {
@@ -67,7 +67,7 @@ public static class CameraSetup
             vcam.Target = t;
         }
 
-        // PositionComposer（Nine Sols 风格：横快纵慢，关 Lookahead）
+        // PositionComposer（横快纵慢，关 Lookahead）
         composer.CameraDistance   = 10f;
         composer.TargetOffset     = Vector3.zero;
         composer.Damping          = new Vector3(0.3f, 0.7f, 1f);   // X 灵敏、Y 迟钝
@@ -82,7 +82,7 @@ public static class CameraSetup
         comp.HardLimits.Offset    = Vector2.zero;
         composer.Composition = comp;
 
-        // Lookahead 关闭（Nine Sols 不依赖前瞻，纯延迟跟随）
+        // Lookahead 关闭（不依赖前瞻，纯延迟跟随）
         var look = composer.Lookahead;
         look.Enabled   = false;
         look.Time      = 0f;

@@ -36,7 +36,7 @@ public class PlayerStats : MonoBehaviour
     public float CurrentHP { get; private set; }
     public float CurrentGhostHP { get; private set; }
     public float CurrentStamina { get; private set; }
-    public bool IsInvulnerable { get; private set; }
+    public bool IsInvulnerable => invulnHeld || Time.time < invulnUntil;   // 两类无敌来源并存:held(冲刺/突刺/处决过程,进态开·出态关)或定时(处决后摇)任一有效即无敌
     public float SkillAttackBonus => baseAttack * skillAttackPercent / 100f;
     public float SkillDefenseBonus => baseDefense * skillDefensePercent / 100f;
 
@@ -48,6 +48,7 @@ public class PlayerStats : MonoBehaviour
     public event Action OnDeath;
 
     bool deathTriggered;
+    DamageFeedback feedback;
     float equipmentAttackBonus;
     float equipmentDefenseBonus;
     float skillAttackPercent;
@@ -55,6 +56,7 @@ public class PlayerStats : MonoBehaviour
 
     void Awake()
     {
+        feedback = GetComponent<DamageFeedback>();
         RecalculateCombatStats(false);
         CurrentHP = maxHP;
         CurrentGhostHP = 0f;
@@ -139,32 +141,21 @@ public class PlayerStats : MonoBehaviour
         OnDamaged?.Invoke(damage);
         Debug.Log($"[{System.DateTime.Now:HH:mm:ss.fff}] [受伤] 主角 -{damage:0.#}  HP {CurrentHP:0}/{maxHP:0}");
 
-        var feedback = GetComponent<DamageFeedback>();
         if (feedback != null) feedback.Flash();
         CameraShake.Shake(0.1f, 0.06f);
 
         if (CurrentHP <= 0f) Die();
     }
 
-    public void SetInvulnerable(bool value)
-    {
-        IsInvulnerable = value;
-    }
+    // 无敌拆成两条独立通道,任一有效即无敌(见 IsInvulnerable),避免它们互相覆盖:
+    //   invulnHeld  —— "进 state 开 / 出 state 关"的持续无敌(冲刺 / 突刺 / 处决过程中)
+    //   invulnUntil —— 定时无敌(处决后摇 0.35s)的截止时刻
+    // 旧版共用一个 bool:冲刺 Exit 的 SetInvulnerable(false) 会误清掉正生效的处决后摇无敌(反之亦然)。分开后不再互相清。
+    bool  invulnHeld;
+    float invulnUntil = -1f;
 
-    // 限时无敌:设无敌并在 duration 秒后自动解除(处决收尾的"后摇无敌帧")
-    Coroutine invulnCo;
-    public void SetInvulnerableFor(float duration)
-    {
-        SetInvulnerable(true);
-        if (invulnCo != null) StopCoroutine(invulnCo);
-        invulnCo = StartCoroutine(InvulnTimer(duration));
-    }
-    IEnumerator InvulnTimer(float d)
-    {
-        yield return new WaitForSeconds(d);
-        SetInvulnerable(false);
-        invulnCo = null;
-    }
+    public void SetInvulnerable(bool value)        => invulnHeld  = value;
+    public void SetInvulnerableFor(float duration) => invulnUntil = Time.time + Mathf.Max(0f, duration);
 
     public void ApplyStatBonus(float attackDelta, float defenseDelta, float maxHPDelta, bool healMaxHPIncrease = false)
     {
@@ -246,16 +237,13 @@ public class PlayerStats : MonoBehaviour
     public void LoadSavedVitals(float currentHP, float currentGhostHP, float savedStamina, int savedGold)
     {
         deathTriggered = false;
-        IsInvulnerable = false;
-        CurrentHP = Mathf.Clamp(currentHP, 0f, maxHP);
+        invulnHeld = false; invulnUntil = -1f;   // 读档/复活:两条无敌通道都清空
+        CurrentHP = Mathf.Clamp(currentHP, 1f, maxHP);   // 下限 1:读档是恢复状态,绝不把玩家读成尸体(死亡只由战斗扣血触发,不由读档触发)
         CurrentGhostHP = Mathf.Max(0f, currentGhostHP);
         CurrentStamina = Mathf.Clamp(savedStamina, 0f, maxStamina);
         gold = Mathf.Max(0, savedGold);
         NotifyStatsChanged();
         OnStaminaChanged?.Invoke(CurrentStamina, maxStamina);
-
-        if (CurrentHP <= 0f)
-            Die();
     }
 
     public void AddGold(int amount)
@@ -267,7 +255,7 @@ public class PlayerStats : MonoBehaviour
     public void RestoreAll()
     {
         deathTriggered = false;
-        IsInvulnerable = false;
+        invulnHeld = false; invulnUntil = -1f;   // 读档/复活:两条无敌通道都清空
         CurrentHP = maxHP;
         CurrentGhostHP = 0f;
         NotifyStatsChanged();
@@ -300,6 +288,6 @@ public class PlayerStats : MonoBehaviour
         deathTriggered = true;
         AudioManager.Instance?.PlayDeath();
         OnDeath?.Invoke();
-        GameManager.Instance?.TriggerGameOver();   // 任何场景死亡都触发 GameOver（不依赖关卡级 LevelManager）
+        GameManager.Instance?.TriggerGameOver();   // 任何场景死亡都触发 GameOver（不依赖 BossBattleManager）
     }
 }

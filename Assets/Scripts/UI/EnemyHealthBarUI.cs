@@ -17,6 +17,7 @@ public class EnemyHealthBarUI : MonoBehaviour
     float visibleTimer;
     Collider2D targetCol;
     RectTransform rt;
+    Camera cam;
     float baseWidthPx = 150f;
 
     void Awake()
@@ -83,8 +84,9 @@ public class EnemyHealthBarUI : MonoBehaviour
                 1f);
         }
 
-        if (Camera.main != null)
-            transform.rotation = Camera.main.transform.rotation;
+        if (cam == null) cam = Camera.main;
+        if (cam != null)
+            transform.rotation = cam.transform.rotation;
     }
 
     // 任一变化(HP 或韧性)都把两条都刷新到当前值，避免血条出现时显示 stale(如满血只扣韧 → 血条空成黑底)

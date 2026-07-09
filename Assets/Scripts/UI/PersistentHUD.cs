@@ -1,7 +1,7 @@
 using UnityEngine;
 
 // 让 PlayerHUD_Canvas 跨场景常驻、全局唯一（挂在 Bootstrap 的 PlayerHUD_Canvas 根上）。
-// HUD 内部 PlayerHealthBarUI / BossHealthBarUI 会在每次 sceneLoaded 重新绑定当前场景的玩家/boss。
+// HUD 内部的 PlayerHealthBarUI 每次 sceneLoaded 重绑当前场景玩家;BossHealthBarUI 是场景级独立对象(不在本 HUD 内),靠 Start/SaveSystem.AfterApply/Update 自愈重绑。
 // 仿 PersistentEventSystem。
 public class PersistentHUD : MonoBehaviour
 {

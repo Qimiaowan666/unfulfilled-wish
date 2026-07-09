@@ -18,15 +18,15 @@
 
 **入口 & 触发**
 - 这些对象都不是代码 new 的,而是预先摆在 `Bootstrap.unity` 场景里,靠各自 `Awake` 做单例 + `DontDestroyOnLoad` 常驻(符合项目"常驻单例进 Bootstrap"的约定)。
-- 玩家死亡:`PlayerStats.cs:303` 在 `Die()` 里调 `GameManager.Instance?.TriggerGameOver()`(任何场景死亡都触发,不依赖关卡级 LevelManager)。
+- 玩家死亡:`PlayerStats.cs:303` 在 `Die()` 里调 `GameManager.Instance?.TriggerGameOver()`(任何场景死亡都触发,不依赖关卡级 BossBattleManager)。
 - 暂停:`UI/PauseMenu.cs:112/183` 调 `TogglePause()`;`PauseMenu` 同时订阅 `OnGamePaused/OnGameResumed`(`:158-166`)开关面板。
-- 重试/换场景:`UI/GameOverUI.cs:59` 调 `RestartScene()`,`:66` 调 `LoadScene(MainMenu)`;`PauseMenu`、`VictoryUI`、`MainMenuUI`、`SaveSystem.cs:416`、`LevelManager.cs:117`、`Interactables/SceneLoadTrigger.cs:62` 都通过 `LoadScene()` 切场景。
+- 重试/换场景:`UI/GameOverUI.cs:59` 调 `RestartScene()`,`:66` 调 `LoadScene(MainMenu)`;`PauseMenu`、`VictoryUI`、`MainMenuUI`、`SaveSystem.cs:416`、`BossBattleManager.cs:117`、`Interactables/SceneLoadTrigger.cs:62` 都通过 `LoadScene()` 切场景。
 - 设置面板调 `GameSettings.SetBGMVolume/SetSFXVolume/SetFullscreen/SetResolution`(`UI/PauseMenu.cs`)。
 
 **依赖 & 被依赖**
 - GameManager 依赖:`SaveSystem`(`PrepareRespawn` `Save/Save.cs:251`、`Load` 取 `sceneName`)、`PlayerController.Revive`(`:167`)/`PlayerStats.RestoreAll`(`:267`)、`EnemyBase`(`Respawn()`、`RespawnsAtCheckpoint`(`Enemy/EnemyBase.cs:51`)、`Initialized`(`:66`))、`SceneNames`(`Util/GameConstants.cs:14`)。
 - GameSettings 依赖:`AudioManager.Instance`(`Audio/AudioManager.cs:8`,音量实际生效与默认值兜底)。
-- 被依赖:`PlayerStats`(GameOver)、`PauseMenu`/`GameOverUI`/`VictoryUI`/`MainMenuUI`/`CharacterPanelUI`/`ShopUI`(状态查询 + 事件订阅 + 换场景)、`SaveSystem`/`LevelManager`/`SceneLoadTrigger`(换场景)。`SceneNames.IsNonGameplay`(`Util/GameConstants.cs:24`)被各处用来判断"非游玩场景不暂停/不读档"。
+- 被依赖:`PlayerStats`(GameOver)、`PauseMenu`/`GameOverUI`/`VictoryUI`/`MainMenuUI`/`CharacterPanelUI`/`ShopUI`(状态查询 + 事件订阅 + 换场景)、`SaveSystem`/`BossBattleManager`/`SceneLoadTrigger`(换场景)。`SceneNames.IsNonGameplay`(`Util/GameConstants.cs:24`)被各处用来判断"非游玩场景不暂停/不读档"。
 
 **关键设计 / 易错点**
 - 单例约定:GameManager / PersistentEventSystem 都不自动创建,必须实例摆在 Bootstrap 场景里;别在别处 new 或用 Resources 另起一个(见项目记忆"常驻单例进 Bootstrap")。`Awake` 里 `transform.SetParent(null)` 后再 `DontDestroyOnLoad`——子物体不能跨场景常驻,必须先脱父。

@@ -5,11 +5,8 @@ public class MinotaurBoss : EnemyBase
 {
     // ── State Machine(stateMachine 本体在 EnemyBase,这里只声明各状态)──
     public Boss_IdleState      idleState      { get; private set; }
-    public Boss_BattleState    battleState    { get; private set; }
-    public Boss_ChaseState     chaseState     { get; private set; }
-    public Boss_WaitState      waitState      { get; private set; }
+    public Boss_CombatState    combatState    { get; private set; }   // 决策+走近+站等 合一(原 Battle/Chase/Wait)
     public Boss_AttackState    attackState    { get; private set; }   // 薄壳,驱动统一运行器跑连段
-    public Boss_EnragedState   enragedState   { get; private set; }
     public Boss_StunnedState   stunnedState   { get; private set; }
     public Boss_StaggerState   staggerState   { get; private set; }
     public Boss_DeadState      deadState      { get; private set; }
@@ -38,7 +35,6 @@ public class MinotaurBoss : EnemyBase
     // ── Runtime ──────────────────────────────────────────────────────
     public bool  IsPhase2     { get; private set; }
 
-    DamageFeedback damageFeedback;
     SpriteRenderer spriteRenderer;
     Color          baseSpriteColor = Color.white;   // 原始基色（怒气染色后复活还原用）
 
@@ -49,8 +45,6 @@ public class MinotaurBoss : EnemyBase
     BossHealthBarUI   phaseBossBar;
 
     GameObject rageAura;   // 二阶段常态怒气粒子（跟随 boss，非 parent 避免被 5x 缩放）
-
-    public DamageFeedback DamageFeedback => damageFeedback;
 
     // ── 统一攻击系统钩子(招/连段/驱动在 EnemyBase + AttackRunner)──────────
     public override float DamageMultiplier => IsPhase2 ? phase2AttackMultiplier : 1f;   // 二阶段加伤
@@ -64,17 +58,13 @@ public class MinotaurBoss : EnemyBase
     protected override void Awake()
     {
         base.Awake();
-        damageFeedback = GetComponent<DamageFeedback>();
         spriteRenderer = GetComponentInChildren<SpriteRenderer>();
         if (spriteRenderer != null) baseSpriteColor = spriteRenderer.color;
 
         stateMachine  = new StateMachine();
         idleState     = new Boss_IdleState(this, stateMachine);
-        battleState   = new Boss_BattleState(this, stateMachine);
-        chaseState    = new Boss_ChaseState(this, stateMachine);
-        waitState     = new Boss_WaitState(this, stateMachine);
+        combatState   = new Boss_CombatState(this, stateMachine);
         attackState   = new Boss_AttackState(this, stateMachine);
-        enragedState  = new Boss_EnragedState(this, stateMachine);
         stunnedState  = new Boss_StunnedState(this, stateMachine);
         staggerState  = new Boss_StaggerState(this, stateMachine);
         deadState     = new Boss_DeadState(this, stateMachine);
@@ -91,7 +81,11 @@ public class MinotaurBoss : EnemyBase
 
         CheckPhase2();
         UpdateRageAura();
-        stateMachine.Update();
+        if (PhaseTransition)
+            Rb.linearVelocity = new Vector2(0f, Rb.linearVelocity.y);   // 二阶段演出:定身站着,不跑战斗 FSM(原 Enraged 态干的活)
+        else
+            stateMachine.Update();
+        FeedLocomotionSpeed();   // 混合树驱动 idle↔walk(和小怪共用基类实现)
     }
 
     // 二阶段常态怒气粒子：进二阶段时挂上，每帧跟随 boss 中心 + 按朝向翻转(鼻息方向)
@@ -118,10 +112,14 @@ public class MinotaurBoss : EnemyBase
         if (IsPhase2) return;
         if (!combatEnabled) return;   // 沉睡 / 读档未开战时不触发，避免演出误放
         if (CurrentHP / maxHP >= phase2HPThreshold) return;
-        if (stateMachine.currentState == deadState || stateMachine.currentState == enragedState) return;
+        if (stateMachine.currentState == deadState) return;
 
         IsPhase2 = true;
-        stateMachine.ChangeState(enragedState);
+        // 原 Enraged 态 Enter 的活:收掉进行中的连段(否则 runner 还在跑)+ 定身站 idle + 起演出协程
+        if (Attack.Active) Attack.Cancel();
+        SetOnlyAnimBool("isIdle");
+        Rb.linearVelocity = Vector2.zero;
+        BeginPhase2Transition();
     }
 
     // ── 二阶段过渡：双方定身 → 咆哮强化 → 恢复 ───────────────────────
@@ -158,12 +156,14 @@ public class MinotaurBoss : EnemyBase
 
         // 2) 吼开：声音 + 顿帧 + 强震 + 冲击波 + 迸发火花 + 把玩家吼飞(播 rest)（boss 位置/大小不变）
         AudioManager.Instance?.PlayBossRoar();
-        Time.timeScale = 0.0001f;                               // 顿帧：世界骤停一瞬（“吼”的冲击感）
+        // 顿帧：世界骤停一瞬（"吼"的冲击感）。这里【不能】走 Hitstop.Do——它的还原判断是 timeScale>0.001f,
+        // 而本处 scale=0.0001(<0.001)会让它永不还原 → timeScale 卡死在 0.0001 → 玩家不退、全卡住。故自管 timeScale。
+        Time.timeScale = 0.0001f;
         yield return new WaitForSecondsRealtime(phase2RoarHitstop);
         Time.timeScale = 1f;
         CameraShake.Shake(0.4f, 0.28f);
         VfxManager.Play("Vfx/BossRoar", FxCenter(), Quaternion.identity, 1f, null, spriteRenderer);
-        ScreenRoarFx.Burst(FxCenter(), 0.85f, 0.9f, Color.black);   // 全屏放射状吼叫爆发（以 boss 为中心，连放 4 波，黑色）
+        ScreenRoarFx.Burst(FxCenter(), 0.85f, 0.9f, Color.black);   // 全屏放射状吼叫爆发（以 boss 为中心，连放 7 波，黑色）
         if (prb != null) prb.simulated = true;
         if (pc  != null) pc.Stun(10f);   // 吼飞=进硬直态 10s(实际由 RestorePhase2State 提前解),击退由 RoarKnockbackPlayer 逐帧驱动
         StartCoroutine(RoarKnockbackPlayer(prb, transform.position, phase2RoarKnockback, phase2RoarKnockTime));
@@ -176,7 +176,7 @@ public class MinotaurBoss : EnemyBase
 
         // 3.5) 爆开：蓄满能量炸开（小顿帧 + 强震 + 释放冲击波 + 更大一波迸发火花；boss 自身不缩放/不位移）
         float explodeLen = AudioManager.Instance?.PlayBossExplode() ?? 0f;   // 先放爆炸声
-        Time.timeScale = 0.0001f;
+        Time.timeScale = 0.0001f;   // 同上：不走 Hitstop.Do(0.0001 < 其还原阈值 0.001,会卡死),自管 timeScale
         yield return new WaitForSecondsRealtime(0.09f);
         Time.timeScale = 1f;
         CameraShake.Shake(1f, 0.35f);
@@ -192,7 +192,7 @@ public class MinotaurBoss : EnemyBase
         // 5) 恢复 + 血条 + 玩家回神，带强化继续战斗；二阶段开场强制一套"二阶段开场"(闪到面前→挑飞接大招)
         RestorePhase2State();
         ForceCombo("二阶段开场");
-        stateMachine.ChangeState(battleState);
+        stateMachine.ChangeState(combatState);
     }
 
     // 复原二阶段过渡的所有副作用（timeScale / 玩家物理与状态 / 血条 / 无敌 / 标志）。
@@ -278,8 +278,9 @@ public class MinotaurBoss : EnemyBase
         StopRageAura();
         damageFeedback?.SetBaseColor(baseSpriteColor);   // 还原怒气染色回原始基色
         stateMachine.ChangeState(idleState);
-        // 强制切回 idle clip：攻击 clip 都是 Anim.Play 强制进入的，仅靠 SetBool("isIdle") 切不回来
-        Anim?.Play("idle", 0, 0f);
+        // 强制切回 Locomotion：攻击 clip 都是 Anim.Play 强制进入的，仅靠 SetBool("isIdle") 切不回来
+        // (idle/walk 已合并成混合树 Locomotion,Speed=0 → 显示 idle 帧)
+        Anim?.Play("Locomotion", 0, 0f);
     }
 
     protected override void OnPoiseBroken()

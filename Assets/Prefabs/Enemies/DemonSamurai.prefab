@@ -214,7 +214,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DamageFeedback
   flashColor: {r: 1, g: 1, b: 1, a: 1}
   flashDuration: 0.08
-  flashMaterial: {fileID: 2100000, guid: 6e20bf32e09be244d89d5ec3700faba1, type: 2}
+  warnColor: {r: 1, g: 0, b: 0, a: 1}
+  hitFlashMaterial: {fileID: 2100000, guid: 5d8f13000b46abb43976f9054a937bd3, type: 2}
   knockbackDuration: 0.1
   immuneToKnockback: 0
 --- !u!114 &456932251332295707
@@ -244,9 +245,7 @@ MonoBehaviour:
   playerLayer:
     serializedVersion: 2
     m_Bits: 0
-  attackCooldown: 1.5
-  specialHitStunDuration: 0.6
-  specialHitKnockback: 8
+  defaultAttackCooldown: 1.5
   executePromptHeight: 1.2
   attacks:
   - id: atk1

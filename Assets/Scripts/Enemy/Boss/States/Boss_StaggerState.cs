@@ -22,6 +22,6 @@ public class Boss_StaggerState : BossBaseState
         if (boss.CurrentHP <= 0f) return;   // OnDeath 会接管
 
         if (stateTimer < 0f)
-            stateMachine.ChangeState(boss.battleState);
+            stateMachine.ChangeState(boss.combatState);
     }
 }

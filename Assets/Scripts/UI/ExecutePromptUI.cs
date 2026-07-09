@@ -16,6 +16,7 @@ public class ExecutePromptUI : MonoBehaviour
 
     PlayerController player;
     EnemyBase target;
+    Camera cam;
 
     void Awake()
     {
@@ -67,7 +68,7 @@ public class ExecutePromptUI : MonoBehaviour
 
     void Reposition()
     {
-        var cam = Camera.main;
+        if (cam == null) cam = Camera.main;
         if (cam == null || boxRect == null || target == null) return;
 
         // 逐怪高度:从敌人原点往上 executePromptHeight(每个怪 prefab 上单独调)

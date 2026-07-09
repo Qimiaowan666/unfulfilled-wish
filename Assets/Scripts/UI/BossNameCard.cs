@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-// 九日式 boss 登场揭幕（通用模板）：黑条展开 → 白罗马名淡入 → 大号红色中文名【逐字弹入】→ 停留 → 整体淡出。
+// boss 登场揭幕名牌（通用模板）：黑条展开 → 白罗马名淡入 → 大号红色中文名【逐字弹入】→ 停留 → 整体淡出。
 // 内容由 BossProfile 数据驱动：Play(profile, hold) 时按 profile.romanSprite + nameChars[] 动态排版（任意字数）。
 // 文字用烘焙 PNG 渲染，绕开中文 TMP 被字体材质乘成黑色的坑。模板挂在场景里（自带 Overlay Canvas）。
 public class BossNameCard : MonoBehaviour

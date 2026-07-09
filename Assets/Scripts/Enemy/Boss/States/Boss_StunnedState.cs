@@ -22,13 +22,13 @@ public class Boss_StunnedState : BossBaseState
         if (boss.CurrentHP <= 0f) return; // OnDeath 会切到 deadState
 
         if (stateTimer < 0f)
-            stateMachine.ChangeState(boss.battleState);
+            stateMachine.ChangeState(boss.combatState);
     }
 
     public override void Exit()
     {
         base.Exit();
         // 无论怎么离开硬直（计时结束 / phase 切换 / 其它打断）都恢复韧性，避免韧性条永久卡空
-        boss.GetComponent<PoiseMeter>()?.ResetPoise();
+        boss.ResetPoise();
     }
 }

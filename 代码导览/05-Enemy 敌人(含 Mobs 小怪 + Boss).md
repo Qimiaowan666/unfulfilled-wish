@@ -64,7 +64,7 @@ Boss(`Enemy/Boss/`):
 被依赖(别人用它,具体到方法):
 - `SaveSystem`(`Save/SaveSystem.cs:333/511/690`)——`FindObjectsByType<EnemyBase>` 批量 `Respawn`/`LoadSaveState`,按 `SaveID`/`RespawnsAtCheckpoint` 区分永久死亡 vs 复活点重生。
 - `CheckpointManager`(`Save/CheckpointManager.cs:27`)——`EnemyBase.AnyBossInCombat()` 为真时禁用火堆(boss 战不许存档/回血)。
-- `LevelManager`(`Level/LevelManager.cs:66`)——按 `isBoss` 找场景 boss,接管 BGM/胜利检测,死亡后按 `nextSceneOnDefeat` 切场景。
+- `BossBattleManager`(`BossFight/BossBattleManager.cs:66`)——按 `isBoss` 找场景 boss,接管 BGM/胜利检测,死亡后触发原子存档 + 击破演出(`BossFinishUI`)+ 通关门(`VictoryGate`)。
 - `EnemyHealthBarUI`/`BossHealthBarUI`(`UI/`)——订阅 `OnHPChanged`/`OnDied` 事件画血条。
 - `BossIntroTrigger`/`BossFogGate`/`VictoryGate`/`EnemyClearGate`(`BossFight/`)——用 `combatEnabled`/`Activate`/`CurrentHP`/`IsDefeated` 控制登场与门禁。
 - `Player_ExecuteState`/`Player_AttackState`/`Player_CounterState`/`Player_BlockState`——玩家侧攻击/处决/识破/格挡的对接点。

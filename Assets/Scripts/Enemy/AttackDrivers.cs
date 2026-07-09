@@ -94,7 +94,7 @@ public class LaunchDriver : AttackDriverBase
 
         if (launched && target != null)
         {
-            var ts = target.GetComponent<PlayerStats>();
+            var ts = target.Stats;
             if (ts != null && ts.IsInvulnerable) { target.EndLift(); target = null; launched = false; }   // 空中翻滚挣脱
             else
             {
@@ -153,7 +153,6 @@ public abstract class LungeDriver : AttackDriverBase
 [System.Serializable, TypeLabel("后撤")] public class LungeBackward : LungeDriver { protected override bool Forward => false; }   // 后撤
 
 // ── 跳劈:出招【中】抛物线跳向玩家,边跳边劈(攻击 clip 与跳同时进行)。命中走 Fire(i)。腾空时无敌,落地解。
-//    和 JumpMover(出招前=先跳完再砍)区别:这个是"跳和砍同时",符合跳劈的最初设计。
 [System.Serializable]
 [TypeLabel("跳劈 (边跳边砍)")]
 public class JumpDriver : AttackDriverBase

@@ -40,6 +40,7 @@ public class DialogueUI : MonoBehaviour
 
     public void Play(DialogueSequence sequence, Action done = null)
     {
+        if (IsPlaying) return;   // 重入守卫:正在放对话时又调 Play,会把 previousTimeScale 记成已冻结的 0 → 结束后还原成 0 卡死游戏
         if (sequence == null || sequence.lines == null || sequence.lines.Count == 0)
         {
             done?.Invoke();

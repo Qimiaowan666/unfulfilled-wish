@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-// 九日式 boss 击破演出（常驻 Bootstrap）：顿帧/慢放 + 全屏压暗 + 角色变白色剪影 + 水墨泼溅白爆 + boss 消散。
+// boss 击破演出（常驻 Bootstrap）：顿帧/慢放 + 全屏压暗 + 角色变白色剪影 + 水墨泼溅白爆 + boss 消散。
 // 白闪布局在 BossFinishUI.prefab；剪影材质(silhouetteMaterial)、压暗块、泼溅、碎屑由代码生成。
 public class BossFinishUI : MonoBehaviour
 {

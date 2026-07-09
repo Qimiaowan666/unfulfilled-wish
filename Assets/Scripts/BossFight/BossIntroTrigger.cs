@@ -12,7 +12,7 @@ public class BossIntroTrigger : MonoBehaviour
     public EnemyBase boss;   // 任意 boss（通用，不绑定具体类型）
     [Tooltip("场景里预摆的登场过场相机(默认低优先级，框 boss)。可在编辑器里调它的取景/大小")]
     public CinemachineCamera bossIntroVcam;
-    [Tooltip("九日式登场揭幕名牌(黑条+罗马名+大红中文名)，吼叫时扫入")]
+    [Tooltip("登场揭幕名牌(黑条+罗马名+大红中文名)，吼叫时扫入")]
     public BossNameCard nameCard;
     [Tooltip("雾门：开战时关上挡住出口，boss 死亡/读档重置时自动开")]
     public BossFogGate fogGate;
@@ -31,6 +31,7 @@ public class BossIntroTrigger : MonoBehaviour
     public static bool Sequencing { get; private set; }
 
     bool played;
+    Rigidbody2D frozenPlayerRb;   // 登场演出里被冻住物理(simulated=false)的玩家 Rb;演出被打断时兜底恢复(OnDisable)
 
     void Start()
     {
@@ -39,7 +40,14 @@ public class BossIntroTrigger : MonoBehaviour
     }
 
     void OnEnable()  { SaveSystem.AfterApply += OnSaveApplied; }
-    void OnDisable() { SaveSystem.AfterApply -= OnSaveApplied; }
+    void OnDisable()
+    {
+        SaveSystem.AfterApply -= OnSaveApplied;
+        // 登场演出中途被打断(切场景/触发器被销毁)→ IntroSequence 协程死在解冻前,
+        // 兜底把玩家物理与 Sequencing 复原,避免常驻玩家永远 simulated=false 卡死(软锁)。
+        if (frozenPlayerRb != null) { frozenPlayerRb.simulated = true; frozenPlayerRb = null; }
+        Sequencing = false;
+    }
     void OnDestroy() { Sequencing = false; }
 
     // 读档 / 重生重新 apply 后：boss 若被还原为存活，则重新沉睡 + 藏血条 + 重置触发，让登场可再次触发。
@@ -62,7 +70,7 @@ public class BossIntroTrigger : MonoBehaviour
     {
         if (played || !BossActive()) return;
         // 兜底：读档/复活点已落在 boss 一侧 → 直接亮条开打、不演出。
-        var player = GameObject.FindGameObjectWithTag(Tags.Player);
+        var player = PlayerController.Instance;
         if (player != null && PlayerPastTrigger(player.transform.position))
         {
             played = true;
@@ -93,7 +101,7 @@ public class BossIntroTrigger : MonoBehaviour
         var prb = playerGo != null ? playerGo.GetComponent<Rigidbody2D>() : null;
         if (prb != null) prb.linearVelocity = Vector2.zero;
         if (pc  != null) pc.stateMachine.ChangeState(pc.idleState);
-        if (prb != null) prb.simulated = false;
+        if (prb != null) { prb.simulated = false; frozenPlayerRb = prb; }   // 记下被冻的 Rb → 演出被打断时 OnDisable 兜底解冻
 
         var cam = Camera.main;
         // 不再手动接管/关 Brain —— 改用临时高优先级 vcam，让 Cinemachine 平滑 blend 进/出，
@@ -137,7 +145,7 @@ public class BossIntroTrigger : MonoBehaviour
         if (nameCard != null) nameCard.Play(boss != null ? boss.profile : null, roarDuration);
         Bar()?.Reveal(barRevealDuration);
         StartCoroutine(BossScalePunch());
-        ScreenRoarFx.Burst(BossSpriteCenter(), 0.85f, 0.88f, Color.black);   // 连放 4 波集中线（黑色）
+        ScreenRoarFx.Burst(BossSpriteCenter(), 0.85f, 0.88f, Color.black);   // 连放 7 波集中线（黑色，波数=ScreenRoarFx.Burst 默认 pulses）
 
         float t = 0f;
         while (t < roarDuration)
@@ -200,6 +208,7 @@ public class BossIntroTrigger : MonoBehaviour
         var pgo = GameObject.FindGameObjectWithTag(Tags.Player);
         var prb = pgo != null ? pgo.GetComponent<Rigidbody2D>() : null;
         if (prb != null) { prb.simulated = true; prb.linearVelocity = Vector2.zero; }
+        frozenPlayerRb = null;   // 正常解冻完成 → 撤销 OnDisable 兜底
         if (boss != null) boss.Activate();
         if (fogGate != null) fogGate.Close();   // 关上雾门，封住出口
         AudioManager.Instance?.PlayBossBGM();
@@ -221,7 +230,8 @@ public class BossIntroTrigger : MonoBehaviour
             boss.FaceToward(player.transform.position);
     }
 
-    BossHealthBarUI Bar() => FindAnyObjectByType<BossHealthBarUI>();
+    BossHealthBarUI barCache;
+    BossHealthBarUI Bar() => barCache != null ? barCache : (barCache = FindAnyObjectByType<BossHealthBarUI>());
 
     bool PlayerPastTrigger(Vector3 playerPos)
     {

@@ -130,7 +130,10 @@ public class AudioManager : MonoBehaviour
 
     void PlayDefaultBGMForScene(string sceneName, bool restart = false)
     {
-        if (sceneName == "MainMenu")
+        if (sceneName == SceneNames.Bootstrap)   // 引导场景不放曲:开机那一帧还在 Bootstrap,马上就切 MainMenu → 由那时的 OnSceneLoaded 放菜单曲(否则会先瞬闪一下区域曲)
+            return;
+
+        if (sceneName == SceneNames.MainMenu)
         {
             PlayBGM(menuBGMClip != null ? menuBGMClip : bgmClip, restart);
             return;
@@ -183,9 +186,9 @@ public class AudioManager : MonoBehaviour
         }
     }
 
-    // PlayPerfectBlock fires both the clang and the Eastern instrument tail simultaneously
     public void PlayDashStrike()     => Play(dashStrikeClip != null ? dashStrikeClip : dashClip);
     public void PlayBlock()          => Play(blockClip);
+    // 完美格挡：当啷声 + 东方乐器尾音同时播
     public void PlayPerfectBlock()   { Play(perfectBlockClip); Play(perfectBlockTailClip); }
     // 成功识破：兵刃相交稍延后于提刀（~0.08s），错开避免被提刀盖住，形成“提刀→当啷”的先后层次
     public void PlayCounter()        => PlayDelayed(counterClip, 0.08f);

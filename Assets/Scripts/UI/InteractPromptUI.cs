@@ -14,6 +14,7 @@ public class InteractPromptUI : MonoBehaviour
     [Tooltip("相对世界点的屏幕像素偏移")]
     public Vector2 screenOffset = Vector2.zero;
 
+    Camera cam;
     static Vector3 worldPos;
     static object  owner;
 
@@ -50,7 +51,7 @@ public class InteractPromptUI : MonoBehaviour
 
     void Reposition()
     {
-        var cam = Camera.main;
+        if (cam == null) cam = Camera.main;
         if (cam == null || boxRect == null) return;
         Vector3 sp = cam.WorldToScreenPoint(worldPos);
         if (sp.z < 0f) { if (box != null) box.SetActive(false); return; }

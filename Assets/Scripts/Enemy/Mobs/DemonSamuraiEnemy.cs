@@ -1,7 +1,7 @@
 using System.Collections;
 using UnityEngine;
 
-// 恶魔武士：多招(atk1/2/3 近战 + jumpattack 突进)，HP 降到 50% 吼叫变身 → 火焰形态(换 _flame 动画 + 攻防速强化)。
+// 恶魔武士：多招(atk1/2/3 近战 + jumpattack 突进)，HP 降到 50% 吼叫变身 → 火焰形态(换 _flame 动画 + 攻击/移速强化)。
 public class DemonSamuraiEnemy : GroundEnemy
 {
     [Header("变身 (50% HP → 火焰形态)")]
@@ -49,7 +49,7 @@ public class DemonSamuraiEnemy : GroundEnemy
         Invincible       = false;
         transforming     = false;
         // 干净地回到追击/待机(火焰形态)
-        stateMachine.ChangeState(playerTransform != null ? (EnemyBaseState)chaseState : idleState);
+        stateMachine.ChangeState(playerTransform != null ? (EnemyBaseState)chaseState : patrolState);
     }
 
     protected override void Update()
@@ -73,6 +73,6 @@ public class DemonSamuraiEnemy : GroundEnemy
         }
         transformed  = false;
         transforming = false;
-        if (Anim != null) Anim.SetBool("isFlame", false);    // 退回基础形态
+        if (Anim != null) { Anim.SetBool("isFlame", false); Anim.SetBool("isShout", false); }   // 退回基础形态 + 清吼叫态(变身中途被掐断时残留)
     }
 }

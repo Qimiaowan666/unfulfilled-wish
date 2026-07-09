@@ -63,7 +63,7 @@ public class Player_CounterState : PlayerBaseState
         // 识破成功：暖金火花（更大更亮，系统粒子预制，走 VfxManager 池）
         Vector3 sp = player.transform.position + new Vector3((player.FacingRight ? 1f : -1f) * 0.7f, 0.95f, 0f);
         VfxManager.Play("Vfx/GuardSpark", sp, Quaternion.identity, 1.2f,
-                        new Color(1f, 0.8f, 0.45f), player.GetComponentInChildren<SpriteRenderer>());
+                        new Color(1f, 0.8f, 0.45f), player.MainSprite);
         enemy.OnCountered();   // 切到 boss 的 staggerState，结束当前攻击 + 短暂停顿
         enemy.ApplyPoiseDamage(player.Stats.counterPoiseDamage);   // 识破再削一截韧性（凑满 → 升级成破韧大硬直）
         CombatSignals.RaiseCountered();

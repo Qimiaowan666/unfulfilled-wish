@@ -24,7 +24,7 @@ public class Enemy_StunnedState : EnemyBaseState
         if (stateTimer < 0f)
             stateMachine.ChangeState(enemy.playerTransform != null
                 ? (EnemyBaseState)enemy.chaseState
-                : enemy.idleState);
+                : enemy.patrolState);
     }
 
     public override void Exit()

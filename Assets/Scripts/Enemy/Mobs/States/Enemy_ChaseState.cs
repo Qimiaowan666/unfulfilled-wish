@@ -1,39 +1,24 @@
 using UnityEngine;
 
+// 小怪交战态(战斗大脑):锁定玩家后每帧决策——脱战没?→ 转身面向 → 冷却好且够得着就出手 → 否则按距离维持战距(太远走近/太近后撤/合适站定)。
+// 动画:构造声明 isIdle 撑住 Locomotion(base.Enter 点亮 / base.Exit 清掉),idle↔walk 全由 Speed(水平速度,GroundEnemy.Update 每帧喂)自动切。
 public class Enemy_ChaseState : EnemyBaseState
 {
     float lastTimeDetected;
-    bool  moveAnim;   // 当前是否在播 move 动画(只在切换时调 Play，避免每帧重播)
 
     public Enemy_ChaseState(GroundEnemy enemy, StateMachine sm)
-        : base(enemy, sm) { }
+        : base(enemy, sm, "isIdle") { }
 
     public override void Enter()
     {
-        base.Enter();
-        moveAnim = false;
-        enemy.SetOnlyAnimBool("isIdle");   // 先 idle，Update 立刻按移动情况切 move(纯 bool)
+        base.Enter();   // isIdle=true → 撑住 Locomotion
         lastTimeDetected = Time.time;
     }
-
-    public override void Exit()
-    {
-        base.Exit();
-        enemy.SetOnlyAnimBool("");   // 清掉 chase 期间设的 isIdle/isMoving，避免带进下一态(保持一次只亮一个)
-    }
-
-    // 站定时播 idle、移动时播 move（等 CD 站桩不再原地跑）
-    void SetMoveAnim(bool moving)
-    {
-        if (moving == moveAnim) return;
-        moveAnim = moving;
-        if (moving) enemy.SetOnlyAnimBool("isMoving");
-        else        enemy.SetOnlyAnimBool("isIdle");
-    }
+    // Exit 用基类默认(把 isIdle 清成 false),无需覆盖
 
     public override void Update()
     {
-        if (enemy.Passive) { stateMachine.ChangeState(enemy.idleState); return; }   // 被动态绝不交战，被打进来也立刻退回待命
+        if (enemy.Passive) { stateMachine.ChangeState(enemy.patrolState); return; }   // 被动态绝不交战，被打进来也立刻退回待命
 
         base.Update();
 
@@ -44,7 +29,7 @@ public class Enemy_ChaseState : EnemyBaseState
         else if (Time.time > lastTimeDetected + enemy.battleTimeDuration)
         {
             enemy.LoseTarget();
-            stateMachine.ChangeState(enemy.idleState);
+            stateMachine.ChangeState(enemy.patrolState);
             return;
         }
 
@@ -68,7 +53,6 @@ public class Enemy_ChaseState : EnemyBaseState
         if (enemy.Stationary)
         {
             rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
-            SetMoveAnim(false);
             return;
         }
 
@@ -77,18 +61,15 @@ public class Enemy_ChaseState : EnemyBaseState
             float back  = -dir;   // 后退也别退下平台边
             bool  canGo = !enemy.LedgeAhead(back);
             rb.linearVelocity = new Vector2(canGo ? back * enemy.battleMoveSpeed * 0.5f : 0f, rb.linearVelocity.y);
-            SetMoveAnim(canGo);
             return;
         }
         if (dist <= enemy.preferredCombatDistance)
         {
-            rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
-            SetMoveAnim(false);   // 站定(等 CD)→ idle
+            rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);   // 站定(等 CD)→ Speed=0 → idle
             return;
         }
         // 追到平台边(前方是悬崖)就停住，不走下去
         bool fwd = !enemy.LedgeAhead(dir);
         rb.linearVelocity = new Vector2(fwd ? dir * enemy.battleMoveSpeed : 0f, rb.linearVelocity.y);
-        SetMoveAnim(fwd);
     }
 }

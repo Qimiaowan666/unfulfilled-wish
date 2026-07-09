@@ -51,7 +51,7 @@ public class Player_BlockState : PlayerBaseState
     {
         if (InPerfectWindow)
         {
-            spamStacks = 0;   // 成功精防 → 清零防刷惩罚，下次满窗口(仿只狼连段弹反)
+            spamStacks = 0;   // 成功精防 → 清零防刷惩罚，下次满窗口(连段弹反手感)
             Debug.Log($"[{System.DateTime.Now:HH:mm:ss.fff}] [格挡] ✔完美！ 命中时剩{perfectBlockTimer:F2}s  → 惩罚清零·下次满窗");
             player.Stats.RedeemGhostHP(player.Stats.perfectBlockHealAmount);
             player.Stats.GainStamina(player.Stats.perfectBlockStaminaGain);
@@ -61,7 +61,7 @@ public class Player_BlockState : PlayerBaseState
             // 精准格挡：冷白蓝火花（系统粒子预制，走 VfxManager 池）
             Vector3 bp = player.transform.position + new Vector3((player.FacingRight ? 1f : -1f) * 0.7f, 0.95f, 0f);
             VfxManager.Play("Vfx/GuardSpark", bp, Quaternion.identity, 0.95f,
-                            new Color(0.8f, 0.95f, 1f), player.GetComponentInChildren<SpriteRenderer>());
+                            new Color(0.8f, 0.95f, 1f), player.MainSprite);
             CombatSignals.RaisePerfectBlocked();   // 完美格挡 → 只发完美信号(教程里与普通格挡分开计数)
         }
         else

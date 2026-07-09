@@ -104,7 +104,7 @@ public class EquipmentPageView : CharacterPageView
     {
         if (statsContainer == null || statRowPrefab == null) return;
         ClearChildren(statsContainer);
-        var stats = Object.FindAnyObjectByType<PlayerStats>();
+        var stats = PlayerController.Instance?.Stats;
         if (stats == null) return;
 
         float dAtk = 0f, dDef = 0f, dHP = 0f;

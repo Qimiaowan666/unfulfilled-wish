@@ -7,7 +7,7 @@
 - `Assets/Scripts/BossFight/BossIntroTrigger.cs:8` —— 登场总导演。挂在 boss 房入口触发区(`[RequireComponent(typeof(Collider2D))]`)。玩家首次进入触发 `IntroSequence()` 协程:推镜对准 boss → 对话 → 吼叫(名牌扫入/血条充满/震屏/zoom 抖/放射 FX)→ 拉回相机 → `StartCombat()` 正式开打。暴露静态 `Sequencing`(`:31`)供全局屏蔽输入/暂停。
 - `Assets/Scripts/BossFight/BossFogGate.cs:6` —— 雾门(出口封锁)。开战 `Close()` 时启用实体碰撞挡路 + 雾墙淡入;boss 死亡/消失或读档重置时自动 `Open()`。挂在出口竖墙物体上。
 - `Assets/Scripts/BossFight/EnemyClearGate.cs:10` —— 清场雾门(精英怪房)。和 BossFogGate 同构,但触发条件是"指定的一组 `enemies` 全部死亡",订阅每个怪的 `OnDied` 事件实时判定。和 boss 无关,用于小怪封锁房。
-- `Assets/Scripts/BossFight/VictoryGate.cs:8` —— 通关门。继承 `InteractTrigger`,默认隐藏;最终 boss 击破演出后由 `LevelManager.ShowEnding()` 调 `Appear()` 出现 → 玩家走近按 F → `VictoryUI`。
+- `Assets/Scripts/BossFight/VictoryGate.cs:8` —— 通关门。继承 `InteractTrigger`,默认隐藏;最终 boss 击破演出后由 `BossBattleManager.ShowEnding()` 调 `Appear()` 出现 → 玩家走近按 F → `VictoryUI`。
 
 **怎么工作**
 
@@ -16,7 +16,7 @@
 1. **进场冻结**:置 `Sequencing=true`,静音 BGM,boss 转向玩家;清玩家速度、切回 idleState、`Rigidbody2D.simulated=false` 把玩家原地钉死(`:90-96`)。
 2. **推镜(不硬切相机)**:不手动接管 CinemachineBrain,而是把场景里预摆的低优先级 `bossIntroVcam` 的 `Priority` 临时抬到 100(`:121`),让 Cinemachine 自己 blend 过去;同时把 Brain 的 `DefaultBlend` 临时改成 `camMoveDuration`(场景默认 2s 太慢)(`:103-112`)。等 `WaitForSecondsRealtime(camMoveDuration)`。
 3. **对话**:调 `DialogueUI.Play(sequence, 回调)`,内部会把 `timeScale=0`,协程 `while(!dialogueDone) yield`(`:128-133`)。
-4. **吼叫高潮**(`:135-160`):`AudioManager.PlayBossPhaseChange()` + `nameCard.Play(boss.profile, roarDuration)`(九日式黑条名牌)+ `Bar().Reveal()`(血条缓露充满)+ `BossScalePunch()`(boss squash 弹一下)+ `ScreenRoarFx.Burst()`(全屏黑色放射线)。`roarDuration` 内每帧对 `bossIntroVcam` 做衰减随机位移(震屏)+ 正弦 OrthographicSize 抖动(zoom punch)——注意是抖 **vcam** 而非直接动相机,避免破坏 blend。
+4. **吼叫高潮**(`:135-160`):`AudioManager.PlayBossPhaseChange()` + `nameCard.Play(boss.profile, roarDuration)`(登场揭幕名牌)+ `Bar().Reveal()`(血条缓露充满)+ `BossScalePunch()`(boss squash 弹一下)+ `ScreenRoarFx.Burst()`(全屏黑色放射线)。`roarDuration` 内每帧对 `bossIntroVcam` 做衰减随机位移(震屏)+ 正弦 OrthographicSize 抖动(zoom punch)——注意是抖 **vcam** 而非直接动相机,避免破坏 blend。
 5. **拉回 + 还原**:把 vcam 优先级降回 `prevPrio`,Cinemachine 平滑混回玩家 vcam,再还原 Brain 的 `DefaultBlend`(`:162-167`)。
 6. **开打** `StartCombat()`(`:196`):清 `Sequencing`,恢复玩家 `simulated=true` 并清残速,`boss.Activate()`(把 `combatEnabled` 置 true 唤醒),`fogGate.Close()` 封门,`AudioManager.PlayBossBGM()` 起 boss 曲。
 
@@ -32,7 +32,7 @@
 
 - 这些组件都**预摆在场景里**(ForsakenShrine / Tutorial 等 boss/精英房),由 Inspector 接线,无运行时创建。
 - BossIntroTrigger 在 `Start()`(`:35`)把 boss `combatEnabled=false` 先沉睡,并自动把自己的 boss 填进 `fogGate.boss`。登场由玩家 `OnTriggerEnter2D` 进触发区驱动(`:73`);另有 `Update()` 兜底:读档/复活点已落在 boss 一侧(`PlayerPastTrigger`)则跳过演出直接 `WakeImmediate()` 开打(`:61-71`)。
-- VictoryGate 由 `LevelManager.ShowEnding()`(`Assets/Scripts/Level/LevelManager.cs:107`)在最终 boss 击破后调 `Appear()`;玩家走近按 F 触发基类 `InteractTrigger` 的交互流 → `Interact()` → `VictoryUI.Instance.Show()`。
+- VictoryGate 由 `BossBattleManager.ShowEnding()`(`Assets/Scripts/BossFight/BossBattleManager.cs:107`)在最终 boss 击破后调 `Appear()`;玩家走近按 F 触发基类 `InteractTrigger` 的交互流 → `Interact()` → `VictoryUI.Instance.Show()`。
 - EnemyClearGate 由其 `enemies` 数组里任一怪 `OnDied` 触发判定,玩家"打光一房小怪"即开门。
 
 **依赖 & 被依赖**
@@ -43,7 +43,7 @@
 - Cinemachine(`CinemachineCamera`/`CinemachineBrain`/`CinemachineBlendDefinition`)、`DialogueUI.Play`、`BossNameCard.Play`、`BossHealthBarUI.Reveal/HideForIntro`、`ScreenRoarFx.Burst`、`AudioManager`(StopBGM/PlayBossPhaseChange/PlayBossBGM/PlayDoorOpen)、`PlayerController`、`InteractTrigger`(VictoryGate 基类)、`VictoryUI`。
 
 被依赖(反过来用它的):
-- `LevelManager.ShowEnding()` 调 `VictoryGate.Appear()`;`LevelManager` 注释明确 boss 曲由本子系统的 `BossIntroTrigger.StartCombat` 放、自己不放(`Assets/Scripts/Level/LevelManager.cs:59-61`)。
+- `BossBattleManager.ShowEnding()` 调 `VictoryGate.Appear()`;`BossBattleManager` 注释明确 boss 曲由本子系统的 `BossIntroTrigger.StartCombat` 放、自己不放(`Assets/Scripts/BossFight/BossBattleManager.cs:59-61`)。
 - `BossIntroTrigger.Sequencing` 被多处当"演出中"开关读取:`PauseMenu.cs:173`(禁暂停)、`PlayerInput.cs:21`(屏蔽输入)、`CharacterPanelUI.cs:80/93`(禁开面板)。
 
 **关键设计 / 易错点**

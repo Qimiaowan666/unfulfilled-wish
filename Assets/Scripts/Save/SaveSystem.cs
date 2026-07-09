@@ -105,7 +105,7 @@ public class SaveSystem : MonoBehaviour
         }
     }
 
-    // 读档的统一触发点：每个游戏场景加载后等一帧自动 apply（不再依赖场景里是否挂了 LevelManager）
+    // 读档的统一触发点：每个游戏场景加载后等一帧自动 apply（不再依赖场景里是否挂了 BossBattleManager）
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         if (SceneNames.IsNonGameplay(scene.name)) return;
@@ -223,7 +223,7 @@ public class SaveSystem : MonoBehaviour
         return true;
     }
 
-    // 每个场景加载时由 LevelManager 调：
+    // 场景加载后由 SaveSystem 自身 OnSceneLoaded → ApplyAfterFrame 调用：
     //   全局态只首次 apply（之后内存连续，不被存档覆盖）；场景态每次都 apply（恢复本场景敌人/门/钥匙）
     public bool ApplyOnSceneLoaded()
     {
@@ -287,10 +287,10 @@ public class SaveSystem : MonoBehaviour
         bool isRespawn = nextLoadIsRespawn;   // 死亡重生(满血回火堆)≠ 普通读档(读存档血量)
         if (player != null)
         {
-            // 死亡重生 → 火堆复活点(respawnX/Y)；普通读档/进入 → 读档落点(playerX/Y)。旧档无 respawn 坐标时回退 playerX/Y
-            bool useRespawn = isRespawn && (data.respawnX != 0f || data.respawnY != 0f);
-            float px = useRespawn ? data.respawnX : data.playerX;
-            float py = useRespawn ? data.respawnY : data.playerY;
+            // 死亡重生 → 火堆复活点(respawnX/Y)；普通读档/进入 → 读档落点(playerX/Y)。
+            // 新档 respawnX/Y 一定是真实火堆坐标(含合法的 (0,0)),不再拿 (0,0) 当"没坐标"哨兵。
+            float px = isRespawn ? data.respawnX : data.playerX;
+            float py = isRespawn ? data.respawnY : data.playerY;
             player.transform.position = new Vector3(px, py, player.transform.position.z);
             if (player.Rb != null)
                 player.Rb.linearVelocity = Vector2.zero;
@@ -386,13 +386,11 @@ public class SaveSystem : MonoBehaviour
         if (stats == null) { Debug.LogWarning("SaveToSlot: 找不到 PlayerStats"); return false; }
         Vector3 landPos = player != null ? player.transform.position : stats.transform.position;
 
-        // 复活点 = 当前自动档记录的火堆点（最后坐的火）；没坐过火则落当前位置
+        // 复活点 = 当前自动档记录的火堆点（最后坐的火）；没自动档（没坐过火）则落当前位置
         Vector3 respawnPos = landPos;
         var auto = Load(AutoSlot);
         if (auto != null)
-            respawnPos = (auto.respawnX != 0f || auto.respawnY != 0f)
-                ? new Vector3(auto.respawnX, auto.respawnY, 0f)
-                : new Vector3(auto.playerX, auto.playerY, 0f);
+            respawnPos = new Vector3(auto.respawnX, auto.respawnY, 0f);
 
         WriteSlot(slot, BuildSaveData(stats, landPos, respawnPos, CheckpointManager.Instance));
         WriteThumbnail(slot);
@@ -416,7 +414,7 @@ public class SaveSystem : MonoBehaviour
         else 
         {
             AudioManager.Instance?.RefreshSceneBGM();   // 先回到场景默认曲(区域曲)——同场景读档没有 sceneLoaded
-            ApplySave(data);                            // 再 apply → AfterApply → LevelManager 视战斗状态切 boss 曲（最终定）
+            ApplySave(data);                            // 再 apply → AfterApply：各 boss 子系统重接管(boss 睡回/血条/雾门/通关门)；boss 曲不在此恢复，area 曲维持到重新触发遭遇才由 BossIntroTrigger 放
         }
         return true;
     }
@@ -460,7 +458,7 @@ public class SaveSystem : MonoBehaviour
     public void MarkEnemyDefeated(string id)
     {
         // 只记进内存集合(本会话内一直死、过场景不丢);"永久死亡"的落盘交给正常存档(CaptureEnemyStates 在坐火堆/存档时抓)。
-        // boss 靠击破后的完整 autosave(LevelManager.OnBossDefeated)记住;精英等无 autosave 的怪 → 不存档就死、读档会复活。
+        // boss 靠击破后的完整 autosave(BossBattleManager.OnBossDefeated)记住;精英等无 autosave 的怪 → 不存档就死、读档会复活。
         if (!string.IsNullOrWhiteSpace(id))
             runtimeDefeatedEnemyIDs.Add(id);
     }

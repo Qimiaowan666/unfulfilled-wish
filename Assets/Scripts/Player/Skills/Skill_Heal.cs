@@ -9,7 +9,7 @@ public class Skill_Heal : Skill_Base
     [SerializeField] float castDuration = 1.5f;    // 持续施法时间（秒）
 
     [Header("Animation")]
-    [SerializeField] string animStateName = "rest";  // 施法期间播的 animator state（留空 = 不播）
+    [SerializeField] string animStateName = "rest";  // （当前未被任何代码读取；Heal 的 rest 动画由 isHealing bool 驱动，不受此字段影响）
 
     [Header("VFX (HealAura 粒子)")]
     [SerializeField] bool    vfxEnabled     = true;

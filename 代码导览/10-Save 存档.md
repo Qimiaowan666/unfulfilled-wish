@@ -21,7 +21,7 @@
 
 死亡重生分支(`SaveSystem.cs:288-309`):`isRespawn` 时落 `respawnX/Y`(火堆点)且**强制满血满体力、虚血清零**——绝不读死亡瞬间存档里的 0 血,否则会 Die→Revive 后空血站着。
 
-OnSceneLoaded 触发(`SaveSystem.cs:110`):每个 gameplay 场景加载后等一帧(让玩家/敌人 Awake 完)再 `ApplyOnSceneLoaded`,不再依赖场景里挂没挂 LevelManager。场景态 apply 完会触发静态事件 `AfterApply`(`SaveSystem.cs:209`),供 boss 登场/血条/雾门/通关门等在"同场景原地读档(没有 sceneLoaded)"时重新接管。
+OnSceneLoaded 触发(`SaveSystem.cs:110`):每个 gameplay 场景加载后等一帧(让玩家/敌人 Awake 完)再 `ApplyOnSceneLoaded`,不再依赖场景里挂没挂 BossBattleManager。场景态 apply 完会触发静态事件 `AfterApply`(`SaveSystem.cs:209`),供 boss 登场/血条/雾门/通关门等在"同场景原地读档(没有 sceneLoaded)"时重新接管。
 
 **入口 & 触发**
 - 创建:`SaveSystem` 与 `CheckpointManager` 都是 DontDestroyOnLoad 单例,放在 Bootstrap 场景常驻(`SaveSystem.cs:91`、`CheckpointManager.cs:17`)。
@@ -29,14 +29,14 @@ OnSceneLoaded 触发(`SaveSystem.cs:110`):每个 gameplay 场景加载后等一�
 - 死亡重生:`GameManager.RestartScene`(`Core/GameManager.cs:41`)→ `PrepareRespawn()` + 加载"上次火堆所在场景"。教程场景特例:就地复活不碰存读档(`GameManager.cs:48`)。
 - 主菜单:`MainMenuUI.NewGame` → `ResetForNewGame()`(`UI/MainMenuUI.cs:52`);`Continue` → `RequestFullReload()` 后进存档场景(`MainMenuUI.cs:58-60`)。
 - ESC 菜单手动存读:`PauseMenu` 调 `SaveToSlot`/`LoadSlot`(0/1/2 三槽,带截图缩略图,`UI/PauseMenu.cs:341/365`)。
-- boss 击破:`LevelManager`(`Level/LevelManager.cs:98`)在最终 boss 死后 `AutoSaveAtPlayer()` 原子写一次完整档。
+- boss 击破:`BossBattleManager`(`BossFight/BossBattleManager.cs:98`)在最终 boss 死后 `AutoSaveAtPlayer()` 原子写一次完整档。
 - 标记永久死亡/开门:敌人 `EnemyBase`(`Enemy/EnemyBase.cs:473`)、`LockedDoor`/`ChestInteract`/`TutorialGate` 在死/开时调 `MarkEnemyDefeated`/`MarkDoorOpened` 写内存集合,落盘交给下次正常存档。
 
 **依赖 & 被依赖**
 
 依赖(它读/写的系统):`PlayerStats`(`LoadBaseStats`/`LoadSavedVitals`/`RestoreAll`)、`InventorySystem.LoadItems`、`EquipmentSystem.LoadEquipment`/`GetEquippedMaxHPBonus`、`SkillSystem.LoadSkills`;场景物体 `EnemyBase`(`SaveID`/`SavesPermanentDeath`/`RespawnsAtCheckpoint`/`Initialized`/`LoadSaveState`/`Respawn`)、`LockedDoor`/`ChestInteract`/`TutorialGate`(`LoadOpened`)、`EquipmentPickup`/`ItemPickup`(`SyncToEquipment`/`SyncToInventory`)、`ShopSystem`(`CaptureSaveData`/`LoadSaveData`);`GameManager.LoadScene`、`AudioManager`(`RefreshSceneBGM`/`PlayCheckpoint`)、`SceneNames.IsNonGameplay`/`Tutorial`。
 
-被依赖(反过来用它):`GameManager`(重生)、`LevelManager`(boss 击破 autosave + 订阅 `AfterApply` 重接 boss)、`MainMenuUI`/`PauseMenu`(新游戏/继续/手动存读)、`EnemyBase`(标记永久死亡)、各类门/箱/教程门(标记开门)。`AfterApply` 静态事件被 `BossIntroTrigger`/`BossFogGate`/`BossHealthBarUI`/`VictoryGate`/`EnemyClearGate`/`LevelManager` 订阅,用于读档后重置 boss 登场/血条/雾门/通关门状态。
+被依赖(反过来用它):`GameManager`(重生)、`BossBattleManager`(boss 击破 autosave + 订阅 `AfterApply` 重接 boss)、`MainMenuUI`/`PauseMenu`(新游戏/继续/手动存读)、`EnemyBase`(标记永久死亡)、各类门/箱/教程门(标记开门)。`AfterApply` 静态事件被 `BossIntroTrigger`/`BossFogGate`/`BossHealthBarUI`/`VictoryGate`/`EnemyClearGate`/`BossBattleManager` 订阅,用于读档后重置 boss 登场/血条/雾门/通关门状态。
 
 **关键设计 / 易错点**
 - **全局态/场景态分层 + `globalStateLoaded` 内存连续**是整套设计的灵魂:普通过门不碰背包/玩家属性和已开门集合,只有"真读档/重生"才回滚。改这块务必想清楚 `realLoad` 取值(`SaveSystem.cs:236`)。

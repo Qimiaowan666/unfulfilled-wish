@@ -64,7 +64,8 @@ public class ShopSystem : MonoBehaviour
     {
         get
         {
-            var skillSystem = SkillSystem.GetOrCreate();
+            var skillSystem = SkillSystem.Instance;
+            if (skillSystem == null) yield break;
             foreach (var entry in skillEntries)
             {
                 if (entry == null || !entry.IsAvailable) continue;

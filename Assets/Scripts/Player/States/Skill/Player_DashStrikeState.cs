@@ -55,7 +55,7 @@ public class Player_DashStrikeState : PlayerBaseState
         AudioManager.Instance?.PlayDashStrike();
         // 突进能量 VFX：向心收拢光线 + 中心闪光，跟在玩家前方随冲刺前进（Update 每帧驱动位置）
         dashVfx = VfxManager.PlayLoop("Vfx/DashStrike", null, DashVfxPos(), 1f,
-                                      new Color(0.7f, 0.9f, 1f), player.GetComponentInChildren<SpriteRenderer>());
+                                      new Color(0.7f, 0.9f, 1f), player.MainSprite);
 
         // 强制播挥剑动画 + 调倍速
         if (!string.IsNullOrEmpty(skill.AnimStateName) && anim != null)

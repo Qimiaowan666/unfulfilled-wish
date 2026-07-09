@@ -68,7 +68,8 @@ public class Player_ExecuteState : PlayerBaseState
     {
         if (!hitApplied) ApplyExecuteHit();   // 绝对兜底:离开前一定结算
         base.Exit();
-        player.Stats.SetInvulnerableFor(0.35f);   // 处决收尾的后摇无敌帧,避免刚结束就被反打
+        player.Stats.SetInvulnerable(false);       // 先释放处决过程中的 held 无敌(否则没人关它会一直吊着)
+        player.Stats.SetInvulnerableFor(0.35f);    // 再换成 0.35s 定时后摇无敌;两通道独立 → 期间冲刺的 Exit 不会误清掉它
         pendingEnemy = null;
     }
 }

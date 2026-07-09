@@ -3,7 +3,7 @@ using UnityEngine.UI;
 using TMPro;
 
 /// <summary>
-/// 通关胜利画面：boss 击败后由 LevelManager 显示。常驻单例，布局在 VictoryUI.prefab 里摆好（木框风）。
+/// 通关胜利画面：boss 击败后由 BossBattleManager 显示。常驻单例，布局在 VictoryUI.prefab 里摆好（木框风）。
 /// </summary>
 public class VictoryUI : MonoBehaviour
 {

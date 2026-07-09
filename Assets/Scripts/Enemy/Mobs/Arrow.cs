@@ -56,6 +56,7 @@ public class Arrow : MonoBehaviour
         var stats = other.GetComponent<PlayerStats>();
         if (stats != null && owner != null)
         {
+            if (stats.IsInvulnerable) return;   // 玩家翻滚 i-frame 躲过 → 箭穿过:不吸附、不扣血、不播命中音,继续飞
             owner.ApplyHitToCollider(other, damage, unblockable, knockback, hitStun);   // 复用近战那套(格挡/识破/击退)
             // 命中玩家：碎裂吸附到玩家表面(消除箭长造成的空隙)，并跟随被击退的玩家
             var follow = other.attachedRigidbody != null ? other.attachedRigidbody.transform : stats.transform;

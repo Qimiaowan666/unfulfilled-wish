@@ -2,23 +2,17 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-// 通用特效播放器：常驻单例 + 对象池。特效做成 Resources 下的 ParticleSystem 预制，
+// 通用特效播放器：常驻单例(摆在 Bootstrap 的 FxSystems)+ 对象池。特效做成 Resources 下的 ParticleSystem 预制，
 // 调用处只需 VfxManager.Play(...)（一次性）或 PlayLoop/StopLoop（持续/跟随）。新增特效 = 做个预制 + 一行调用，不写脚本。
 public class VfxManager : MonoBehaviour
 {
     static VfxManager _inst;
-    static VfxManager Inst
+
+    void Awake()
     {
-        get
-        {
-            if (_inst == null)
-            {
-                var go = new GameObject("VfxManager");
-                _inst = go.AddComponent<VfxManager>();
-                DontDestroyOnLoad(go);
-            }
-            return _inst;
-        }
+        if (_inst != null && _inst != this) { Destroy(gameObject); return; }
+        _inst = this;
+        DontDestroyOnLoad(gameObject);
     }
 
     readonly Dictionary<string, GameObject>        prefabs    = new Dictionary<string, GameObject>();
@@ -28,7 +22,9 @@ public class VfxManager : MonoBehaviour
 
     // ── 一次性（自动回收）─────────────────────────────
     public static void Play(string key, Vector3 pos, Quaternion rot, float scale = 1f, Color? tint = null, SpriteRenderer sortRef = null)
-        => Inst.PlayInternal(key, pos, rot, scale, tint ?? Color.white, sortRef);
+    {
+        if (_inst != null) _inst.PlayInternal(key, pos, rot, scale, tint ?? Color.white, sortRef);
+    }
 
     void PlayInternal(string key, Vector3 pos, Quaternion rot, float scale, Color tint, SpriteRenderer sortRef)
     {
@@ -42,7 +38,7 @@ public class VfxManager : MonoBehaviour
 
     // ── 持续/循环（跟随父物体，手动 StopLoop）────────────
     public static GameObject PlayLoop(string key, Transform parent, Vector3 localOffset, float scale = 1f, Color? tint = null, SpriteRenderer sortRef = null)
-        => Inst.PlayLoopInternal(key, parent, localOffset, scale, tint ?? Color.white, sortRef);
+        => _inst != null ? _inst.PlayLoopInternal(key, parent, localOffset, scale, tint ?? Color.white, sortRef) : null;
 
     GameObject PlayLoopInternal(string key, Transform parent, Vector3 localOffset, float scale, Color tint, SpriteRenderer sortRef)
     {
