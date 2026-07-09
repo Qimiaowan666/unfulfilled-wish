@@ -17,14 +17,5 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/DemoScenes/ForsakenShrine.unity
     guid: f9196df013374b048b8e89f23cf2dcc9
-  - enabled: 1
-    path: Assets/Scenes/DemoScenes/BambooCorridor.unity
-    guid: 2e43fbcb212be37479d25e4e72d7377a
-  - enabled: 1
-    path: Assets/Scenes/DemoScenes/SilentCourt.unity
-    guid: ebad791e7fbe45b448f79bbc75916fbf
-  - enabled: 1
-    path: Assets/Scenes/DemoScenes/StoneCrossing.unity
-    guid: 246d22c7e50f3764a8d4148f7669108e
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}

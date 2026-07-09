@@ -184,7 +184,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SceneLoadTrigger
   portalID: 
-  sceneName: StoneCrossing
+  sceneName: ForsakenShrine
   targetPortalID: 
   prompt: "\u6309 F \u8FDB\u5165"
   promptHeightOffset: 4
