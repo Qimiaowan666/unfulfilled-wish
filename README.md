@@ -30,7 +30,7 @@ Unity 6 (URP) · C# · New Input System · Cinemachine 3
 
 ## 相关链接
 - 🎮 作品集主页:https://qimiaowan666.github.io/
-- ▶ 演示视频:*(待补)*
+- ▶ 演示视频:https://www.bilibili.com/video/BV1Wn326vEBE
 
 ---
 
